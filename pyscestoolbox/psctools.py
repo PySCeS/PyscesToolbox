@@ -32,7 +32,7 @@ def make_path(mod,analysis_method,subdirs = []):
 
     """
 
-    model_name = path.split(mod.ModelFile)[1][:-4]
+    model_name = get_model_name(mod)
     
     model_path = path.join(output_dir,
                            model_name)
@@ -153,7 +153,7 @@ def fix_metabolite(mod, fix, model_name = 0):
     assert fix in mod.species, "\nInvalid fixed species."
 
     if model_name == 0:
-        model_name = path.split(mod.ModelFile)[1][:-4] + '_' + fix
+        model_name = get_model_name(mod) + '_' + fix
 
     mod_str = mod_to_str(mod)
     fix_head, mod_str_sans_fix = strip_fixed(mod_str)
