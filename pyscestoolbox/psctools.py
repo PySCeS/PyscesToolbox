@@ -2,6 +2,15 @@ from os import path, mkdir
 from pysces import model, model_dir, output_dir
 import cStringIO,string
 
+def get_model_name(mod):
+    """Returns the name of a model 'mod' sans the extension
+
+    Arguments:
+    ==========
+    mod             - The model of interest
+    """
+    return path.split(mod.ModelFile)[1][:-4]
+
 
 def make_path(mod,analysis_method,subdirs = []):
     """
