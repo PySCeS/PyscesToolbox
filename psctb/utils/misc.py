@@ -1,7 +1,37 @@
+import sys
+import os
+
 __all__ = ['cc_list',
            'ec_list',
            'rc_list',
-           'prc_list']
+           'prc_list',
+           'silence_print']
+
+
+def silence_print(func):
+    """
+    A function wrapper that silences the stdout output of a function.
+
+    This function is *very* useful for silencing pysces functions that
+    print a lot of unneeded output.
+
+    Parameters
+    ----------
+    func : function
+        A function that talks too much
+    Returns
+    -------
+    values: function
+        A very quiet function
+    """
+
+    def wrapper(*args, **kwargs):
+        stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+        returns = func(*args, **kwargs)
+        sys.stdout = stdout
+        return returns
+    return wrapper
 
 
 def cc_list(mod):
