@@ -1,240 +1,194 @@
-from sympy import latex,sympify
+from sympy import latex, sympify, Symbol
 
-__all__ = ['make_subs_dict',
-           'make_prc_subs_dic',
-           'expression_to_latex']
+__all__ = ['LatexExpr']
 
-def make_subs_dict(mod,vars_only = True, partials =False):
-    """Returns a dictionary of sympy formatted strings
-    for the fluxes, control and elasticity 
-    coefficients for a model 'mod'. Eg:
 
-    For a model with 
-    reactions:
-    v_1, v_2
-    species:
-    S, x_1, P
-    the dictionary will look like:
-
-    {'J_v_1'      : 'J_v1',
-     'J_v_2'      : 'J_v2',
-     'ecv_1_S'   : 'varepsilon__v1_S',
-     'ecv_1_x_1' : 'varepsilon__v1_x1',
-     'ecv_2_x_1' : 'varepsilon__v2_x1',
-     'ecv_2_P'   : 'varepsilon__v1_P',
-     'ccJ_v_1_v_1': 'C__Jv1_v1',
-     'ccJ_v_1_v_2': 'C__Jv1_v2',
-     'ccJ_v_2_v_1': 'C__Jv2_v1',
-     'ccJ_v_2_v_2': 'C__Jv2_v2',
-     'ccJ_S_v_1'  : 'C__S_v1',
-     'ccJ_S_v_2'  : 'C__S_v2',
-     'ccJ_x_1_v_1': 'C__x1_v1',
-     'ccJ_x_1_v_2': 'C__x1_v2',
-     'ccJ_P_v_1': 'C__P_v1',
-     'ccJ_P_v_2': 'C__P_v2'}
-
-    }
-
-    Used in conjunction with expression to latex, but
-    might be useful on its own. 
-
-    Arguments:
-    ==========
-    mod       - The model object
-    vars_only - If 'False' elasticity coefficient expression for model 
-                parameters are included (optional - default='True')
+def min_(string):
     """
-    ec_subs = {}
-    j_subs = {}
-    cc_subs = {}
-    rc_subs = {}
-    prc_subs = {}
+    Returns a string stripped of underscores.
 
-    for reaction in mod.reactions:
-        j_subs['J' + reaction] = 'J_' + reaction.replace('_','')
-        
-        for species in mod.species:
-            ec_orig_expr = ('ec' +
-                            reaction + 
-                            '_' + 
-                            species
-            )
-            ec_new_expr = ('varepsilon__' +  
-                           reaction.replace('_','') + 
-                           '_' + 
-                           species.replace('_','')
-            )  
+    Parameters
+    ----------
+    string : str
+        A string containing underscores
 
-            ec_subs[ec_orig_expr] = ec_new_expr 
-
-            rc_orig_expr = ('rcJ' +
-                             reaction +
-                             '_' +
-                             species
-            )
-            rc_new_expr = ('R__J' +
-                           reaction.replace('_','') + 
-                           '_' + 
-                           species.replace('_','')
-            )
-
-            rc_subs[rc_orig_expr] = [rc_new_expr]
-
-        for reaction2 in mod.reactions:
-            cc_orig_expr = ('ccJ' + 
-                            reaction +
-                            '_' +
-                            reaction2
-            )
-            cc_new_expr = ('C__J' + 
-                           reaction.replace('_','') + 
-                           '_' + 
-                           reaction2.replace('_','')
-            )
-
-            cc_subs[cc_orig_expr] = cc_new_expr
-            if partials:
-                for species in mod.species:
-                    prc_orig_expr = ('prc' +
-                                      reaction2 +
-                                      '_J' +
-                                      reaction +
-                                      '_' +
-                                      species
-                    )
-                    prc_new_expr = ('R__' +
-                                    reaction2.replace('_','') +
-                                    '__J' +
-                                    reaction.replace('_','') +
-                                    '_' +
-                                    species.replace('_','')
-                    )
-                    prc_subs[prc_orig_expr] = prc_new_expr
-
-    for species in mod.species: 
-        for reaction in mod.reactions:
-            cc_orig_expr = ('cc' +
-                            species + 
-                            '_' + 
-                            reaction
-            )
-            cc_new_expr = ('C__' +
-                           species.replace('_','') + 
-                           '_' +
-                           reaction.replace('_','')
-            )
-            
-            cc_subs[cc_orig_expr] = cc_new_expr
-
-        for species2 in mod.species:
-            rc_orig_expr = ('rc' +
-                             species2 +
-                             '_' +
-                             species
-            )
-            rc_new_expr = ('R__' +
-                           species2.replace('_','') + 
-                           '_' + 
-                           species.replace('_','')
-            )
-
-            rc_subs[rc_orig_expr] = [rc_new_expr]
+    Returns
+    -------
+    values: str
+        A string without underscores
+    """
+    return string.replace('_', '')
 
 
-    if vars_only == False:
-        for reaction in mod.reactions:
-            for param in mod.parameters:
-                ec_orig_expr = ('ec' +
-                            reaction + 
-                            '_' + 
-                            param
-                )
-                ec_new_expr = ('varepsilon__' +  
-                               reaction.replace('_','') + 
-                               '_' + 
-                               param.replace('_','')
-                )  
+class LatexExpr(object):
 
-                ec_subs[ec_orig_expr] = ec_new_expr
+    """docstring for LatexExpr"""
 
-    subs = {}
-    subs.update(ec_subs)
-    subs.update(cc_subs)
-    subs.update(j_subs)
-    subs.update(rc_subs)
-    subs.update(prc_subs)
+    def __init__(self, mod):
+        super(LatexExpr, self).__init__()
+        self.mod = mod
+        self._subs_dict = None
+        self._prc_subs = None
 
+    @property
+    def subs_dict(self):
+        if not self._subs_dict:
+            ec_subs = {}
+            rc_subs = {}
+            cc_subs = {}
+            prc_subs = {}
+            j_subs = {}
+            sp_subs = {}
+            mod = self.mod
 
-    return subs
+            # For clarity:
+            # lots of code duplication
+            # min_() strips string of underscores
 
-def make_prc_subs_dic(mod):
-    prc_subs = {}
-    
-    for reaction1 in mod.reactions:
-        for reaction2 in mod.reactions:
+            # Species:
             for species in mod.species:
-                prc_orig_expr  = ('R^{'+
-                                  reaction2.replace('_','')+
-                                  ' J'+
-                                  reaction1.replace('_','')+
-                                  '}_{'+
-                                  species.replace('_','')+
-                                  '}'
-                )
-                prc_new_expr  = ('\,^{' +
-                                reaction2.replace('_','')+
-                                '}R^{' +
-                                'J'+
-                                reaction1.replace('_','')+
-                                '}_{'+
-                                species.replace('_','')+
-                                '}'
-                )
-                prc_subs[prc_orig_expr] = prc_new_expr
-    return prc_subs
+                sp_subs[species] = min_(species)
 
+            # Fluxes:
+            for reaction in mod.reactions:
+                j_subs['J' + reaction] = 'J_' + min_(reaction)
 
+            # Control Coefficients:
+            for base_reaction in mod.reactions:
+                for top_species in mod.species:
+                    o_cc = 'cc%s_%s' % (top_species, base_reaction)
+                    n_cc = 'C__%s_%s' % (min_(top_species),
+                                         min_(base_reaction))
+                    cc_subs[o_cc] = n_cc
 
-def expression_to_latex(expression,mod=None,subs_dict=None,prc_subs_dic = None):
-    """Returns a latex expression from a sympy (or string) expression
-    using a subtitution dictionary generated by 'make_subs_dict(model)' 
-    (or a custom dictionary). If the expression contains partial 
-    response coefficients a 'prc_subs_dic' is needed as provided
-    by 'make_prc_subs_dic(model)'. A model (mod) can provided instead
-    to create these dictionaries automatically.
-    :
+                for top_reaction in mod.reactions:
+                    o_cc = 'ccJ%s_%s' % (top_reaction, base_reaction)
+                    n_cc = 'C__J%s_%s' % (min_(top_reaction),
+                                          min_(base_reaction))
 
-    For subs_dict = {'J_v_2'  : 'J_v2',
-                    'ecv_1_S': 'varepsilon__v1_S'}
-    and
+            # Elasticity Coefficients:
+            for top_reaction in mod.reactions:
+                for base_species in mod.species:
+                    o_ec = 'ec%s_%s' % (top_reaction, base_species)
+                    n_ec = 'varepsilon__%s_%s' % (min_(top_reaction),
+                                                  min_(base_species))
+                    ec_subs[o_ec] = n_ec
 
-    expression = 'J_v_2*ec_v_1_S/10'
+                for base_param in mod.parameters:
+                    o_ec = 'ec%s_%s' % (top_reaction, base_param)
+                    n_ec = 'varepsilon__%s_%s' % (min_(top_reaction),
+                                                  min_(base_param))
+                    ec_subs[o_ec] = n_ec
 
-    the output will be:
+            # Response Coefficients:
+            # I'm adding species together with parameter
+            # This increases the size of the dictionary
+            # but it ensures that only one LatexExpr object
+            # is needed for something like RateChar (or SymCa)
+            for base_param in set(mod.parameters + mod.species):
+                for top_species in mod.species:
+                    o_rc = 'rc%s_%s' % (top_species, base_param)
+                    n_rc = 'R__%s_%s' % (min_(top_species),
+                                         min_(base_param))
+                    rc_subs[o_rc] = n_rc
 
-    '\\frac{J_{v2}\\varepsilon^{v1}_{S}}{10}'
+                for top_reaction in mod.reactions:
+                    o_rc = 'rcJ%s_%s' % (top_reaction, base_param)
+                    n_rc = 'R__J%s_%s' % (min_(top_reaction),
+                                          min_(base_param))
+                    rc_subs[o_rc] = n_rc
 
-    Arguments:
-    ==========
-    mod          - The model 
-    subs_dict    - The substitution dictionary
-    expression   - The sympy or string dictionary
-    prc_subs_dic - Needed if expression contains a partial response
-    """
-    assert mod or subs_dict, 'Must provide either a model or a subs_dict'
-    if mod:
-        subs_dict = make_subs_dict(mod, vars_only = False, partials=True)
-        prc_subs_dic = make_prc_subs_dic(mod)
-    
-    if type(expression) == str:
-        expr = sympify(expression)
-    else:
-        expr = expression
+            # Partial Response Coefficients:
+            # I'm adding species together with parameter
+            # This increases the size of the dictionary
+            # but it ensures that only one LatexExpr object
+            # is needed for something like RateChar (or SymCa)
+            for base_param in set(mod.parameters + mod.species):
+                for back_reaction in mod.reactions:
+                    for top_species in mod.species:
+                        o_prc = 'prc%s_%s_%s' % (top_species,
+                                                 base_param,
+                                                 back_reaction)
+                        n_prc = 'R__%s_%s__%s' % (min_(top_species),
+                                                  min_(base_param),
+                                                  min_(back_reaction))
+                        prc_subs[o_prc] = n_prc
 
-    latex_expr = latex(expr.subs(subs_dict),long_frac_ratio = 10)
+                    for top_reaction in mod.reactions:
+                        o_prc = 'prcJ%s_%s_%s' % (top_reaction,
+                                                  base_param,
+                                                  back_reaction)
+                        n_prc = 'R__J%s_%s__%s' % (min_(top_reaction),
+                                                   min_(base_param),
+                                                   min_(back_reaction))
+                        prc_subs[o_prc] = n_prc
 
-    if prc_subs_dic:
-        for each in prc_subs_dic:
-            latex_expr = latex_expr.replace(each,prc_subs_dic[each])
+            subs_dict = {}
+            subs_dict.update(ec_subs)
+            subs_dict.update(cc_subs)
+            subs_dict.update(rc_subs)
+            subs_dict.update(j_subs)
+            subs_dict.update(sp_subs)
+            subs_dict.update(prc_subs)
+            self._subs_dict = subs_dict
 
-    return latex_expr
+        return self._subs_dict
+
+    @property
+    def prc_subs(self):
+        if not self._prc_subs:
+            mod = self.mod
+            prc_subs = {}
+            for base_param in set(mod.parameters + mod.species):
+                for back_reaction in mod.reactions:
+                    for top_species in mod.species:
+                        o_prc = 'R^{%s %s}_{%s}' % (min_(top_species),
+                                                    min_(back_reaction),
+                                                    min_(base_param))
+
+                        n_prc = '\,^{%s}R^{%s}_{%s}' % (min_(back_reaction),
+                                                        min_(top_species),
+                                                        min_(base_param))
+
+                        prc_subs[o_prc] = n_prc
+
+                    for top_reaction in mod.reactions:
+                        o_prc = 'R^{J%s %s}_{%s}' % (min_(top_reaction),
+                                                     min_(back_reaction),
+                                                     min_(base_param))
+
+                        n_prc = '\,^{%s}R^{J%s}_{%s}' % (min_(back_reaction),
+                                                         min_(top_reaction),
+                                                         min_(base_param))
+
+                        prc_subs[o_prc] = n_prc
+
+            self._prc_subs = prc_subs
+
+        return self._prc_subs
+
+    def expression_to_latex(self, expression):
+        if type(expression) == str:
+            expression = sympify(expression)
+
+        # symbol subtitution in sympy takes longer for larger dicts
+        # therefore I only get the symbols that I need
+        # for mcanut model substitution of a 2 symbol expression
+        # takes 3xxms for conversion with the full dict, but
+        # only 1.9x - 2.2xms with the smaller_dict. Thats over 9000 times
+        # faster!!! Ok only over 100X
+        needed_symbols = expression.atoms(Symbol)
+        smaller_dict = {}
+
+        for each in needed_symbols:
+            each = str(each)
+            smaller_dict[each] = self.subs_dict[each]
+
+        # using smaller_dict here instead of self.subs_dict
+        latex_expr = latex(expression.subs(smaller_dict),
+                           long_frac_ratio=10)
+
+        for k, v in self.prc_subs.iteritems():
+            latex_expr = latex_expr.replace(k, v)
+
+        return latex_expr
