@@ -65,6 +65,7 @@ class LatexExpr(object):
                     o_cc = 'ccJ%s_%s' % (top_reaction, base_reaction)
                     n_cc = 'C__J%s_%s' % (min_(top_reaction),
                                           min_(base_reaction))
+                    cc_subs[o_cc] = n_cc
 
             # Elasticity Coefficients:
             for top_reaction in mod.reactions:
