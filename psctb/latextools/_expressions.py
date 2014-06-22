@@ -51,7 +51,7 @@ class LatexExpr(object):
 
             # Fluxes:
             for reaction in mod.reactions:
-                j_subs['J' + reaction] = 'J_' + min_(reaction)
+                j_subs['J_' + reaction] = 'J_' + min_(reaction)
 
             # Control Coefficients:
             for base_reaction in mod.reactions:
