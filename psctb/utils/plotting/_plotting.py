@@ -5,6 +5,7 @@ from matplotlib import rcParams
 import numpy as np
 from IPython.html import widgets
 from pysces import ModelMap
+from pysces import output_dir as psc_out_dir
 
 from ..misc import *
 from ...latextools import LatexExpr
@@ -43,6 +44,8 @@ def add_legend_viewlim(ax, **kwargs):
 
     elif ax.get_legend():
         ax.get_legend().set_visible(False)
+    else:
+        ax.legend().set_visible(False)
 
 
 class LineData(object):
@@ -230,7 +233,8 @@ class ScanFig(object):
     def __init__(self, line_data_list,
                  category_classes=None,
                  fig_properties=None,
-                 ax_properties=None):
+                 ax_properties=None,
+                 fname=None,):
 
         super(ScanFig, self).__init__()
 
@@ -265,6 +269,15 @@ class ScanFig(object):
             self.category_classes = category_classes
         else:
             self.category_classes = {'': [k for k in self.categories]}
+
+        if fname:
+            self.fname = fname
+        else:
+            self.fname = psc_out_dir + '/' + 'ScanFig'
+
+        self.save_counter = 0
+
+        self.lines
         plt.close()
 
     def show(self):
@@ -289,9 +302,6 @@ class ScanFig(object):
             loc=2,
             borderaxespad=0.)
 
-        # just reference lines to populate the object - maybe move up this
-        # reference to the init.
-        self.lines
         if rcParams['backend'] == \
                 'module://IPython.kernel.zmq.pylab.backend_inline':
             clear_output(wait=True)
@@ -299,6 +309,29 @@ class ScanFig(object):
         else:
             self.fig.show()
 
+    def save(self, fname=None, dpi=None, fmt=None):
+        if not fmt:
+            fmt = 'svg'
+
+        if not dpi:
+            dpi = 180
+
+        name_string = '_' + str(self.save_counter) + '.' + fmt
+
+        if not fname:
+            fname = self.fname + name_string
+        else:
+            fname = fname + name_string
+
+        self.save_counter += 1
+
+        self.fig.savefig(fname,
+                         format=fmt,
+                         dpi=dpi,
+                         bbox_extra_artists=(self.ax.get_legend(),),
+                         bbox_inches='tight')
+
+        
     @property
     def _widgets(self):
         if not self._widgets_:
