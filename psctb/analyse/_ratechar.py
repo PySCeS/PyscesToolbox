@@ -11,7 +11,7 @@ from colorsys import hsv_to_rgb, rgb_to_hsv
 
 from .. import modeltools
 from ..latextools import LatexExpr
-from ..utils.plotting import ScanFig, LineData
+from ..utils.plotting import ScanFig, LineData, Data2D
 
 __all__ = ['RateChar']
 
@@ -737,14 +737,82 @@ class RateCharData(object):
                                           'xlim':  [self.scan_min,
                                                     self.scan_max],
                                           'ylim':  [self.flux_min,
-                                                    self.flux_max]},
+                                                    self.flux_max * 2]},
                            category_classes=category_classes)
 
         scan_fig.toggle_category('Supply', True)
         scan_fig.toggle_category('Demand', True)
         scan_fig.toggle_category('Fluxes', True)
+        scan_fig.ax.axvline(self.fixed_ss, ls=':', color='gray')
 
         return scan_fig
+
+    def plot_decompose(self):
+        ecs = []
+        ccs = []
+        prc_names = []
+
+        reagent_of = [each[2:] for each in self.flux_names]
+        all_reactions = reagent_of + \
+            getattr(self._model_map, self.fixed).isModifierOf()
+
+        for flux_reaction in self.flux_names:
+            reaction = flux_reaction[2:]
+
+            for route_reaction in all_reactions:
+
+                ec = 'ec' + route_reaction + '_' + self.fixed
+                cc = 'ccJ' + reaction + '_' + route_reaction
+
+                name = 'prcJ%s_%s_%s' % (reaction,
+                                         self.fixed,
+                                         route_reaction)
+
+                ecs.append(ec)
+                ccs.append(cc)
+                prc_names.append(name)
+
+        user_output = [self.fixed] + ecs + ccs
+        print user_output
+
+        scanner = pysces.Scanner(self.mod)
+        scanner.quietRun = True
+        scanner.addScanParameter(self.fixed,
+                                 self.scan_min,
+                                 self.scan_max,
+                                 self.scan_points,
+                                 log=True)
+        scanner.addUserOutput(*user_output)
+        scanner.Run()
+
+        cc_ec_plt = Data2D(self.mod,
+                           user_output,
+                           scanner.UserOutputResults,
+                           self._ltxe).plot()
+
+        prc_data = []
+        for i, prc_name in enumerate(prc_names):
+            outs = scanner.UserOutputResults[:, 1:]
+            cc_s_pos = len(prc_names)
+            ec_col_data = outs[:, i]
+            cc_col_data = outs[:, i + cc_s_pos]
+            col = ec_col_data * cc_col_data
+            prc_data.append(col)
+        prc_out_arr = [scanner.UserOutputResults[:, 0]] + prc_data
+        prc_out_arr = np.vstack(prc_out_arr).transpose()
+
+        prc_plt = Data2D(self.mod,
+                         [self.fixed] + prc_names,
+                         prc_out_arr,
+                         self._ltxe).plot()
+
+        for plot in [cc_ec_plt, prc_plt]:
+            plot.ax.set_xscale('log')
+            plot.ax.set_ylabel('Coefficient Value')
+            plot.ax.set_xlim([self.scan_min,
+                              self.scan_max])
+
+        return prc_plt, cc_ec_plt
 
 
 ##########################################

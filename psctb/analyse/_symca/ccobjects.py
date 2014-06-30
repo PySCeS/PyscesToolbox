@@ -1,6 +1,7 @@
 import numpy as np
 #from PyscesToolBox import PyscesToolBox as PYCtools
 from sympy import Symbol
+from ...utils.plotting import LineData, ScanFig
 
 
 class CCBase(object):
@@ -134,7 +135,31 @@ class CCoef(CCBase):
         if init_return:
             setattr(self.mod, parameter, init)
 
-        return np.array(scan_res, dtype=np.float).transpose()
+        cp_names = [cp.name for cp in self.control_patterns]
+        data = np.array(scan_res, dtype=np.float).transpose()
+        line_data_list = []
+        for i, cp in enumerate(cp_names):
+            ld = LineData(name=cp,
+                          x_data=data[:, 0],
+                          y_data=data[:, 1+i],
+                          categories=[cp])
+            line_data_list.append(ld)
+
+        if parameter in self.mod.fixed_species:
+            x_label = '[%s]' % parameter.replace('_', ' ')
+        else:
+            x_label = '%s' % parameter.replace('_', ' ')
+        scan_fig = ScanFig(line_data_list,
+                           ax_properties={'xlabel': x_label,
+                                          'ylabel': 'Percentage Contribution',
+                                          'xscale': 'log',
+                                          'xlim': [np.min(scan_range),
+                                                   np.max(scan_range)],
+                                          'ylim':  [0, 100]},
+                           category_classes={'Control Patterns': cp_names})
+        return scan_fig
+
+        #return np.array(scan_res, dtype=np.float).transpose()
 
     def _recalculate_value(self):
         """Recalculates the control coefficients and control pattern

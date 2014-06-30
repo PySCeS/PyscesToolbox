@@ -14,7 +14,8 @@ from collections import OrderedDict
 This whole module is fd in the a
 """
 __all__ = ['LineData',
-           'ScanFig']
+           'ScanFig',
+           'Data2D']
 
 
 def add_legend_viewlim(ax, **kwargs):
@@ -223,6 +224,7 @@ class Data2D(object):
                        ax_properties=self.ax_properties)
 
 
+
 class ScanFig(object):
 
     def __init__(self, line_data_list,
@@ -232,7 +234,7 @@ class ScanFig(object):
 
         super(ScanFig, self).__init__()
 
-        rcParams.update({'font.size': 13})
+        rcParams.update({'font.size': 16})
 
         self._categories = None
         self._categories_status = None
@@ -243,7 +245,7 @@ class ScanFig(object):
 
         # figure setup
         plt.ioff()
-        self.fig = plt.figure(figsize=(16, 10))
+        self.fig = plt.figure(figsize=(10, 5.72))
         if fig_properties:
             self.fig.set(**fig_properties)
 
@@ -263,6 +265,7 @@ class ScanFig(object):
             self.category_classes = category_classes
         else:
             self.category_classes = {'': [k for k in self.categories]}
+        plt.close()
 
     def show(self):
         """
@@ -281,7 +284,7 @@ class ScanFig(object):
 
         add_legend_viewlim(
             self.ax,
-            bbox_to_anchor=(0, -0.10),
+            bbox_to_anchor=(0, -0.15),
             ncol=3,
             loc=2,
             borderaxespad=0.)
@@ -485,7 +488,7 @@ class ScanFig(object):
                     line.set(**each.properties)
                 else:
                     line.set_label(each.name)
-                    line.set_linewidth(1.5)
+                    line.set_linewidth(2)
                 line.set_visible(False)
 
                 lines[each.name] = line
