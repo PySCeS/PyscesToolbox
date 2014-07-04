@@ -297,7 +297,7 @@ class ScanFig(object):
 
         add_legend_viewlim(
             self.ax,
-            bbox_to_anchor=(0, -0.15),
+            bbox_to_anchor=(0, -0.17),
             ncol=3,
             loc=2,
             borderaxespad=0.)
@@ -517,11 +517,14 @@ class ScanFig(object):
             for i, each in enumerate(self._raw_line_data):
                 line, = self.ax.plot(each.x, each.y)
 
+                #set width to a default width of 2
+                #bc the default value of one is too low
+                line.set_linewidth(2)
                 if each.properties:
                     line.set(**each.properties)
                 else:
                     line.set_label(each.name)
-                    line.set_linewidth(2)
+
                 line.set_visible(False)
 
                 lines[each.name] = line
