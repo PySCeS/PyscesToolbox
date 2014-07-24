@@ -5,6 +5,7 @@ from matplotlib import rcParams
 import numpy as np
 from IPython.html import widgets
 from pysces import ModelMap
+from pysces import output_dir as psc_out_dir
 
 from ..misc import *
 from ...latextools import LatexExpr
@@ -14,7 +15,8 @@ from collections import OrderedDict
 This whole module is fd in the a
 """
 __all__ = ['LineData',
-           'ScanFig']
+           'ScanFig',
+           'Data2D']
 
 
 def add_legend_viewlim(ax, **kwargs):
@@ -42,6 +44,8 @@ def add_legend_viewlim(ax, **kwargs):
 
     elif ax.get_legend():
         ax.get_legend().set_visible(False)
+    else:
+        ax.legend().set_visible(False)
 
 
 class LineData(object):
@@ -223,16 +227,18 @@ class Data2D(object):
                        ax_properties=self.ax_properties)
 
 
+
 class ScanFig(object):
 
     def __init__(self, line_data_list,
                  category_classes=None,
                  fig_properties=None,
-                 ax_properties=None):
+                 ax_properties=None,
+                 fname=None,):
 
         super(ScanFig, self).__init__()
 
-        rcParams.update({'font.size': 13})
+        rcParams.update({'font.size': 16})
 
         self._categories = None
         self._categories_status = None
@@ -243,7 +249,7 @@ class ScanFig(object):
 
         # figure setup
         plt.ioff()
-        self.fig = plt.figure(figsize=(16, 10))
+        self.fig = plt.figure(figsize=(10, 5.72))
         if fig_properties:
             self.fig.set(**fig_properties)
 
@@ -264,6 +270,16 @@ class ScanFig(object):
         else:
             self.category_classes = {'': [k for k in self.categories]}
 
+        if fname:
+            self.fname = fname
+        else:
+            self.fname = psc_out_dir + '/' + 'ScanFig'
+
+        self.save_counter = 0
+
+        self.lines
+        plt.close()
+
     def show(self):
         """
         Shows the figure.
@@ -281,14 +297,11 @@ class ScanFig(object):
 
         add_legend_viewlim(
             self.ax,
-            bbox_to_anchor=(0, -0.10),
+            bbox_to_anchor=(0, -0.17),
             ncol=3,
             loc=2,
             borderaxespad=0.)
 
-        # just reference lines to populate the object - maybe move up this
-        # reference to the init.
-        self.lines
         if rcParams['backend'] == \
                 'module://IPython.kernel.zmq.pylab.backend_inline':
             clear_output(wait=True)
@@ -296,6 +309,29 @@ class ScanFig(object):
         else:
             self.fig.show()
 
+    def save(self, fname=None, dpi=None, fmt=None):
+        if not fmt:
+            fmt = 'svg'
+
+        if not dpi:
+            dpi = 180
+
+        name_string = '_' + str(self.save_counter) + '.' + fmt
+
+        if not fname:
+            fname = self.fname + name_string
+        else:
+            fname = fname + name_string
+
+        self.save_counter += 1
+
+        self.fig.savefig(fname,
+                         format=fmt,
+                         dpi=dpi,
+                         bbox_extra_artists=(self.ax.get_legend(),),
+                         bbox_inches='tight')
+
+        
     @property
     def _widgets(self):
         if not self._widgets_:
@@ -481,11 +517,14 @@ class ScanFig(object):
             for i, each in enumerate(self._raw_line_data):
                 line, = self.ax.plot(each.x, each.y)
 
+                #set width to a default width of 2
+                #bc the default value of one is too low
+                line.set_linewidth(2)
                 if each.properties:
                     line.set(**each.properties)
                 else:
                     line.set_label(each.name)
-                    line.set_linewidth(1.5)
+
                 line.set_visible(False)
 
                 lines[each.name] = line

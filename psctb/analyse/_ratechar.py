@@ -69,6 +69,10 @@ class RateChar(object):
         # this function wraps _do_scan functionality in a user friendly bubble
         if fixed == 'all':
             to_scan = self.mod.species
+        elif type(fixed) is list or type(fixed) is tuple:
+            for each in fixed:
+                assert each in self.mod.species, 'Invalid species'
+            to_scan = fixed
         else:
             assert fixed in self.mod.species, 'Invalid species'
             to_scan = [fixed]
@@ -549,6 +553,10 @@ class RateCharData(object):
                     ['J_' + reaction for reaction in self.mod.reactions] +
                     ['Total Demand'],
                     color_list))
+            #just to darken the colors a bit
+            for k, v in color_dict.iteritems():
+                color_dict[k] = [v[0], v[1], v[2]*0.9]
+
             self._color_dict_ = color_dict
 
         return self._color_dict_
@@ -577,8 +585,7 @@ class RateCharData(object):
                                              'Demand',
                                              flux],
                                  properties={'label': '$%s$' % latex_expr,
-                                             'color': color,
-                                             'linewidth': 2})
+                                             'color': color})
                     break
             for sup in supply_blocks:
                 if sup in flux:
@@ -590,8 +597,7 @@ class RateCharData(object):
                                              'Supply',
                                              flux],
                                  properties={'label': '$%s$' % latex_expr,
-                                             'color': color,
-                                             'linewidth': 2})
+                                             'color': color})
                     break
         self._flux_ld_dict = flux_ld_dict
 
@@ -604,7 +610,7 @@ class RateCharData(object):
                 if ec_reaction in ec_name:
                     flux_color = self._color_dict[flux]
                     color = hsv_to_rgb(flux_color[0],
-                                       flux_color[1] * 0.75,
+                                       flux_color[1] * 0.65,
                                        flux_color[2])
                     ec_data = getattr(self, ec_name)
                     categories = ['Elasticity Coefficients'] + \
@@ -617,8 +623,7 @@ class RateCharData(object):
                                  y_data=ec_data[:, 1],
                                  categories=categories,
                                  properties={'label': '$%s$' % latex_expr,
-                                             'color': color,
-                                             'linewidth': 2})
+                                             'color': color})
         self._ec_ld_dict = ec_ld_dict
 
     def _make_rc_ld(self):
@@ -631,7 +636,7 @@ class RateCharData(object):
                     flux_color = self._color_dict[flux]
                     color = hsv_to_rgb(flux_color[0],
                                        flux_color[1],
-                                       flux_color[2] * 0.75)
+                                       flux_color[2] * 0.65)
                     rc_data = getattr(self, rc_name)
                     categories = ['Response Coefficients'] + \
                         flux_ld.categories[1:]
@@ -644,7 +649,7 @@ class RateCharData(object):
                                  categories=categories,
                                  properties={'label': '$%s$' % latex_expr,
                                              'color': color,
-                                             'linewidth': 2})
+                                             'ls': '--'})
         self._rc_ld_dict = rc_ld_dict
 
     def _make_prc_ld(self):
@@ -680,8 +685,7 @@ class RateCharData(object):
                                  y_data=prc_data[:, 1],
                                  categories=categories,
                                  properties={'label': '$%s$' % latex_expr,
-                                             'color': color,
-                                             'linewidth': 2})
+                                             'color': color})
         self._prc_ld_dict = prc_ld_dict
 
     def _make_total_flux_ld(self):
@@ -695,8 +699,7 @@ class RateCharData(object):
                                  'Supply',
                                  'Total Supply'],
                      properties={'label': '$%s$' % 'Total\,Supply',
-                                 'color': self._color_dict['Total Supply'],
-                                 'linewidth': 2})
+                                 'color': self._color_dict['Total Supply']})
 
         total_flux_ld_dict['Total Demand'] = \
             LineData(name='Total Demand',
@@ -706,8 +709,7 @@ class RateCharData(object):
                                  'Demand',
                                  'Total Demand'],
                      properties={'label': '$%s$' % 'Total\,Demand',
-                                 'color': self._color_dict['Total Demand'],
-                                 'linewidth': 2})
+                                 'color': self._color_dict['Total Demand']})
 
         self._total_flux_ld_dict = total_flux_ld_dict
 
