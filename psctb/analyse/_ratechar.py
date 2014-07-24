@@ -185,9 +185,10 @@ class RateChar(object):
         fixed_mod.doState()
         return fixed_mod, fixed_ss
 
-    def save(self):
+    def save(self, file_name=None):
+        if not file_name:
+            file_name = self._working_dir + 'save_data.pickle'        
 
-        path_to_pickle = self._working_dir + 'save_data.pickle'
         save_data = []
         temp_mod_list = []
         
@@ -204,9 +205,13 @@ class RateChar(object):
 
             save_data.append(rcd)
 
-        with open(path_to_pickle, 'w') as f:
-            pickle.dump(save_data, f)
+        try:
+            with open(file_name, 'w') as f:
+                pickle.dump(save_data, f)
+        except IOError as e:
+            print e.strerror
 
+        #add everything back
         for i,species in enumerate(self.mod.species):
             rcd = getattr(self,species)
             if rcd:                
@@ -214,11 +219,13 @@ class RateChar(object):
                 rcd._ltxe = self._ltxe
                 rcd._basemod = self.mod
 
-    def load(self):
-        path_to_pickle = self._working_dir + 'save_data.pickle'
+    def load(self, file_name=None):
+        if not file_name:
+            file_name = self._working_dir + 'save_data.pickle'
+      
         
         try:
-            with open(path_to_pickle) as f:
+            with open(file_name) as f:
                 save_data = pickle.load(f)
 
             for rcd in save_data:
@@ -227,8 +234,8 @@ class RateChar(object):
                     rcd.mod = self._fix_at_ss(rcd.fixed)[0]
                     rcd._ltxe = self._ltxe
                     setattr(self,rcd.fixed,rcd)       
-        except:
-            print 'No save data to load'
+        except IOError as e:
+            print e.strerror
 
 class RateCharData(object):
 
