@@ -2,6 +2,7 @@ import pysces
 import numpy as np
 import os
 import sys
+import cPickle as pickle
 
 from pysces.PyscesModelMap import ModelMap
 
@@ -40,7 +41,8 @@ class RateChar(object):
 
     def __init__(self, mod, min_concrange_factor=100,
                  max_concrange_factor=100,
-                 scan_points=256):
+                 scan_points=256,
+                 auto_load=False):
         super(RateChar, self).__init__()
 
         self.mod = mod
@@ -57,6 +59,10 @@ class RateChar(object):
         self._scan_points = scan_points
 
         self._ltxe = LatexExpr(self.mod)
+        for species in self.mod.species:
+            setattr(self,species,None)
+        if auto_load:
+            self.load()
 
     def do_ratechar(self, fixed='all',
                     scan_min=None,
@@ -64,7 +70,8 @@ class RateChar(object):
                     min_concrange_factor=None,
                     max_concrange_factor=None,
                     scan_points=None,
-                    solver=0):
+                    solver=0,
+                    auto_save=False):
 
         # this function wraps _do_scan functionality in a user friendly bubble
         if fixed == 'all':
@@ -96,6 +103,7 @@ class RateChar(object):
                 scan_points = self._scan_points
 
             column_names, results = self._do_scan(fixed_mod,
+                                                  each,
                                                   scan_start,
                                                   scan_end,
                                                   scan_points)
@@ -110,6 +118,8 @@ class RateChar(object):
                                self._model_map,
                                self._ltxe)
             setattr(self, each, rcd)
+        if save_after_run:
+            self.save()
 
     def _min_max_chooser(self, ss, point, concrange, min_max):
         # chooses a minimum or maximum point based
@@ -134,7 +144,7 @@ class RateChar(object):
         return the_point
 
     @silence_print
-    def _do_scan(self, fixed_mod, scan_min, scan_max, scan_points, solver=0):
+    def _do_scan(self, fixed_mod, fixed, scan_min, scan_max, scan_points, solver=0):
         # do scan is a simplified interface to pysces.Scanner
         # waaay more intuitive than Scan1 (functional vs OO??)
         # returns the names of the scanned blocks together with
@@ -143,7 +153,6 @@ class RateChar(object):
         assert solver in (0, 1, 2), 'Solver mode can only be one of 0, 1 or 2'
 
         fixed_mod.mode_solver = solver
-        fixed = fixed_mod.fixed
 
         demand_blocks = [
             'J_' + r for r in getattr(self._model_map, fixed).isSubstrateOf()]
@@ -170,18 +179,56 @@ class RateChar(object):
         fixed_mod.SetQuiet()
         # i don't like this approach at all, too many possible unintended side
         # effects
-        setattr(fixed_mod, fixed, fixed_ss)
-        setattr(fixed_mod, 'fixed', fixed)
-        setattr(fixed_mod, 'fixed_ss', fixed_ss)
+        #setattr(fixed_mod, fixed, fixed_ss)
+        #setattr(fixed_mod, 'fixed', fixed)
+        #setattr(fixed_mod, 'fixed_ss', fixed_ss)
         fixed_mod.doState()
         return fixed_mod, fixed_ss
 
     def save(self):
-        pass
+
+        path_to_pickle = self._working_dir + 'save_data.pickle'
+        save_data = []
+        temp_mod_list = []
+        
+        #remove all PyscesModel object instances before saving 
+        for species in self.mod.species:
+            rcd = getattr(self,species)
+            if rcd:
+                temp_mod_list.append(rcd.mod)
+                rcd.mod = None
+                rcd._ltxe = None
+                rcd._basemod = None
+            else:
+                temp_mod_list.append(None)
+
+            save_data.append(rcd)
+
+        with open(path_to_pickle, 'w') as f:
+            pickle.dump(save_data, f)
+
+        for i,species in enumerate(self.mod.species):
+            rcd = getattr(self,species)
+            if rcd:                
+                rcd.mod = temp_mod_list[i]
+                rcd._ltxe = self._ltxe
+                rcd._basemod = self.mod
 
     def load(self):
-        pass
+        path_to_pickle = self._working_dir + 'save_data.pickle'
+        
+        try:
+            with open(path_to_pickle) as f:
+                save_data = pickle.load(f)
 
+            for rcd in save_data:
+                if rcd:
+                    rcd._basemod = self.mod
+                    rcd.mod = self._fix_at_ss(rcd.fixed)[0]
+                    rcd._ltxe = self._ltxe
+                    setattr(self,rcd.fixed,rcd)       
+        except:
+            print 'No save data to load'
 
 class RateCharData(object):
 
@@ -413,14 +460,6 @@ class RateCharData(object):
         setup_for = ['ec', 'rc', 'prc']
         for each in setup_for:
             eval('self._make_' + each + '_lines()')
-
-    # def _tangent_setup(self):
-    #     setup_for = ['ec', 'rc', 'prc']
-    #     for each in setup_for:
-    #         eval('self._' + each + '_lines()')
-    #         eval('self._attach_coefficients_to_self(self.' + each + '_names,\
-    #                                             self.' + each + '_data)')
-    #         eval('self._setup_' + each + '_metadata()')
 
     def _make_attach_total_fluxes(self):
         demand_blocks = getattr(self._model_map, self.fixed).isSubstrateOf()
