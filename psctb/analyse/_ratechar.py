@@ -221,8 +221,7 @@ class RateChar(object):
 
     def load(self, file_name=None):
         if not file_name:
-            file_name = self._working_dir + 'save_data.pickle'
-      
+            file_name = self._working_dir + 'save_data.pickle'    
         
         try:
             with open(file_name) as f:
@@ -396,11 +395,17 @@ class RateCharData(object):
             self.total_supply.reshape(scan_points, 1),
             self.total_demand.reshape(scan_points, 1)])
         column_names = self._column_names + ['Total Supply', 'Total Demand']
-        pysces.write.exportLabelledArrayWithHeader(all_cols,
-                                                   names=None,
-                                                   header=column_names,
-                                                   fname=file_name,
-                                                   sep=separator)
+        
+        try:
+            pysces.write.exportLabelledArrayWithHeader(all_cols,
+                                                       names=None,
+                                                       header=column_names,
+                                                       fname=file_name,
+                                                       sep=separator)
+        except IOError as e:
+            print e.strerror
+
+
 
     @silence_print
     def save_coefficient_data(self, coefficient, file_name=None, separator=','):
@@ -417,11 +422,14 @@ class RateCharData(object):
             new_names.append('x_vals')
             new_names.append(each)
 
-        pysces.write.exportLabelledArrayWithHeader(results,
-                                                   names=None,
-                                                   header=new_names,
-                                                   fname=file_name,
-                                                   sep=separator)
+        try:
+            pysces.write.exportLabelledArrayWithHeader(results,
+                                                       names=None,
+                                                       header=new_names,
+                                                       fname=file_name,
+                                                       sep=separator)
+        except IOError as e:
+            print e.strerror
 
     def save_data(self, separator=','):
         self.save_flux_data(separator=separator)
