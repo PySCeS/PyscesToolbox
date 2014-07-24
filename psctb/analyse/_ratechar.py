@@ -118,7 +118,7 @@ class RateChar(object):
                                self._model_map,
                                self._ltxe)
             setattr(self, each, rcd)
-        if save_after_run:
+        if auto_save:
             self.save()
 
     def _min_max_chooser(self, ss, point, concrange, min_max):
