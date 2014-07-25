@@ -5,7 +5,8 @@ __all__ = ['cc_list',
            'ec_list',
            'rc_list',
            'prc_list',
-           'silence_print']
+           'silence_print',
+           'DotDict']
 
 
 def silence_print(func):
@@ -177,3 +178,54 @@ def prc_list(mod):
                 prcs.append(prc)
     prcs.sort()
     return prcs
+
+
+class DotDict(dict):
+
+    """A class that inherits from ``dict``.
+
+    The DotDict class has the same functionality as ``dict`` but with the added
+    feature that dictionary elements may be accessed via dot notation.
+
+    See Also
+    --------
+    dict
+    """
+
+    reserved = ['clear', 'fromkeys', 'has_key', 'iteritems', 'itervalues',
+                'pop', 'setdefault', 'values', 'viewkeys', 'copy', 'get',
+                'items', 'iterkeys', 'keys', 'popitem', 'update', 'viewitems',
+                'viewvalues', '__class__', '__delitem__', '__ge__',
+                '__hash__', '__len__', '__reduce__', '__setitem__', '__cmp__',
+                '__doc__', '__getattribute__', '__init__', '__lt__',
+                '__reduce_ex__', '__sizeof__', '__contains__', '__eq__',
+                '__getitem__', '__iter__', '__ne__', '__repr__', '__str__',
+                '__delattr__', '__format__', '__gt__', '__le__', '__new__',
+                '__setattr__', '__subclasshook__']
+
+    def __init__(self, *args, **kwargs):
+        super(DotDict, self).__init__(*args, **kwargs)
+        self._setall_init()
+
+    def __setitem__(self, x, y):
+        dict.__setitem__(self, x, y)
+        try:
+            if x in DotDict.reserved:
+                raise Exception
+            else:
+                setattr(self, x, y)
+        except Exception:
+            print '%s is a reserved key' % x
+
+    def _setall_init(self):
+        """
+        Internal function that populates the self namespace on
+        initialisation. Throws exception if any of the keys are
+        reserved.
+        """
+
+        for k, v in self.iteritems():
+            if k in DotDict.reserved:
+                raise Exception('%s is a reserved key' % k)
+            else:
+                setattr(self, k, v)
