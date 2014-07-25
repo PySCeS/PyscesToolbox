@@ -60,7 +60,7 @@ class RateChar(object):
 
         self._ltxe = LatexExpr(self.mod)
         for species in self.mod.species:
-            setattr(self,species,None)
+            setattr(self, species, None)
         if auto_load:
             self.load()
 
@@ -187,14 +187,14 @@ class RateChar(object):
 
     def save(self, file_name=None):
         if not file_name:
-            file_name = self._working_dir + 'save_data.pickle'        
+            file_name = self._working_dir + 'save_data.pickle'
 
         save_data = []
         temp_mod_list = []
-        
-        #remove all PyscesModel object instances before saving 
+
+        # remove all PyscesModel object instances before saving
         for species in self.mod.species:
-            rcd = getattr(self,species)
+            rcd = getattr(self, species)
             if rcd:
                 temp_mod_list.append(rcd.mod)
                 rcd.mod = None
@@ -211,18 +211,18 @@ class RateChar(object):
         except IOError as e:
             print e.strerror
 
-        #add everything back
-        for i,species in enumerate(self.mod.species):
-            rcd = getattr(self,species)
-            if rcd:                
+        # add everything back
+        for i, species in enumerate(self.mod.species):
+            rcd = getattr(self, species)
+            if rcd:
                 rcd.mod = temp_mod_list[i]
                 rcd._ltxe = self._ltxe
                 rcd._basemod = self.mod
 
     def load(self, file_name=None):
         if not file_name:
-            file_name = self._working_dir + 'save_data.pickle'    
-        
+            file_name = self._working_dir + 'save_data.pickle'
+
         try:
             with open(file_name) as f:
                 save_data = pickle.load(f)
@@ -232,9 +232,10 @@ class RateChar(object):
                     rcd._basemod = self.mod
                     rcd.mod = self._fix_at_ss(rcd.fixed)[0]
                     rcd._ltxe = self._ltxe
-                    setattr(self,rcd.fixed,rcd)       
+                    setattr(self, rcd.fixed, rcd)
         except IOError as e:
             print e.strerror
+
 
 class RateCharData(object):
 
@@ -395,7 +396,7 @@ class RateCharData(object):
             self.total_supply.reshape(scan_points, 1),
             self.total_demand.reshape(scan_points, 1)])
         column_names = self._column_names + ['Total Supply', 'Total Demand']
-        
+
         try:
             pysces.write.exportLabelledArrayWithHeader(all_cols,
                                                        names=None,
@@ -404,8 +405,6 @@ class RateCharData(object):
                                                        sep=separator)
         except IOError as e:
             print e.strerror
-
-
 
     @silence_print
     def save_coefficient_data(self, coefficient, file_name=None, separator=','):
@@ -607,9 +606,9 @@ class RateCharData(object):
                     ['J_' + reaction for reaction in self.mod.reactions] +
                     ['Total Demand'],
                     color_list))
-            #just to darken the colors a bit
+            # just to darken the colors a bit
             for k, v in color_dict.iteritems():
-                color_dict[k] = [v[0], v[1], v[2]*0.9]
+                color_dict[k] = [v[0], v[1], v[2] * 0.9]
 
             self._color_dict_ = color_dict
 
