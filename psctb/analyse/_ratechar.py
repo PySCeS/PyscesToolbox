@@ -13,18 +13,19 @@ from colorsys import hsv_to_rgb, rgb_to_hsv
 from .. import modeltools
 from ..latextools import LatexExpr
 from ..utils.plotting import ScanFig, LineData
+from ..utils.misc import silence_print
 
 __all__ = ['RateChar']
 
 
-def silence_print(func):
-    def wrapper(*args, **kwargs):
-        stdout = sys.stdout
-        sys.stdout = open(os.devnull, 'w')
-        returns = func(*args, **kwargs)
-        sys.stdout = stdout
-        return returns
-    return wrapper
+# def silence_print(func):
+#     def wrapper(*args, **kwargs):
+#         stdout = sys.stdout
+#         sys.stdout = open(os.devnull, 'w')
+#         returns = func(*args, **kwargs)
+#         sys.stdout = stdout
+#         return returns
+#     return wrapper
 
 
 def strip_nan_from_scan(array_like):
