@@ -1,10 +1,9 @@
-import pysces
 import numpy as np
-import os
-import sys
 import cPickle as pickle
 
 from pysces.PyscesModelMap import ModelMap
+from pysces import Scanner
+from pysces import write
 
 from collections import OrderedDict
 from matplotlib.pyplot import get_cmap
@@ -16,16 +15,6 @@ from ..utils.plotting import ScanFig, LineData
 from ..utils.misc import silence_print
 
 __all__ = ['RateChar']
-
-
-# def silence_print(func):
-#     def wrapper(*args, **kwargs):
-#         stdout = sys.stdout
-#         sys.stdout = open(os.devnull, 'w')
-#         returns = func(*args, **kwargs)
-#         sys.stdout = stdout
-#         return returns
-#     return wrapper
 
 
 def strip_nan_from_scan(array_like):
@@ -145,9 +134,15 @@ class RateChar(object):
         return the_point
 
     @silence_print
-    def _do_scan(self, fixed_mod, fixed, scan_min, scan_max, scan_points, solver=0):
+    def _do_scan(self,
+                 fixed_mod,
+                 fixed,
+                 scan_min,
+                 scan_max,
+                 scan_points,
+                 solver=0):
         # do scan is a simplified interface to pysces.Scanner
-        # waaay more intuitive than Scan1 (functional vs OO??)
+        # more intuitive than Scan1 (functional vs OO??)
         # returns the names of the scanned blocks together with
         # the results of the scan
 
@@ -161,7 +156,7 @@ class RateChar(object):
             'J_' + r for r in getattr(self._model_map, fixed).isProductOf()]
         user_output = [fixed] + demand_blocks + supply_blocks
 
-        scanner = pysces.Scanner(fixed_mod)
+        scanner = Scanner(fixed_mod)
         scanner.quietRun = True
         scanner.addScanParameter(
             fixed, scan_min, scan_max, scan_points, log=True)
@@ -399,11 +394,11 @@ class RateCharData(object):
         column_names = self._column_names + ['Total Supply', 'Total Demand']
 
         try:
-            pysces.write.exportLabelledArrayWithHeader(all_cols,
-                                                       names=None,
-                                                       header=column_names,
-                                                       fname=file_name,
-                                                       sep=separator)
+            write.exportLabelledArrayWithHeader(all_cols,
+                                                names=None,
+                                                header=column_names,
+                                                fname=file_name,
+                                                sep=separator)
         except IOError as e:
             print e.strerror
 
@@ -423,11 +418,11 @@ class RateCharData(object):
             new_names.append(each)
 
         try:
-            pysces.write.exportLabelledArrayWithHeader(results,
-                                                       names=None,
-                                                       header=new_names,
-                                                       fname=file_name,
-                                                       sep=separator)
+            write.exportLabelledArrayWithHeader(results,
+                                                names=None,
+                                                header=new_names,
+                                                fname=file_name,
+                                                sep=separator)
         except IOError as e:
             print e.strerror
 
