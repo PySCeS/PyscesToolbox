@@ -3,11 +3,13 @@ from sympy.matrices import Matrix
 from ...modeltools import make_path
 from ...latextools import LatexExpr
 from .symca_toolbox import SymcaToolBox as SMCAtools
+from ...utils.misc import PseudoDotDict
 #from LatexOut import LatexOut
 
 import logging
 
 all = ['Symca']
+
 
 class Symca(object):
 
@@ -30,6 +32,7 @@ class Symca(object):
         #self._latex_out = LatexOut(self)
 
         self._object_populated = False
+        self.CC = PseudoDotDict()
 
         self._nmatrix = None
         self._species = None
@@ -224,22 +227,26 @@ class Symca(object):
         if not self._object_populated:
             print 'No data to save, run do_symca first'
         else:
-            SMCAtools.save(self.CC,
-                           self.common_denominator,
-                           self._working_dir + 'data.dump'
+            CC = [self.CC[k] for k in set(self.CC.keys()) -
+                  set(['common_denominator'])]
+
+
+            SMCAtools.save(CC,
+                           self.CC.common_denominator,
+                           self._working_dir + 'save_data.pickle'
                            )
 
     def load(self):
         cc_objects = SMCAtools.load(self.mod,
-                                    self._working_dir + 'data.dump'
+                                    self._working_dir + 'save_data.pickle'
                                     )
 
         for cc in cc_objects:
-            setattr(self, cc.name, cc)
-        self.CC = cc_objects[1:]
+            self.CC[cc.name] = cc
+        #self.CC = cc_objects[1:]
         self._object_populated = True
 
-    def do_symca(self,auto_save=False):
+    def do_symca(self, auto_save=False):
 
         CC_i_num, common_denom_expr = SMCAtools.invert(
             self.ematrix,
@@ -284,8 +291,8 @@ class Symca(object):
         )
 
         for cc in cc_objects:
-            setattr(self, cc.name, cc)
-        self.CC = cc_objects[1:]
+            self.CC[cc.name] = cc
+        #self.CC = cc_objects[1:]
         self._object_populated = True
         self.CC_i_num = CC_i_num
 
