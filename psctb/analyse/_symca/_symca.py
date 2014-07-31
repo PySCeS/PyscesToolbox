@@ -11,7 +11,7 @@ all = ['Symca']
 
 class Symca(object):
 
-    def __init__(self, mod):
+    def __init__(self, mod, auto_load=False):
         super(Symca, self).__init__()
 
         self.mod = mod
@@ -50,6 +50,8 @@ class Symca(object):
         self._es_matrix = None
         self._esL = None
         self._ematrix = None
+        if auto_load:
+            self.load()
 
     @property
     def nmatrix(self):
@@ -237,7 +239,7 @@ class Symca(object):
         self.CC = cc_objects[1:]
         self._object_populated = True
 
-    def do_symca(self):
+    def do_symca(self,auto_save=False):
 
         CC_i_num, common_denom_expr = SMCAtools.invert(
             self.ematrix,
@@ -286,3 +288,6 @@ class Symca(object):
         self.CC = cc_objects[1:]
         self._object_populated = True
         self.CC_i_num = CC_i_num
+
+        if auto_save:
+            self.save()
