@@ -6,7 +6,8 @@ __all__ = ['cc_list',
            'rc_list',
            'prc_list',
            'silence_print',
-           'DotDict']
+           'DotDict',
+           'PseudoDotDict']
 
 
 def silence_print(func):
@@ -180,6 +181,42 @@ def prc_list(mod):
     return prcs
 
 
+class PseudoDotDict:
+
+    _reserved = ['__class__', '__format__', '__init__', '__reduce_ex__',
+                 '__sizeof__', '__delattr__', '__getattribute__', '__new__',
+                 '__repr__', '__str__', '__doc__', '__hash__', '__reduce__',
+                 '__setattr__', '__subclasshook__', 'keys', 'items', 'values']
+
+    def __init__(self, *args, **kwargs):
+        self._dict = dict(*args, **kwargs)
+        self._setall_init
+        self.keys = self._dict.keys
+        self.values = self._dict.values
+        self.items = self._dict.items
+
+    def _setall_init(self):
+        for k, v in self._dict.iteritems():
+            if k in PseudoDotDict._reserved:
+                raise Exception('%s is a reserved key' % k)
+            else:
+                setattr(self, k, v)
+
+    def __setitem__(self, x, y):
+        self._dict[x] = y
+        if x in PseudoDotDict._reserved:
+            raise Exception('%s is a reserved key' % x)
+        else:
+            setattr(self, x, y)
+
+    def __getitem__(self, x):
+        return self._dict[x]
+
+    def update(self, dic):
+        for k, v in dic.iteritems():
+            self.__setitem__(k, v)
+
+
 class DotDict(dict):
 
     """A class that inherits from ``dict``.
@@ -192,25 +229,30 @@ class DotDict(dict):
     dict
     """
 
-    reserved = ['clear', 'fromkeys', 'has_key', 'iteritems', 'itervalues',
-                'pop', 'setdefault', 'values', 'viewkeys', 'copy', 'get',
-                'items', 'iterkeys', 'keys', 'popitem', 'update', 'viewitems',
-                'viewvalues', '__class__', '__delitem__', '__ge__',
-                '__hash__', '__len__', '__reduce__', '__setitem__', '__cmp__',
-                '__doc__', '__getattribute__', '__init__', '__lt__',
-                '__reduce_ex__', '__sizeof__', '__contains__', '__eq__',
-                '__getitem__', '__iter__', '__ne__', '__repr__', '__str__',
-                '__delattr__', '__format__', '__gt__', '__le__', '__new__',
-                '__setattr__', '__subclasshook__']
+    _reserved1 = ['clear', 'fromkeys', 'has_key', 'iteritems', 'itervalues',
+                  'pop', 'setdefault', 'values', 'viewkeys', 'copy', 'get',
+                  'items', 'iterkeys', 'keys', 'popitem', 'update',
+                  'viewitems', 'viewvalues']
+
+    _reserved2 = ['__class__', '__delitem__', '__ge__', '__hash__', '__len__',
+                  '__reduce__', '__setitem__', '__cmp__', '__doc__',
+                  '__getattribute__', '__init__', '__lt__', '__reduce_ex__',
+                  '__sizeof__', '__contains__', '__eq__', '__getitem__',
+                  '__iter__', '__ne__', '__repr__', '__str__', '__delattr__',
+                  '__format__', '__gt__', '__le__', '__new__',
+                  '__setattr__', '__subclasshook__']
+
+    _reserved = _reserved1 + _reserved2
 
     def __init__(self, *args, **kwargs):
         super(DotDict, self).__init__(*args, **kwargs)
         self._setall_init()
+        # self._reassign_reserved_to_internals()
 
     def __setitem__(self, x, y):
         dict.__setitem__(self, x, y)
         try:
-            if x in DotDict.reserved:
+            if x in DotDict._reserved:
                 raise Exception
             else:
                 setattr(self, x, y)
@@ -225,7 +267,7 @@ class DotDict(dict):
         """
 
         for k, v in self.iteritems():
-            if k in DotDict.reserved:
+            if k in DotDict._reserved:
                 raise Exception('%s is a reserved key' % k)
             else:
                 setattr(self, k, v)
