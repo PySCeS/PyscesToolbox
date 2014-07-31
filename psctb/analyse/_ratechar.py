@@ -5,8 +5,7 @@ from os import path, mkdir
 
 from pysces.PyscesModelMap import ModelMap
 from pysces import Scanner
-from pysces import write.exportLabelledArrayWithHeader as exportLAWH
-
+import pysces
 from collections import OrderedDict
 from matplotlib.pyplot import get_cmap
 from colorsys import hsv_to_rgb, rgb_to_hsv
@@ -17,7 +16,7 @@ from ..utils.plotting import ScanFig, LineData
 from ..utils.misc import silence_print
 from ..utils.misc import PseudoDotDict
 
-exportLAWH = silence_print(exportLAWH)
+exportLAWH = silence_print(pysces.write.exportLabelledArrayWithHeader)
 
 
 __all__ = ['RateChar']
@@ -412,7 +411,6 @@ class RateCharData(object):
                 file_name = path.join(folder,
                                       self.plot_data.fixed,
                                       'mca_summary.cvs')
-                print file_name
             else:
                 file_name = path.join(self._working_dir, 'mca_summary.cvs')
 
