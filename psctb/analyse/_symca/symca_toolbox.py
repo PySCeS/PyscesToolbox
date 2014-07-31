@@ -8,7 +8,7 @@ from sympy import Symbol, sympify, nsimplify, fraction, S
 from sympy.matrices import Matrix, diag, NonSquareMatrixError
 from .ccobjects import CCBase, CCoef
 
-import pickle
+import cPickle as pickle
 
 all = ['SymcaToolBox']
 
