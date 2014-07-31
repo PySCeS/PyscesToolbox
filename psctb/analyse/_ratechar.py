@@ -1,9 +1,11 @@
 import numpy as np
 import cPickle as pickle
 
+from os import path, mkdir
+
 from pysces.PyscesModelMap import ModelMap
 from pysces import Scanner
-from pysces import write
+from pysces import write.exportLabelledArrayWithHeader as exportLAWH
 
 from collections import OrderedDict
 from matplotlib.pyplot import get_cmap
@@ -13,6 +15,10 @@ from .. import modeltools
 from ..latextools import LatexExpr
 from ..utils.plotting import ScanFig, LineData
 from ..utils.misc import silence_print
+from ..utils.misc import PseudoDotDict
+
+exportLAWH = silence_print(exportLAWH)
+
 
 __all__ = ['RateChar']
 
@@ -41,8 +47,8 @@ class RateChar(object):
         self.mod.doState()
 
         self._analysis_method = 'ratechar'
-        self._working_dir = modeltools.make_path(
-            self.mod, self._analysis_method)
+        self._working_dir = modeltools.make_path(self.mod,
+                                                 self._analysis_method)
 
         self._min_concrange_factor = min_concrange_factor
         self._max_concrange_factor = max_concrange_factor
@@ -52,7 +58,7 @@ class RateChar(object):
         for species in self.mod.species:
             setattr(self, species, None)
         if auto_load:
-            self.load()
+            self.load_scan()
 
     def do_ratechar(self, fixed='all',
                     scan_min=None,
@@ -109,7 +115,7 @@ class RateChar(object):
                                self._ltxe)
             setattr(self, each, rcd)
         if auto_save:
-            self.save()
+            self.save_scan()
 
     def _min_max_chooser(self, ss, point, concrange, min_max):
         # chooses a minimum or maximum point based
@@ -175,13 +181,13 @@ class RateChar(object):
         fixed_mod.SetQuiet()
         # i don't like this approach at all, too many possible unintended side
         # effects
-        #setattr(fixed_mod, fixed, fixed_ss)
-        #setattr(fixed_mod, 'fixed', fixed)
-        #setattr(fixed_mod, 'fixed_ss', fixed_ss)
+        # setattr(fixed_mod, fixed, fixed_ss)
+        # setattr(fixed_mod, 'fixed', fixed)
+        # setattr(fixed_mod, 'fixed_ss', fixed_ss)
         fixed_mod.doState()
         return fixed_mod, fixed_ss
 
-    def save(self, file_name=None):
+    def save_scan(self, file_name=None):
         if not file_name:
             file_name = self._working_dir + 'save_data.pickle'
 
@@ -215,7 +221,11 @@ class RateChar(object):
                 rcd._ltxe = self._ltxe
                 rcd._basemod = self.mod
 
-    def load(self, file_name=None):
+    def save_results(self, separator=',', folder=None):
+        for species in self.mod.species:
+            getattr(self, species).save_results(separator, folder)
+
+    def load_scan(self, file_name=None):
         if not file_name:
             file_name = self._working_dir + 'save_data.pickle'
 
@@ -247,15 +257,28 @@ class RateCharData(object):
         super(RateCharData, self).__init__()
         self.mod = fixed_mod
 
+        self.plot_data = PseudoDotDict()
+        self.mca_data = PseudoDotDict()
+
         self._slope_range_factor = 3.0
 
-        self.fixed = column_names[0]
-        self.fixed_ss = fixed_ss
+        self.plot_data['fixed'] = column_names[0]
+        self.plot_data['fixed_ss'] = fixed_ss
 
-        self.scan_range = scan_results[:, 0]
-        self.flux_names = column_names[1:]
-        self.flux_data = scan_results[:, 1:]
-        self.scan_points = len(self.scan_range)
+        self.plot_data['scan_range'] = scan_results[:, 0]
+        self.plot_data['flux_names'] = column_names[1:]
+        self.plot_data['flux_data'] = scan_results[:, 1:]
+        self.plot_data['scan_points'] = len(self.plot_data.scan_range)
+        self.plot_data['flux_max'] = None
+        self.plot_data['flux_min'] = None
+        self.plot_data['scan_max'] = None
+        self.plot_data['scan_min'] = None
+        self.plot_data['ec_names'] = None
+        self.plot_data['ec_data'] = None
+        self.plot_data['rc_names'] = None
+        self.plot_data['rc_data'] = None
+        self.plot_data['prc_names'] = None
+        self.plot_data['prc_data'] = None
 
         self._column_names = column_names
         self._scan_results = scan_results
@@ -265,7 +288,7 @@ class RateCharData(object):
         self._basemod = basemod
         self._working_dir = modeltools.make_path(self._basemod,
                                                  self._analysis_method,
-                                                 [self.fixed])
+                                                 [self.plot_data.fixed])
         self._ltxe = ltxe
 
         self._color_dict_ = None
@@ -273,7 +296,7 @@ class RateCharData(object):
 
     def _data_setup(self):
         # reset value to do mcarc
-        setattr(self.mod, self.fixed, self.fixed_ss)
+        setattr(self.mod, self.plot_data.fixed, self.plot_data.fixed_ss)
         self.mod.doMcaRC()
         self._min_max_setup()
         self._attach_fluxes_to_self()
@@ -282,9 +305,6 @@ class RateCharData(object):
         self._attach_all_coefficients_to_self()
         self._make_all_summary()
         self._make_all_line_data()
-
-    def save_summary(self):
-        pass
 
     def _make_all_line_data(self):
         self._make_flux_ld()
@@ -311,11 +331,12 @@ class RateCharData(object):
         self._make_cc_summary()
         self._make_rc_summary()
         self._make_prc_summary()
-        self._summary = {}
-        self._summary.update(self._ec_summary)
-        self._summary.update(self._cc_summary)
-        self._summary.update(self._rc_summary)
-        self._summary.update(self._prc_summary)
+
+        self.mca_data.update(self._ec_summary)
+        self.mca_data.update(self._cc_summary)
+        self.mca_data.update(self._rc_summary)
+        self.mca_data.update(self._prc_summary)
+
         del self._ec_summary
         del self._cc_summary
         del self._rc_summary
@@ -323,9 +344,9 @@ class RateCharData(object):
 
     def _make_ec_summary(self):
         ecs = {}
-        for flux in self.flux_names:
+        for flux in self.plot_data.flux_names:
             reaction = flux[2:]
-            name = 'ec%s_%s' % (reaction, self.fixed)
+            name = 'ec%s_%s' % (reaction, self.plot_data.fixed)
             val = getattr(self.mod, name)
             ecs[name] = val
 
@@ -333,9 +354,9 @@ class RateCharData(object):
 
     def _make_rc_summary(self):
         rcs = {}
-        for flux in self.flux_names:
+        for flux in self.plot_data.flux_names:
             reaction = flux[2:]
-            name = '%s_%s' % (reaction, self.fixed)
+            name = '%s_%s' % (reaction, self.plot_data.fixed)
             val = getattr(self.mod.rc, name)
             name = 'rcJ' + name
             rcs[name] = val
@@ -345,8 +366,9 @@ class RateCharData(object):
     def _make_cc_summary(self):
 
         ccs = {}
-        reagent_of = [each[2:] for each in self.flux_names]
-        modifier_of = getattr(self._model_map, self.fixed).isModifierOf()
+        reagent_of = [each[2:] for each in self.plot_data.flux_names]
+        modifier_of = getattr(
+            self._model_map, self.plot_data.fixed).isModifierOf()
         all_reactions = reagent_of + modifier_of
 
         for flux_reaction in reagent_of:
@@ -361,76 +383,123 @@ class RateCharData(object):
 
         prcs = {}
 
-        reagent_of = [each[2:] for each in self.flux_names]
-        modifier_of = getattr(self._model_map, self.fixed).isModifierOf()
+        reagent_of = [each[2:] for each in self.plot_data.flux_names]
+        modifier_of = getattr(
+            self._model_map, self.plot_data.fixed).isModifierOf()
         all_reactions = reagent_of + modifier_of
 
         for flux_reaction in reagent_of:
             for route_reaction in all_reactions:
                 ec = getattr(self.mod,
-                             'ec%s_%s' % (route_reaction, self.fixed))
+                             'ec%s_%s' % (route_reaction, self.plot_data.fixed))
 
                 cc = getattr(self.mod,
                              'ccJ%s_%s' % (flux_reaction, route_reaction))
                 val = ec * cc
                 name = 'prcJ%s_%s_%s' % (flux_reaction,
-                                         self.fixed,
+                                         self.plot_data.fixed,
                                          route_reaction)
 
                 prcs[name] = val
 
         self._prc_summary = prcs
 
-    @silence_print
-    def save_flux_data(self, file_name=None, separator=','):
+    def _save_summary(self, file_name=None, separator=',', folder=None):
         if not file_name:
-            file_name = self._working_dir + 'flux_data.csv'
+            if folder:
+                if not path.exists(path.join(folder, self.plot_data.fixed)):
+                    mkdir(path.join(folder, self.plot_data.fixed))
+                file_name = path.join(folder,
+                                      self.plot_data.fixed,
+                                      'mca_summary.cvs')
+                print file_name
+            else:
+                file_name = path.join(self._working_dir, 'mca_summary.cvs')
 
-        scan_points = self.scan_points
-        all_cols = np.hstack([
-            self._scan_results,
-            self.total_supply.reshape(scan_points, 1),
-            self.total_demand.reshape(scan_points, 1)])
-        column_names = self._column_names + ['Total Supply', 'Total Demand']
+        keys = self.mca_data.keys()
+        keys.sort()
+        values = np.array([self.mca_data[k]
+                           for k in keys]).reshape(len(keys), 1)
 
         try:
-            write.exportLabelledArrayWithHeader(all_cols,
-                                                names=None,
-                                                header=column_names,
-                                                fname=file_name,
-                                                sep=separator)
+            exportLAWH(values,
+                       names=keys,
+                       header=['Value'],
+                       fname=file_name,
+                       sep=separator)
         except IOError as e:
             print e.strerror
 
-    @silence_print
-    def save_coefficient_data(self, coefficient, file_name=None, separator=','):
+    def _save_flux_data(self, file_name=None, separator=',', folder=None):
+        if not file_name:
+            if folder:
+                if not path.exists(path.join(folder, self.plot_data.fixed)):
+                    mkdir(path.join(folder, self.plot_data.fixed))
+                file_name = path.join(folder,
+                                      self.plot_data.fixed,
+                                      'flux_data.csv')
+            else:
+                file_name = path.join(self._working_dir,
+                                      'flux_data.csv')
+
+        scan_points = self.plot_data.scan_points
+        all_cols = np.hstack([
+            self._scan_results,
+            self.plot_data.total_supply.reshape(scan_points, 1),
+            self.plot_data.total_demand.reshape(scan_points, 1)])
+        column_names = self._column_names + ['Total Supply', 'Total Demand']
+
+        try:
+            exportLAWH(all_cols,
+                       names=None,
+                       header=column_names,
+                       fname=file_name,
+                       sep=separator)
+        except IOError as e:
+            print e.strerror
+
+    def _save_coefficient_data(self,
+                               coefficient,
+                               file_name=None,
+                               separator=',',
+                               folder=None):
         assert_message = 'coefficient must be one of "ec", "rc" or "prc"'
 
         assert coefficient in ['rc', 'ec', 'prc'], assert_message
         if not file_name:
-            file_name = self._working_dir + coefficient + '_data.csv'
+            if folder:
+                if not path.exists(path.join(folder, self.plot_data.fixed)):
+                    mkdir(path.join(folder, self.plot_data.fixed))
+                file_name = path.join(folder,
+                                      self.plot_data.fixed,
+                                      coefficient + '_data.csv')
+            else:
+                file_name = path.join(self._working_dir,
+                                      coefficient + '_data.csv')
 
-        results = getattr(self, coefficient + '_data')
-        names = getattr(self, coefficient + '_names')
+        results = getattr(self.plot_data, coefficient + '_data')
+        names = getattr(self.plot_data, coefficient + '_names')
         new_names = []
         for each in names:
             new_names.append('x_vals')
             new_names.append(each)
 
         try:
-            write.exportLabelledArrayWithHeader(results,
-                                                names=None,
-                                                header=new_names,
-                                                fname=file_name,
-                                                sep=separator)
+            exportLAWH(results,
+                       names=None,
+                       header=new_names,
+                       fname=file_name,
+                       sep=separator)
         except IOError as e:
             print e.strerror
 
-    def save_data(self, separator=','):
-        self.save_flux_data(separator=separator)
+    def save_results(self, separator=',', folder=None):
+        self._save_flux_data(separator=separator, folder=folder)
+        self._save_summary(separator=separator, folder=folder)
         for each in ['ec', 'rc', 'prc']:
-            self.save_coefficient_data(coefficient=each,
-                                       separator=separator)
+            self._save_coefficient_data(coefficient=each,
+                                        separator=separator,
+                                        folder=folder)
 
     def _min_max_setup(self):
         # Negative minimum linear values mean nothing
@@ -438,8 +507,9 @@ class RateCharData(object):
         # therefore we want the minimum non-negative/non-zero values.
 
         # lets make sure there are no zeros
-        n_z_f = self.flux_data[np.nonzero(self.flux_data)]
-        n_z_s = self.scan_range[np.nonzero(self.scan_range)]
+        n_z_f = self.plot_data.flux_data[np.nonzero(self.plot_data.flux_data)]
+        n_z_s = self.plot_data.scan_range[
+            np.nonzero(self.plot_data.scan_range)]
         # and that the array is not now somehow empty
         # although if this happens-you have bigger problems
         if len(n_z_f) == 0:
@@ -451,20 +521,21 @@ class RateCharData(object):
         # by converting to logspace (to get NaNs) and back
         # and then getting the min/max non-NaN
         with np.errstate(invalid='ignore'):
-            self.flux_max = np.nanmax(10 ** np.log10(n_z_f))
-            self.flux_min = np.nanmin(10 ** np.log10(n_z_f))
-            self.scan_max = np.nanmax(10 ** np.log10(n_z_s))
-            self.scan_min = np.nanmin(10 ** np.log10(n_z_s))
+            self.plot_data.flux_max = np.nanmax(10 ** np.log10(n_z_f))
+            self.plot_data.flux_min = np.nanmin(10 ** np.log10(n_z_f))
+            self.plot_data.scan_max = np.nanmax(10 ** np.log10(n_z_s))
+            self.plot_data.scan_min = np.nanmin(10 ** np.log10(n_z_s))
 
     def _attach_fluxes_to_self(self):
-        for i, each in enumerate(self.flux_names):
-            setattr(self, each, self.flux_data[:, i])
+        for i, each in enumerate(self.plot_data.flux_names):
+            # setattr(self, each, self.plot_data.flux_data[:, i])
+            self.plot_data[each] = self.plot_data.flux_data[:, i]
 
     def _attach_all_coefficients_to_self(self):
         setup_for = ['ec', 'rc', 'prc']
         for each in setup_for:
-            eval('self._attach_coefficients_to_self(self.' + each + '_names,\
-                                                self.' + each + '_data)')
+            eval('self._attach_coefficients_to_self(self.plot_data.' + each + '_names,\
+                                                self.plot_data.' + each + '_data)')
 
     def _make_all_coefficient_lines(self):
         setup_for = ['ec', 'rc', 'prc']
@@ -472,26 +543,30 @@ class RateCharData(object):
             eval('self._make_' + each + '_lines()')
 
     def _make_attach_total_fluxes(self):
-        demand_blocks = getattr(self._model_map, self.fixed).isSubstrateOf()
-        supply_blocks = getattr(self._model_map, self.fixed).isProductOf()
+        demand_blocks = getattr(
+            self._model_map, self.plot_data.fixed).isSubstrateOf()
+        supply_blocks = getattr(
+            self._model_map, self.plot_data.fixed).isProductOf()
 
-        dem_pos = [self.flux_names.index('J_' + flux)
+        dem_pos = [self.plot_data.flux_names.index('J_' + flux)
                    for flux in demand_blocks]
-        sup_pos = [self.flux_names.index('J_' + flux)
+        sup_pos = [self.plot_data.flux_names.index('J_' + flux)
                    for flux in supply_blocks]
 
-        self.total_demand = np.sum([self.flux_data[:, i] for i in dem_pos],
-                                   axis=0)
-        self.total_supply = np.sum([self.flux_data[:, i] for i in sup_pos],
-                                   axis=0)
+        self.plot_data['total_demand'] = np.sum([self.plot_data.flux_data[:, i]
+                                                 for i in dem_pos],
+                                                axis=0)
+        self.plot_data['total_supply'] = np.sum([self.plot_data.flux_data[:, i]
+                                                 for i in sup_pos],
+                                                axis=0)
 
     def _make_rc_lines(self):
         names = []
         resps = []
 
-        for each in self.flux_names:
+        for each in self.plot_data.flux_names:
             reaction = each[2:]
-            name = reaction + '_' + self.fixed
+            name = reaction + '_' + self.plot_data.fixed
 
             J_ss = getattr(self.mod, each)
             slope = getattr(self.mod.rc, name)
@@ -503,18 +578,18 @@ class RateCharData(object):
 
         resps = np.hstack(resps)
 
-        self.rc_names = names
-        self.rc_data = resps
+        self.plot_data.rc_names = names
+        self.plot_data.rc_data = resps
 
     def _make_prc_lines(self):
         names = []
         prcs = []
 
-        reagent_of = [each[2:] for each in self.flux_names]
+        reagent_of = [each[2:] for each in self.plot_data.flux_names]
         all_reactions = reagent_of + \
-            getattr(self._model_map, self.fixed).isModifierOf()
+            getattr(self._model_map, self.plot_data.fixed).isModifierOf()
 
-        for flux_reaction in self.flux_names:
+        for flux_reaction in self.plot_data.flux_names:
 
             J_ss = getattr(self.mod, flux_reaction)
             reaction = flux_reaction[2:]
@@ -522,13 +597,13 @@ class RateCharData(object):
             for route_reaction in all_reactions:
 
                 ec = getattr(
-                    self.mod, 'ec' + route_reaction + '_' + self.fixed)
+                    self.mod, 'ec' + route_reaction + '_' + self.plot_data.fixed)
                 cc = getattr(self.mod, 'ccJ' + reaction + '_' + route_reaction)
                 slope = ec * cc
 
                 prc = self._tangent_line(J_ss, slope)
                 name = 'prcJ%s_%s_%s' % (reaction,
-                                         self.fixed,
+                                         self.plot_data.fixed,
                                          route_reaction)
 
                 names.append(name)
@@ -536,17 +611,17 @@ class RateCharData(object):
 
         prcs = np.hstack(prcs)
 
-        self.prc_names = names
-        self.prc_data = prcs
+        self.plot_data.prc_names = names
+        self.plot_data.prc_data = prcs
 
     def _make_ec_lines(self):
         names = []
         elasts = []
 
-        for each in self.flux_names:
+        for each in self.plot_data.flux_names:
 
             reaction = each[2:]
-            name = 'ec' + reaction + '_' + self.fixed
+            name = 'ec' + reaction + '_' + self.plot_data.fixed
 
             J_ss = getattr(self.mod, each)
             slope = getattr(self.mod, name)
@@ -557,25 +632,26 @@ class RateCharData(object):
 
         elasts = np.hstack(elasts)
 
-        self.ec_names = names
-        self.ec_data = elasts
+        self.plot_data.ec_names = names
+        self.plot_data.ec_data = elasts
 
     def _attach_coefficients_to_self(self, names, tangent_lines):
         sp = 0
         ep = 2
         for name in names:
-            setattr(self, name, tangent_lines[:, sp:ep])
+            # setattr(self, name, tangent_lines[:, sp:ep])
+            self.plot_data[name] = tangent_lines[:, sp:ep]
             sp = ep
             ep += 2
 
     def _tangent_line(self, J_ss, slope):
 
-        fix_ss = self.fixed_ss
+        fix_ss = self.plot_data.fixed_ss
 
         constant = J_ss / (fix_ss ** slope)
 
-        ydist = np.log10(self.flux_max / self.flux_min)
-        xdist = np.log10(self.scan_max / self.scan_min)
+        ydist = np.log10(self.plot_data.flux_max / self.plot_data.flux_min)
+        xdist = np.log10(self.plot_data.scan_max / self.plot_data.scan_min)
         golden_ratio = (1 + np.sqrt(5)) / 2
         xyscale = xdist / (ydist * golden_ratio * 1.5)
 
@@ -615,13 +691,15 @@ class RateCharData(object):
 
         flux_ld_dict = {}
 
-        demand_blocks = getattr(self._model_map, self.fixed).isSubstrateOf()
-        supply_blocks = getattr(self._model_map, self.fixed).isProductOf()
+        demand_blocks = getattr(
+            self._model_map, self.plot_data.fixed).isSubstrateOf()
+        supply_blocks = getattr(
+            self._model_map, self.plot_data.fixed).isProductOf()
 
-        for flux in self.flux_names:
-            flux_col = self.flux_names.index(flux)
-            x_data = self.scan_range
-            y_data = self.flux_data[:, flux_col]
+        for flux in self.plot_data.flux_names:
+            flux_col = self.plot_data.flux_names.index(flux)
+            x_data = self.plot_data.scan_range
+            y_data = self.plot_data.flux_data[:, flux_col]
             latex_expr = self._ltxe.expression_to_latex(flux)
             color = hsv_to_rgb(*color_dict[flux])
             for dem in demand_blocks:
@@ -653,7 +731,7 @@ class RateCharData(object):
     def _make_ec_ld(self):
         ec_ld_dict = {}
 
-        for ec_name in self.ec_names:
+        for ec_name in self.plot_data.ec_names:
             for flux, flux_ld in self._flux_ld_dict.iteritems():
                 ec_reaction = flux[2:]
                 if ec_reaction in ec_name:
@@ -661,7 +739,7 @@ class RateCharData(object):
                     color = hsv_to_rgb(flux_color[0],
                                        flux_color[1] * 0.65,
                                        flux_color[2])
-                    ec_data = getattr(self, ec_name)
+                    ec_data = self.plot_data[ec_name]
                     categories = ['Elasticity Coefficients'] + \
                         flux_ld.categories[1:]
                     latex_expr = self._ltxe.expression_to_latex(ec_name)
@@ -678,7 +756,7 @@ class RateCharData(object):
     def _make_rc_ld(self):
         rc_ld_dict = {}
 
-        for rc_name in self.rc_names:
+        for rc_name in self.plot_data.rc_names:
             for flux, flux_ld in self._flux_ld_dict.iteritems():
                 rc_flux = 'J' + flux[2:]
                 if rc_flux in rc_name:
@@ -686,7 +764,7 @@ class RateCharData(object):
                     color = hsv_to_rgb(flux_color[0],
                                        flux_color[1],
                                        flux_color[2] * 0.65)
-                    rc_data = getattr(self, rc_name)
+                    rc_data = self.plot_data[rc_name]
                     categories = ['Response Coefficients'] + \
                         flux_ld.categories[1:]
                     latex_expr = self._ltxe.expression_to_latex(rc_name)
@@ -711,19 +789,19 @@ class RateCharData(object):
 
         prc_ld_dict = {}
 
-        for prc_name in self.prc_names:
+        for prc_name in self.plot_data.prc_names:
             for flux, flux_ld in self._flux_ld_dict.iteritems():
                 prc_flux = 'J' + flux[2:]
                 if prc_flux in prc_name:
 
                     route_reaction = get_prc_route(prc_name,
                                                    prc_flux,
-                                                   self.fixed)
+                                                   self.plot_data.fixed)
                     flux_color = self._color_dict['J_' + route_reaction]
                     color = hsv_to_rgb(flux_color[0],
                                        flux_color[1] * 0.75,
                                        flux_color[2])
-                    prc_data = getattr(self, prc_name)
+                    prc_data = self.plot_data[prc_name]
                     categories = ['Partial Response Coefficients'] + \
                         flux_ld.categories[1:]
                     latex_expr = self._ltxe.expression_to_latex(prc_name)
@@ -742,8 +820,8 @@ class RateCharData(object):
 
         total_flux_ld_dict['Total Supply'] = \
             LineData(name='Total Supply',
-                     x_data=self.scan_range,
-                     y_data=self.total_supply,
+                     x_data=self.plot_data.scan_range,
+                     y_data=self.plot_data.total_supply,
                      categories=['Fluxes',
                                  'Supply',
                                  'Total Supply'],
@@ -752,8 +830,8 @@ class RateCharData(object):
 
         total_flux_ld_dict['Total Demand'] = \
             LineData(name='Total Demand',
-                     x_data=self.scan_range,
-                     y_data=self.total_demand,
+                     x_data=self.plot_data.scan_range,
+                     y_data=self.plot_data.total_demand,
                      categories=['Fluxes',
                                  'Demand',
                                  'Total Demand'],
@@ -769,7 +847,7 @@ class RateCharData(object):
                 'Supply',
                 'Demand']),
             ('Reaction Blocks',
-             self.flux_names +
+             self.plot_data.flux_names +
              ['Total Supply', 'Total Demand']),
             ('Lines', [
                 'Fluxes',
@@ -781,14 +859,15 @@ class RateCharData(object):
 
         scan_fig = ScanFig(line_data_list,
                            ax_properties={'xlabel': '[%s]' %
-                                          self.fixed.replace('_', ' '),
+                                          self.plot_data.fixed.replace(
+                                              '_', ' '),
                                           'ylabel': 'Rate',
                                           'xscale': 'log',
                                           'yscale': 'log',
-                                          'xlim':  [self.scan_min,
-                                                    self.scan_max],
-                                          'ylim':  [self.flux_min,
-                                                    self.flux_max]},
+                                          'xlim':  [self.plot_data.scan_min,
+                                                    self.plot_data.scan_max],
+                                          'ylim':  [self.plot_data.flux_min,
+                                                    self.plot_data.flux_max]},
                            category_classes=category_classes)
 
         scan_fig.toggle_category('Supply', True)
