@@ -275,7 +275,7 @@ class ScanFig(object):
         else:
             self.fname = psc_out_dir + '/' + 'ScanFig'
 
-        self.save_counter = 0
+        self._save_counter = 0
 
         self.lines
         plt.close()
@@ -316,14 +316,14 @@ class ScanFig(object):
         if not dpi:
             dpi = 180
 
-        name_string = '_' + str(self.save_counter) + '.' + fmt
+        name_string = '_' + str(self._save_counter) + '.' + fmt
 
         if not fname:
             fname = self.fname + name_string
         else:
             fname = fname + name_string
 
-        self.save_counter += 1
+        self._save_counter += 1
 
         self.fig.savefig(fname,
                          format=fmt,
