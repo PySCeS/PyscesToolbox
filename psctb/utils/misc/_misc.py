@@ -182,7 +182,17 @@ def prc_list(mod):
 
 
 class PseudoDotDict:
+    """
+    A class that acts like a dictionary with dot accessable elements.
 
+    This class is not subsclassed from ``dict`` like DotDict, but rather wraps
+    dictionary functionality.
+
+    See Also
+    --------
+    dict
+    DotDict
+    """
     _reserved = ['__class__', '__format__', '__init__', '__reduce_ex__',
                  '__sizeof__', '__delattr__', '__getattribute__', '__new__',
                  '__repr__', '__str__', '__doc__', '__hash__', '__reduce__',
@@ -196,6 +206,11 @@ class PseudoDotDict:
         self.items = self._dict.items
 
     def _setall_init(self):
+        """
+        Internal function that populates the self namespace on
+        initialisation. Throws exception if any of the keys are
+        reserved.
+        """
         for k, v in self._dict.iteritems():
             if k in PseudoDotDict._reserved:
                 raise Exception('%s is a reserved key' % k)
@@ -212,6 +227,9 @@ class PseudoDotDict:
     def __getitem__(self, x):
         return self._dict[x]
 
+    def __repr__(self):
+        return self._dict.__repr__()
+
     def update(self, dic):
         for k, v in dic.iteritems():
             self.__setitem__(k, v)
@@ -227,6 +245,7 @@ class DotDict(dict):
     See Also
     --------
     dict
+    PseudoDotDict
     """
 
     _reserved1 = ['clear', 'fromkeys', 'has_key', 'iteritems', 'itervalues',
