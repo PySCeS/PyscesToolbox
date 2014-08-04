@@ -1,6 +1,38 @@
 import numpy as np
 #from PyscesToolBox import PyscesToolBox as PYCtools
 from sympy import Symbol
+from IPython.display import Math
+from ...utils.misc import silence_print
+
+
+def cctype(obj):
+    return 'ccobjects' in str(type(obj))
+
+
+@silence_print
+def get_state(mod, do_state=False):
+    if do_state:
+        mod.doState()
+    ss = [getattr(mod, 'J_' + r) for r in mod.reactions] + \
+        [getattr(mod, s + '_ss') for s in mod.species]
+    return ss
+
+
+@silence_print
+def silent_mca(mod):
+    mod.doMca()
+
+
+class SK:
+    _last_state_for_mca = None
+
+    @classmethod
+    def do_mca_state(cls, mod, state, old_state):
+        if not cls._last_state_for_mca:
+            cls._last_state_for_mca = old_state
+        if state != cls._last_state_for_mca:
+            silent_mca(mod)
+            cls._last_state_for_mca = state
 
 
 class CCBase(object):
@@ -18,6 +50,8 @@ class CCBase(object):
 
         self._value = None
         self._latex_expression = None
+        self._display = None
+        self._state_ = get_state(mod)
 
     @property
     def latex_expression(self):
@@ -35,9 +69,21 @@ class CCBase(object):
     def value(self):
         """The value property. Calls self._calc_value() when self._value
         is None and returns self._value"""
-        if not self._value:
+        new_ss = get_state(self.mod)
+        state_changed = new_ss != self._state_
+        if state_changed:
+            SK.do_mca_state(self.mod, new_ss, self._state_)
+            self._calc_value()
+            self._state_ = new_ss
+        elif not self._value:
             self._calc_value()
         return self._value
+
+    @property
+    def display(self):
+        self._display = Math(
+            self.latex_expression + '=' + str(self.value))
+        return self._display
 
     def _calc_value(self):
         """Calculates the value of the expression"""
@@ -46,6 +92,33 @@ class CCBase(object):
         for symbol in symbols:
             subsdic[symbol] = getattr(self.mod, str(symbol))
         self._value = self.expression.subs(subsdic)
+
+    def __repr__(self):
+        return self.expression.__repr__()
+
+    def __add__(self, other):
+        if cctype(other):
+            return self.expression.__add__(other.expression)
+        else:
+            return self.expression.__add__(other)
+
+    def __mul__(self, other):
+        if cctype(other):
+            return self.expression.__mul__(other.expression)
+        else:
+            return self.expression.__mul__(other)
+
+    def __div__(self, other):
+        if cctype(other):
+            return self.expression.__div__(other.expression)
+        else:
+            return self.expression.__div__(other)
+
+    def __pow__(self, other):
+        if cctype(other):
+            return self.expression.__pow__(other.expression)
+        else:
+            return self.expression.__pow__(other)
 
 
 class CCoef(CCBase):
@@ -58,14 +131,15 @@ class CCoef(CCBase):
         self.denominator = denominator.expression
         self.expression = self.numerator / denominator.expression
         self.denominator_object = denominator
-        
 
         self._latex_numerator = None
         self._latex_expression_full = None
         self._latex_expression = None
         self._latex_name = None
 
-        self._control_patterns = None
+        self.control_patterns = None
+
+        self._set_control_patterns()
 
     @property
     def latex_numerator(self):
@@ -97,11 +171,11 @@ class CCoef(CCBase):
             )
         return self._latex_name
 
-    @property
-    def control_patterns(self):
-        if not self._control_patterns:
-            self._set_control_patterns()
-        return self._control_patterns
+    #@property
+    # def control_patterns(self):
+    #    if not self._control_patterns:
+    #        self._set_control_patterns()
+    #    return self._control_patterns
 
     def parscan(self, parameter, scan_range, init_return=False):
         """Performs a parameter scan and returns numpy array object
@@ -126,7 +200,7 @@ class CCoef(CCBase):
             self.mod.doMca()
             self.mod.SetLoud()
 
-            self._recalculate_value()
+            #self._recalculate_value()
             for i, cp in enumerate(self.control_patterns):
                 # print type(scan_res[i+1])
                 scan_res[i + 1].append(cp.percentage)
@@ -142,7 +216,7 @@ class CCoef(CCBase):
            pattern. Useful for when model parameters change"""
         for pattern in self.control_patterns:
             pattern._calc_value()
-            self._calc_value()
+        self._calc_value()
 
     def _calc_value(self):
         """Calculates the numeric value of the control pattern from the
@@ -150,13 +224,13 @@ class CCoef(CCBase):
         self._value = sum([pattern.value for pattern in self.control_patterns])
 
     def _set_control_patterns(self):
-        """Divides control coefficient into control pattens and saves
+        """Divides control coefficient into control patterns and saves
            results in self.CPx where x is a number is the number of the
            control pattern as it appears in in control coefficient
            expression"""
-        pattens = self.numerator.as_coeff_add()[1]
+        patterns = self.numerator.as_coeff_add()[1]
         cps = []
-        for i, pattern in enumerate(pattens):
+        for i, pattern in enumerate(patterns):
             name = 'CP' + str(1 + i)
             cp = CPattern(self.mod,
                           name,
@@ -166,7 +240,7 @@ class CCoef(CCBase):
                           self._ltxe)
             setattr(self, name, cp)
             cps.append(cp)
-        self._control_patterns = cps
+        self.control_patterns = cps
         #assert self._check_control_patterns == True
 
     def _check_control_patterns(self):
