@@ -23,28 +23,27 @@ def silent_mca(mod):
     mod.doMca()
 
 
-class SK:
-    _last_state_for_mca = None
+class StateKeeper:
+    def __init__(self, state):
+        self._last_state_for_mca = state
 
-    @classmethod
-    def do_mca_state(cls, mod, state, old_state):
-        if not cls._last_state_for_mca:
-            cls._last_state_for_mca = old_state
-        if state != cls._last_state_for_mca:
+    def do_mca_state(self, mod, state):
+        if state != self._last_state_for_mca:
             silent_mca(mod)
-            cls._last_state_for_mca = state
+            self._last_state_for_mca = state
 
 
 class CCBase(object):
 
     """The base object for the control coefficients and control patterns"""
 
-    def __init__(self, mod, name, expression, ltxe):
+    def __init__(self, mod, name, expression, ltxe, state_keeper):
         super(CCBase, self).__init__()
 
         self.expression = expression
         self.mod = mod
         self._ltxe = ltxe
+        self._state_keeper = state_keeper
         self.name = name
         self._latex_name = '\\Sigma'
 
@@ -72,7 +71,7 @@ class CCBase(object):
         new_ss = get_state(self.mod)
         state_changed = new_ss != self._state_
         if state_changed:
-            SK.do_mca_state(self.mod, new_ss, self._state_)
+            self._state_keeper.do_mca_state(self.mod, new_ss)
             self._calc_value()
             self._state_ = new_ss
         elif not self._value:
@@ -125,8 +124,8 @@ class CCoef(CCBase):
 
     """The object the stores control coefficients. Inherits from CCBase"""
 
-    def __init__(self, mod, name, expression, denominator, ltxe):
-        super(CCoef, self).__init__(mod, name, expression, ltxe)
+    def __init__(self, mod, name, expression, denominator, ltxe, state_keeper):
+        super(CCoef, self).__init__(mod, name, expression, ltxe, state_keeper)
         self.numerator = expression
         self.denominator = denominator.expression
         self.expression = self.numerator / denominator.expression
@@ -200,7 +199,7 @@ class CCoef(CCBase):
             self.mod.doMca()
             self.mod.SetLoud()
 
-            #self._recalculate_value()
+            # self._recalculate_value()
             for i, cp in enumerate(self.control_patterns):
                 # print type(scan_res[i+1])
                 scan_res[i + 1].append(cp.percentage)
@@ -237,7 +236,8 @@ class CCoef(CCBase):
                           pattern,
                           self.denominator_object,
                           self,
-                          self._ltxe)
+                          self._ltxe,
+                          self._state_keeper)
             setattr(self, name, cp)
             cps.append(cp)
         self.control_patterns = cps
@@ -259,8 +259,19 @@ class CPattern(CCBase):
 
     """docstring for CPattern"""
 
-    def __init__(self, mod, name, expression, denominator, parent, ltxe):
-        super(CPattern, self).__init__(mod, name, expression, ltxe)
+    def __init__(self,
+                 mod,
+                 name,
+                 expression,
+                 denominator,
+                 parent,
+                 ltxe,
+                 state_keeper):
+        super(CPattern, self).__init__(mod,
+                                       name,
+                                       expression,
+                                       ltxe,
+                                       state_keeper)
         self.numerator = expression
         self.denominator = denominator.expression
         self.expression = self.numerator / denominator.expression

@@ -6,7 +6,7 @@ import sys
 #from re import sub
 from sympy import Symbol, sympify, nsimplify, fraction, S
 from sympy.matrices import Matrix, diag, NonSquareMatrixError
-from .ccobjects import CCBase, CCoef
+from .ccobjects import CCBase, CCoef, StateKeeper, get_state
 
 import cPickle as pickle
 
@@ -32,7 +32,7 @@ class SymcaToolBox(object):
         # swap columns around to same order as kmatrix, store in new matrix
         nmatrix_cols = nmatrix[:, mod.kmatrix_row]
         # swap rows around to same oder as lmatrix, store in a new matrix
-        nmatrix_cols_rows = nmatrix_cols[mod.lmatrix_row, :]
+        nmatrix_cols_rows = nmatrix_cols[mod.lmatrix_row,:]
         # create Sympy symbolic matrix from the numpy ndarray
         nmat = Matrix(nmatrix_cols_rows)
         return nmat
@@ -85,10 +85,10 @@ class SymcaToolBox(object):
         Substitutes equivalent fluxes in the kmatrix (e.i. dependent fluxes
         with independent fluxes or otherwise equal fluxes)
         """
-        new_fluxes = all_fluxes[:, :]
+        new_fluxes = all_fluxes[:,:]
         for row in xrange(kmatrix.rows - 1, -1, -1):
             for row_above in xrange(row - 1, -1, -1):
-                if kmatrix[row, :] == kmatrix[row_above,:]:
+                if kmatrix[row,:] == kmatrix[row_above,:]:
                     new_fluxes[row] = new_fluxes[row_above]
         return new_fluxes
 
@@ -157,7 +157,7 @@ class SymcaToolBox(object):
         Replaces floats with ints and puts elements with fractions
         on a single demoninator.
         """
-        m = matrix[:, :]
+        m = matrix[:,:]
         for i, e in enumerate(m):
             m[i] = nsimplify(e, rational=True).cancel()
         return m
@@ -195,7 +195,7 @@ class SymcaToolBox(object):
             m = mat.as_mutable()
             m.row_del(i)
             m.col_del(j)
-            return m[:, :]
+            return m[:,:]
 
         def cofactor(mat, i, j):
             if (i + j) % 2 == 0:
@@ -225,7 +225,7 @@ class SymcaToolBox(object):
         if not mat.is_square:
             raise NonSquareMatrixError()
 
-        m, n = mat[:, :], mat.rows
+        m, n = mat[:,:], mat.rows
 
         if n == 1:
             det = m[0, 0]
@@ -286,7 +286,7 @@ class SymcaToolBox(object):
         maxima_in_file = path_to + 'in.txt'
         maxima_out_file = path_to + 'out.txt'
         if expression.is_Matrix:
-            expr_mat = expression[:, :]
+            expr_mat = expression[:,:]
             # print expr_mat
             print 'Simplifying matrix with ' + str(len(expr_mat)) + ' elements'
             for i, e in enumerate(expr_mat):
@@ -330,8 +330,8 @@ class SymcaToolBox(object):
         matrix CC_i_solution
         """
 
-        j_cci_sol = cc_i_num[:num_ind_fluxes, :]
-        s_cci_sol = cc_i_num[num_ind_fluxes:, :]
+        j_cci_sol = cc_i_num[:num_ind_fluxes,:]
+        s_cci_sol = cc_i_num[num_ind_fluxes:,:]
 
         j_ccd_sol = scaledk0 * j_cci_sol
         s_ccd_sol = scaledl0 * s_cci_sol
@@ -415,10 +415,10 @@ class SymcaToolBox(object):
         if num_deps == 0:
             return sympify('1')
         else:
-            dependent_ls = lmatrix[num_inds:, :]
+            dependent_ls = lmatrix[num_inds:,:]
             denom = sympify('1')
             for row in range(dependent_ls.rows):
-                for each in dependent_ls[row, :] * species_independent * -1:
+                for each in dependent_ls[row,:] * species_independent * -1:
                     denom = denom * each.atoms(Symbol).pop()
                 denom = denom * species_dependent[row]
             return denom.nsimplify()
@@ -435,7 +435,7 @@ class SymcaToolBox(object):
 
         cd_num, cd_denom = fraction(common_denom_expr)
 
-        new_cc_num = cc_num[:, :]
+        new_cc_num = cc_num[:,:]
         # print type(new_cc_num)
         for i, each in enumerate(new_cc_num):
             new_cc_num[i] = ((each * cd_denom) / fix_denom).expand()
@@ -443,17 +443,18 @@ class SymcaToolBox(object):
         return new_cc_num, (cd_num / fix_denom).expand()
 
     @staticmethod
-    def spawn_cc_objects(mod, cc_sol, cc_names, common_denom_expr,ltxe):
-
+    def spawn_cc_objects(mod, cc_sol, cc_names, common_denom_expr, ltxe):
+        sk = StateKeeper(get_state(mod))
         common_denom = CCBase(
             mod,
             'common_denominator',
             common_denom_expr,
-            ltxe
+            ltxe,
+            sk
         )
 
         cc_object_list = [common_denom]
-
+        
         for i, each in enumerate(cc_names):
             cc_object_list.append(
                 CCoef(
@@ -461,7 +462,8 @@ class SymcaToolBox(object):
                     str(each),
                     cc_sol[i],
                     common_denom,
-                    ltxe
+                    ltxe,
+                    sk
                 )
             )
 
