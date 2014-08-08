@@ -14,7 +14,7 @@ from .. import modeltools
 from ..latextools import LatexExpr
 from ..utils.plotting import ScanFig, LineData
 from ..utils.misc import silence_print
-from ..utils.misc import PseudoDotDict
+from ..utils.misc import DotDict
 
 exportLAWH = silence_print(pysces.write.exportLabelledArrayWithHeader)
 
@@ -57,7 +57,7 @@ class RateChar(object):
         for species in self.mod.species:
             setattr(self, species, None)
         if auto_load:
-            self.load_scan()
+            self.load()
 
     def do_ratechar(self, fixed='all',
                     scan_min=None,
@@ -114,7 +114,7 @@ class RateChar(object):
                                self._ltxe)
             setattr(self, each, rcd)
         if auto_save:
-            self.save_scan()
+            self.save()
 
     def _min_max_chooser(self, ss, point, concrange, min_max):
         # chooses a minimum or maximum point based
@@ -186,7 +186,7 @@ class RateChar(object):
         fixed_mod.doState()
         return fixed_mod, fixed_ss
 
-    def save_scan(self, file_name=None):
+    def save(self, file_name=None):
         if not file_name:
             file_name = self._working_dir + 'save_data.pickle'
 
@@ -205,6 +205,7 @@ class RateChar(object):
                 temp_mod_list.append(None)
 
             save_data.append(rcd)
+        self.save_data = save_data
 
         try:
             with open(file_name, 'w') as f:
@@ -224,7 +225,7 @@ class RateChar(object):
         for species in self.mod.species:
             getattr(self, species).save_results(separator, folder)
 
-    def load_scan(self, file_name=None):
+    def load(self, file_name=None):
         if not file_name:
             file_name = self._working_dir + 'save_data.pickle'
 
@@ -256,8 +257,8 @@ class RateCharData(object):
         super(RateCharData, self).__init__()
         self.mod = fixed_mod
 
-        self.plot_data = PseudoDotDict()
-        self.mca_data = PseudoDotDict()
+        self.plot_data = DotDict()
+        self.mca_data = DotDict()
 
         self._slope_range_factor = 3.0
 
@@ -292,6 +293,9 @@ class RateCharData(object):
 
         self._color_dict_ = None
         self._data_setup()
+        #del self.plot_data
+        #del self.mca_data
+
 
     def _data_setup(self):
         # reset value to do mcarc
@@ -866,7 +870,8 @@ class RateCharData(object):
                                                     self.plot_data.scan_max],
                                           'ylim':  [self.plot_data.flux_min,
                                                     self.plot_data.flux_max]},
-                           category_classes=category_classes)
+                           category_classes=category_classes,
+                           fname = path.join(self._working_dir,'figure'))
 
         scan_fig.toggle_category('Supply', True)
         scan_fig.toggle_category('Demand', True)

@@ -3,7 +3,7 @@ from sympy.matrices import Matrix
 from ...modeltools import make_path
 from ...latextools import LatexExpr
 from .symca_toolbox import SymcaToolBox as SMCAtools
-from ...utils.misc import PseudoDotDict
+from ...utils.misc import DotDict
 #from LatexOut import LatexOut
 
 import logging
@@ -32,7 +32,7 @@ class Symca(object):
         #self._latex_out = LatexOut(self)
 
         self._object_populated = False
-        self.CC = PseudoDotDict()
+        self.CC = DotDict()
 
         self._nmatrix = None
         self._species = None
