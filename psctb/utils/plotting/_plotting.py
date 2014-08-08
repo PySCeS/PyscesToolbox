@@ -1,8 +1,12 @@
+#TODO:
+#There are cases where path.join would be more appropriate (for cross platform
+#compatability)
 from IPython.display import display, clear_output
 from matplotlib import pyplot as plt
 from matplotlib import transforms
 from matplotlib import rcParams
-import numpy as np
+from os import path
+from numpy import linspace
 from IPython.html import widgets
 from pysces import ModelMap
 from pysces import output_dir as psc_out_dir
@@ -262,7 +266,7 @@ class ScanFig(object):
         # at the moment this is very basic and could be expanded
         # it would be useful to set it up based on category somehow
         cmap = plt.get_cmap('Set1')(
-            np.linspace(0, 1.0, len(line_data_list)))
+            linspace(0, 1.0, len(line_data_list)))
         self.ax.set_color_cycle(cmap)
 
         if category_classes:
@@ -273,12 +277,23 @@ class ScanFig(object):
         if fname:
             self.fname = fname
         else:
-            self.fname = psc_out_dir + '/' + 'ScanFig'
+            self.fname = path.join(psc_out_dir,'ScanFig')
 
         self._save_counter = 0
 
         self.lines
         plt.close()
+        self._save_button_ = None
+    @property
+    def _save_button(self):
+        if not self._save_button_:
+            def save(clicked):
+                self.save()
+            self._save_button_ = widgets.ButtonWidget()
+            self._save_button_.description = 'Save'
+            self._save_button_.on_click(save)
+        return self._save_button_
+
 
     def show(self):
         """
@@ -316,12 +331,11 @@ class ScanFig(object):
         if not dpi:
             dpi = 180
 
-        name_string = '_' + str(self._save_counter) + '.' + fmt
-
         if not fname:
+            name_string = '_' + str(self._save_counter) + '.' + fmt
             fname = self.fname + name_string
         else:
-            fname = fname + name_string
+            fname = fname + '.' + fmt
 
         self._save_counter += 1
 
@@ -331,7 +345,7 @@ class ScanFig(object):
                          bbox_extra_artists=(self.ax.get_legend(),),
                          bbox_inches='tight')
 
-        
+
     @property
     def _widgets(self):
         if not self._widgets_:
@@ -573,6 +587,10 @@ class ScanFig(object):
                 display(v)
                 v.remove_class('vbox')
                 v.add_class('hbox')
+        display(widgets.LatexWidget(value='$~$'))
+        display(self._save_button)
+        self._save_button.remove_class('vbox')
+        self._save_button.add_class('hbox')
 
     def adjust_figure(self):
         self.show()
@@ -583,3 +601,7 @@ class ScanFig(object):
                 display(v)
                 v.remove_class('vbox')
                 v.add_class('hbox')
+        display(widgets.LatexWidget(value='$~$'))
+        display(self._save_button)
+        self._save_button.remove_class('vbox')
+        self._save_button.add_class('hbox')
