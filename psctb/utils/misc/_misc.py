@@ -395,7 +395,7 @@ class DotDict(dict):
             cur_list = []
             for i, each in enumerate(lst):
                 i += 1
-                if i % 5 != 0:
+                if i % 10 != 0:
                     cur_list.append(each)
                 elif i == len(lst):
                     cur_list.append(each)
