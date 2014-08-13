@@ -221,9 +221,10 @@ class RateChar(object):
                 rcd._ltxe = self._ltxe
                 rcd._basemod = self.mod
 
-    def save_results(self, separator=',', folder=None):
+    def save_results(self, folder=None, separator=',', ):
         for species in self.mod.species:
-            getattr(self, species).save_results(separator, folder)
+            getattr(self, species).save_results(folder=folder,
+                                                separator=separator)
 
     def load(self, file_name=None):
         if not file_name:
@@ -495,7 +496,7 @@ class RateCharData(object):
         except IOError as e:
             print e.strerror
 
-    def save_results(self, separator=',', folder=None):
+    def save_results(self, folder=None, separator=','):
         self._save_flux_data(separator=separator, folder=folder)
         self._save_summary(separator=separator, folder=folder)
         for each in ['ec', 'rc', 'prc']:
