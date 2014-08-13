@@ -1,5 +1,7 @@
 import sys
 import os
+from numpy import array as np_array
+from IPython.display import HTML
 
 __all__ = ['cc_list',
            'ec_list',
@@ -7,7 +9,89 @@ __all__ = ['cc_list',
            'prc_list',
            'silence_print',
            'DotDict',
-           'PseudoDotDict']
+           'PseudoDotDict',
+           'is_number',
+           'formatter_factory',
+           'html_table']
+
+
+def is_number(suspected_number):
+    # We make the assumption that most numbers
+    # can be converted to ints
+    number = False
+    try:
+        int(suspected_number)
+        number = True
+    except:
+        pass
+    return number
+
+
+def formatter_factory(max_val=None,
+                      min_val=None,
+                      default_fmt=None,
+                      outlier_fmt=None):
+    if not max_val:
+        max_val = 10000
+    if not min_val:
+        min_val = 0.001
+    if not default_fmt:
+        default_fmt = '%.3f'
+    if not outlier_fmt:
+        outlier_fmt = '%.3e'
+
+    def formatter(to_format):
+        fmt = '%s'
+        if is_number(to_format):
+            if abs(int(to_format)) == 0:
+                fmt = default_fmt
+            elif abs(to_format) >= max_val or abs(to_format) < min_val:
+                fmt = outlier_fmt
+            else:
+                fmt = default_fmt
+        return fmt % to_format
+    return formatter
+
+
+def html_table(matrix_or_array_like,
+               float_fmt='%.2f',
+               raw=False,
+               first_row_headers=False,
+               caption=None,
+               style=None,
+               formatter=None):
+
+    raw_table = matrix_or_array_like
+
+    if not formatter:
+        formatter = formatter_factory(default_fmt=float_fmt,
+                                      outlier_fmt=float_fmt)
+
+    if 'sympy.matrices' in str(type(matrix_or_array_like)):
+        raw_table = np_array(raw_table)
+    if style:
+        html_table = ['<table  style="%s">' % style]
+    else:
+        html_table = ['<table>']
+    if caption:
+        html_table.append('<caption>%s</caption>' % caption)
+    row_count = 0
+    for row in raw_table:
+        for col in row:
+            to_append = formatter(col)
+
+            if first_row_headers and row_count == 0:
+                html_table.append('<th>{0}</th>'.format(to_append))
+            else:
+                html_table.append('<td>{0}</td>'.format(to_append))
+
+        html_table.append('</tr>')
+        row_count += 1
+    html_table.append('</table>')
+    if raw:
+        return ''.join(html_table)
+    else:
+        return HTML(''.join(html_table))
 
 
 def silence_print(func):
@@ -293,3 +377,47 @@ class DotDict(dict):
     def update(self, dic):
         for k, v in dic.iteritems():
             self.__setitem__(k, v)
+
+    def _make_repr(self, key, value, formatter=None):
+
+        def representation(the_self=self):
+            keys = self.keys()
+            keys.sort()
+            values = [self[the_key] for the_key in keys]
+            items = zip(keys, values)
+            lst = []
+            for k, v in items:
+                col1 = eval(key)
+                col2 = eval(value)
+                lst.append((col1, col2))
+
+            tables = []
+            cur_list = []
+            for i, each in enumerate(lst):
+                i += 1
+                if i % 5 != 0:
+                    cur_list.append(each)
+                elif i == len(lst):
+                    cur_list.append(each)
+                    tables.append(
+                        html_table(cur_list,
+                                   style='display: inline-table',
+                                   raw=True,
+                                   formatter=formatter))
+                    cur_list = []
+                else:
+                    cur_list.append(each)
+                    tables.append(
+                        html_table(cur_list,
+                                   style='display: inline-table',
+                                   raw=True,
+                                   formatter=formatter))
+                    cur_list = []
+            div_string = '<div>'
+            for each in tables:
+                div_string += each
+                div_string += '\t\t'
+            div_string += '</div>'
+            return div_string
+
+        self._repr_html_ = representation
