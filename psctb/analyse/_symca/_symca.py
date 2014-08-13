@@ -4,6 +4,7 @@ from ...modeltools import make_path
 from ...latextools import LatexExpr
 from .symca_toolbox import SymcaToolBox as SMCAtools
 from ...utils.misc import DotDict
+from ...utils.misc import formatter_factory
 #from LatexOut import LatexOut
 
 import logging
@@ -292,6 +293,7 @@ class Symca(object):
 
         for cc in cc_objects:
             self.CC[cc.name] = cc
+        self.CC._make_repr('"$" + v.latex_name + "$"', 'v.value', formatter_factory())
         #self.CC = cc_objects[1:]
         self._object_populated = True
         self.CC_i_num = CC_i_num

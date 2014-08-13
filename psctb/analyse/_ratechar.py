@@ -15,6 +15,7 @@ from ..latextools import LatexExpr
 from ..utils.plotting import ScanFig, LineData
 from ..utils.misc import silence_print
 from ..utils.misc import DotDict
+from ..utils.misc import formatter_factory
 
 exportLAWH = silence_print(pysces.write.exportLabelledArrayWithHeader)
 
@@ -294,9 +295,10 @@ class RateCharData(object):
 
         self._color_dict_ = None
         self._data_setup()
+        self.mca_data._ltxe = ltxe
+        self.mca_data._make_repr('"$" + self._ltxe.expression_to_latex(k) + "$"', 'v', formatter_factory())
         #del self.plot_data
         #del self.mca_data
-
 
     def _data_setup(self):
         # reset value to do mcarc
