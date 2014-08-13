@@ -1,7 +1,7 @@
 import numpy as np
 #from PyscesToolBox import PyscesToolBox as PYCtools
 from sympy import Symbol
-from IPython.display import Math
+#from IPython.display import Latex
 from ...utils.misc import silence_print
 
 
@@ -49,7 +49,6 @@ class CCBase(object):
 
         self._value = None
         self._latex_expression = None
-        self._display = None
         self._state_ = get_state(mod)
 
     @property
@@ -78,11 +77,10 @@ class CCBase(object):
             self._calc_value()
         return self._value
 
-    @property
-    def display(self):
-        self._display = Math(
-            self.latex_expression + '=' + str(self.value))
-        return self._display
+    def _repr_latex_(self):
+        return '$%s = %s = %.3f$' % (self.latex_name,
+                                     self.latex_expression,
+                                     self.value)
 
     def _calc_value(self):
         """Calculates the value of the expression"""
@@ -309,9 +307,7 @@ class CPattern(CCBase):
     @property
     def latex_name(self):
         if not self._latex_name:
-            self._latex_name = self._ltxe.expression_to_latex(
-                self.name
-            )
+            self._latex_name = self.name
         return self._latex_name
 
     @property
