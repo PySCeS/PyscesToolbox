@@ -191,36 +191,21 @@ class RateChar(object):
         if not file_name:
             file_name = self._working_dir + 'save_data.pickle'
 
-        save_data = []
-        temp_mod_list = []
+        rcd_data_list = []
 
-        # remove all PyscesModel object instances before saving
         for species in self.mod.species:
             rcd = getattr(self, species)
             if rcd:
-                temp_mod_list.append(rcd.mod)
-                rcd.mod = None
-                rcd._ltxe = None
-                rcd._basemod = None
-            else:
-                temp_mod_list.append(None)
-
-            save_data.append(rcd)
-        self.save_data = save_data
+                rcd_data = [rcd._column_names,
+                            rcd._scan_results]
+                rcd_data_list.append(rcd_data)
 
         try:
             with open(file_name, 'w') as f:
-                pickle.dump(save_data, f)
+                pickle.dump(rcd_data_list, f)
         except IOError as e:
             print e.strerror
 
-        # add everything back
-        for i, species in enumerate(self.mod.species):
-            rcd = getattr(self, species)
-            if rcd:
-                rcd.mod = temp_mod_list[i]
-                rcd._ltxe = self._ltxe
-                rcd._basemod = self.mod
 
     def save_results(self, folder=None, separator=',', ):
         for species in self.mod.species:
@@ -233,14 +218,20 @@ class RateChar(object):
 
         try:
             with open(file_name) as f:
-                save_data = pickle.load(f)
+                rcd_data_list = pickle.load(f)
 
-            for rcd in save_data:
-                if rcd:
-                    rcd._basemod = self.mod
-                    rcd.mod = self._fix_at_ss(rcd.fixed)[0]
-                    rcd._ltxe = self._ltxe
-                    setattr(self, rcd.fixed, rcd)
+            for rcd_data in rcd_data_list:
+                fixed_species = rcd_data[0][0]
+                fixed_mod, fixed_ss = self._fix_at_ss(fixed_species)
+                rcd = RateCharData(fixed_ss,
+                                   fixed_mod,
+                                   self.mod,
+                                   rcd_data[0],
+                                   rcd_data[1],
+                                   self._model_map,
+                                   self._ltxe)
+                setattr(self, fixed_species, rcd)
+
         except IOError as e:
             print e.strerror
 
