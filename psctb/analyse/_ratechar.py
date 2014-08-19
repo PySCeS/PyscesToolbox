@@ -1,5 +1,5 @@
 import numpy as np
-import cPickle as pickle
+import pickle as pickle
 
 from os import path, mkdir
 
@@ -12,10 +12,11 @@ from colorsys import hsv_to_rgb, rgb_to_hsv
 
 from .. import modeltools
 from ..latextools import LatexExpr
-from ..utils.plotting import ScanFig, LineData
+from ..utils.plotting import ScanFig, LineData, Data2D
 from ..utils.misc import silence_print
 from ..utils.misc import DotDict
 from ..utils.misc import formatter_factory
+from ..utils.misc import make_repr
 
 exportLAWH = silence_print(pysces.write.exportLabelledArrayWithHeader)
 
@@ -872,7 +873,7 @@ class RateCharData(object):
                                           'xlim':  [self.plot_data.scan_min,
                                                     self.plot_data.scan_max],
                                           'ylim':  [self.plot_data.flux_min,
-                                                    self.plot_data.flux_max]},
+                                                    self.plot_data.flux_max*2]},
                            category_classes=category_classes,
                            fname = path.join(self._working_dir,'figure'))
 
@@ -883,6 +884,78 @@ class RateCharData(object):
 
         return scan_fig
 
+    @silence_print
+    def plot_decompose(self):
+        ecs = []
+        ccs = []
+        prc_names = []
+
+        reagent_of = [each[2:] for each in self.plot_data.flux_names]
+        all_reactions = reagent_of + \
+            getattr(self._model_map, self.plot_data.fixed).isModifierOf()
+
+        for flux_reaction in self.plot_data.flux_names:
+            reaction = flux_reaction[2:]
+
+            for route_reaction in all_reactions:
+
+                ec = 'ec' + route_reaction + '_' + self.plot_data.fixed
+                cc = 'ccJ' + reaction + '_' + route_reaction
+
+                name = 'prcJ%s_%s_%s' % (reaction,
+                                         self.plot_data.fixed,
+                                         route_reaction)
+
+                ecs.append(ec)
+                ccs.append(cc)
+                prc_names.append(name)
+
+        user_output = [self.plot_data.fixed] + ecs + ccs
+        print user_output
+
+        scanner = pysces.Scanner(self.mod)
+        scanner.quietRun = True
+        scanner.addScanParameter(self.plot_data.fixed,
+                                 self.plot_data.scan_min,
+                                 self.plot_data.scan_max,
+                                 self.plot_data.scan_points,
+                                 log=True)
+        scanner.addUserOutput(*user_output)
+        scanner.Run()
+
+        cc_ec_plt = Data2D(self.mod,
+                           user_output,
+                           scanner.UserOutputResults,
+                           self._ltxe).plot()
+
+        prc_data = []
+        for i, prc_name in enumerate(prc_names):
+            outs = scanner.UserOutputResults[:, 1:]
+            cc_s_pos = len(prc_names)
+            ec_col_data = outs[:, i]
+            cc_col_data = outs[:, i + cc_s_pos]
+            col = ec_col_data * cc_col_data
+            prc_data.append(col)
+        prc_out_arr = [scanner.UserOutputResults[:, 0]] + prc_data
+        prc_out_arr = np.vstack(prc_out_arr).transpose()
+
+        prc_plt = Data2D(self.mod,
+                         [self.plot_data.fixed] + prc_names,
+                         prc_out_arr,
+                         self._ltxe).plot()
+
+        for plot in [cc_ec_plt, prc_plt]:
+            plot.ax.set_xscale('log')
+            plot.ax.set_ylabel('Coefficient Value')
+            plot.ax.set_xlim([self.plot_data.scan_min,
+                              self.plot_data.scan_max])
+
+        prc_plt.ax.axvline(self.plot_data.fixed_ss, ls=':', color='gray')
+        #prc_plt.ax.set_ylim([-5,5])
+        cc_ec_plt.ax.axvline(self.plot_data.fixed_ss, ls=':', color='gray')
+        #cc_ec_plt.ax.set_ylim([-5,5])
+
+        return prc_plt, cc_ec_plt
 
 ##########################################
 '''
