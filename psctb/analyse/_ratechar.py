@@ -16,7 +16,7 @@ from ..utils.plotting import ScanFig, LineData, Data2D
 from ..utils.misc import silence_print
 from ..utils.misc import DotDict
 from ..utils.misc import formatter_factory
-from ..utils.misc import make_repr
+
 
 exportLAWH = silence_print(pysces.write.exportLabelledArrayWithHeader)
 
