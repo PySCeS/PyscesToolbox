@@ -3,7 +3,8 @@ import numpy as np
 from sympy import Symbol
 #from IPython.display import Latex
 from ...utils.misc import silence_print
-from ...utils.plotting import LineData, ScanFig
+from ...utils.plotting import LineData, ScanFig, Data2D
+from pysces import Scanner
 
 
 def cctype(obj):
@@ -367,3 +368,61 @@ class CPattern(CCBase):
     def percentage(self):
         self._percentage = (self.value / self.parent.value) * 100
         return self._percentage
+
+    #@silence_print
+    def parscan(self, parameter, scan_range, init_return=False):
+        """Performs a parameter scan and returns numpy array object
+           with the parameter values in the first column and
+           percentage contribution of each control pattern
+           in subsequent columns
+
+           Arguments:
+           parameter   --  the parameter of the model to scan
+           scan_range  --  the range across which to scan 'parameter'
+
+           calls self._recalculate_value() for each value of
+           parameter in scan_range"""
+
+        #This part sets up the scanner and runs it
+        variables = self.numerator.atoms(Symbol)
+        variables = [str(each) for each in variables]
+        scanner = Scanner(self.mod)
+        scanner.quietRun = True
+        scanner.addScanParameter(parameter,start=scan_range[0],end=scan_range[-1],points=len(scan_range))
+        user_output = [parameter] + variables
+        scanner.addUserOutput(*user_output)
+        scanner.Run()
+
+        #We have to divide each variable by to common denominator
+
+        #lets do a second scan to determine the common denominator values
+
+        scan_range = scanner.UserOutputResults[:,0]
+        c_d_results = []
+        for value in scan_range:
+            setattr(self.mod,parameter,value)
+            self.mod.doState()
+            c_d_results.append(self.denominator_object.value)
+
+        #convert to numpy array
+        c_d_results_arr = np.array([float(val) for
+                                    val in c_d_results]).reshape(50,1)
+
+        #divide results with common_denominator
+        scan_out = scanner.UserOutputResults[:,1:] / c_d_results_arr
+        full_scan = np.hstack([scan_range.reshape(50,1),scan_out])
+
+
+        data = Data2D(self.mod,['Vf7']+variables, full_scan, self._ltxe)
+
+        def plot(self=data):
+            return ScanFig(self.lines,
+                            category_classes=self.category_classes,
+                            ax_properties=self.ax_properties,
+                            fig_properties={'size_inches':(10,10)})
+        data.plot = plot
+        return data
+
+
+
+
