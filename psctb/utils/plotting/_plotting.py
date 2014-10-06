@@ -349,7 +349,7 @@ class ScanFig(object):
     @property
     def _widgets(self):
         if not self._widgets_:
-            widget_classes = {}
+            widget_classes = OrderedDict()
             for k in self.category_classes.iterkeys():
                 widget_classes[k] = widgets.ContainerWidget()
 
@@ -368,6 +368,19 @@ class ScanFig(object):
                 for k, v in self.category_classes.iteritems():
                     if each in v:
                         widget_classes[k].children += (w),
+
+            #this is needed to sort widgets according to alphabetical order
+            for k, v in widget_classes.iteritems():
+                children_list = list(v.children)
+                names = [getattr(widg,'description') for widg in children_list]
+                names.sort()
+
+                new_children_list = []
+                for name in names:
+                    for child in children_list:
+                        if child.description == name:
+                            new_children_list.append(child)
+                v.children = tuple(new_children_list)
 
             self._widgets_ = widget_classes
         return self._widgets_
@@ -587,6 +600,7 @@ class ScanFig(object):
                 display(v)
                 v.remove_class('vbox')
                 v.add_class('hbox')
+                v.set_css({'flex-wrap': 'wrap'})
         display(widgets.LatexWidget(value='$~$'))
         display(self._save_button)
         self._save_button.remove_class('vbox')
@@ -601,6 +615,7 @@ class ScanFig(object):
                 display(v)
                 v.remove_class('vbox')
                 v.add_class('hbox')
+                v.set_css({'flex-wrap': 'wrap'})
         display(widgets.LatexWidget(value='$~$'))
         display(self._save_button)
         self._save_button.remove_class('vbox')
