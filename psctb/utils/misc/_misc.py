@@ -394,10 +394,16 @@ class DotDict(dict):
             tables = []
             cur_list = []
             for i, each in enumerate(lst):
-                i += 1
-                if i % 10 != 0:
+                if (i + 1) % 10 == 0:
                     cur_list.append(each)
-                elif i == len(lst):
+                    tables.append(
+                        html_table(cur_list,
+                                   style='display: inline-table',
+                                   raw=True,
+                                   formatter=formatter))
+                    cur_list = []
+                elif (i + 1) == len(lst):
+                    #print 'Final'
                     cur_list.append(each)
                     tables.append(
                         html_table(cur_list,
@@ -407,12 +413,7 @@ class DotDict(dict):
                     cur_list = []
                 else:
                     cur_list.append(each)
-                    tables.append(
-                        html_table(cur_list,
-                                   style='display: inline-table',
-                                   raw=True,
-                                   formatter=formatter))
-                    cur_list = []
+
             div_string = '<div>'
             for each in tables:
                 div_string += each
