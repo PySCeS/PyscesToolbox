@@ -215,7 +215,10 @@ class CCoef(CCBase):
                 scan_res[i + 2].append(self.value)
 
         if init_return:
+            self.mod.SetQuiet()
             setattr(self.mod, parameter, init)
+            self.mod.doMca()
+            self.mod.SetLoud()
 
         cp_names = [cp.name for cp in self.control_patterns]
         data = np.array(scan_res, dtype=np.float).transpose()
