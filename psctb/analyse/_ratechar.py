@@ -16,6 +16,7 @@ from ..utils.plotting import ScanFig, LineData, Data2D
 from ..utils.misc import silence_print
 from ..utils.misc import DotDict
 from ..utils.misc import formatter_factory
+from collections import OrderedDict
 
 
 exportLAWH = silence_print(pysces.write.exportLabelledArrayWithHeader)
@@ -296,9 +297,9 @@ class RateCharData(object):
         # reset value to do mcarc
         setattr(self.mod, self.plot_data.fixed, self.plot_data.fixed_ss)
         self.mod.doMcaRC()
+        self._make_attach_total_fluxes()
         self._min_max_setup()
         self._attach_fluxes_to_self()
-        self._make_attach_total_fluxes()
         self._make_all_coefficient_lines()
         self._attach_all_coefficients_to_self()
         self._make_all_summary()
@@ -311,12 +312,15 @@ class RateCharData(object):
         self._make_prc_ld()
         self._make_total_flux_ld()
 
-        self._line_data_dict = {}
+        self._line_data_dict = OrderedDict()
+        self._line_data_dict.update(self._prc_ld_dict)
         self._line_data_dict.update(self._flux_ld_dict)
+        self._line_data_dict.update(self._total_flux_ld_dict)
+
         self._line_data_dict.update(self._ec_ld_dict)
         self._line_data_dict.update(self._rc_ld_dict)
-        self._line_data_dict.update(self._prc_ld_dict)
-        self._line_data_dict.update(self._total_flux_ld_dict)
+
+
 
         del self._flux_ld_dict
         del self._ec_ld_dict
@@ -507,6 +511,10 @@ class RateCharData(object):
         n_z_f = self.plot_data.flux_data[np.nonzero(self.plot_data.flux_data)]
         n_z_s = self.plot_data.scan_range[
             np.nonzero(self.plot_data.scan_range)]
+
+        totals = np.vstack([self.plot_data.total_demand,
+                                self.plot_data.total_supply])
+        n_z_t = totals[np.nonzero(totals)]
         # and that the array is not now somehow empty
         # although if this happens-you have bigger problems
         if len(n_z_f) == 0:
@@ -517,8 +525,11 @@ class RateCharData(object):
         # lets also (clumsily) find the non-negative mins and maxes
         # by converting to logspace (to get NaNs) and back
         # and then getting the min/max non-NaN
+        # PS flux max is the max of the totals
+
         with np.errstate(invalid='ignore'):
-            self.plot_data.flux_max = np.nanmax(10 ** np.log10(n_z_f))
+
+            self.plot_data.flux_max = np.nanmax(10 ** np.log10(totals))
             self.plot_data.flux_min = np.nanmin(10 ** np.log10(n_z_f))
             self.plot_data.scan_max = np.nanmax(10 ** np.log10(n_z_s))
             self.plot_data.scan_min = np.nanmin(10 ** np.log10(n_z_s))
@@ -670,9 +681,14 @@ class RateCharData(object):
             cmap = get_cmap('Set2')(
                 np.linspace(0, 1.0, num_of_cols))[:, :3]
             color_list = [rgb_to_hsv(*cmap[i, :]) for i in range(num_of_cols)]
+            fix_map = getattr(self._model_map, self.plot_data.fixed)
+            relavent_reactions = fix_map.isProductOf() + \
+                                 fix_map.isSubstrateOf() + \
+                                 fix_map.isModifierOf()
+            relavent_reactions.sort()
             color_dict = dict(
                 zip(['Total Supply'] +
-                    ['J_' + reaction for reaction in self.mod.reactions] +
+                    ['J_' + reaction for reaction in relavent_reactions] +
                     ['Total Demand'],
                     color_list))
             # just to darken the colors a bit
@@ -698,7 +714,10 @@ class RateCharData(object):
             x_data = self.plot_data.scan_range
             y_data = self.plot_data.flux_data[:, flux_col]
             latex_expr = self._ltxe.expression_to_latex(flux)
-            color = hsv_to_rgb(*color_dict[flux])
+            flux_color = self._color_dict[flux]
+            color = hsv_to_rgb(flux_color[0],
+                               1,
+                               flux_color[2])
             for dem in demand_blocks:
                 if dem in flux:
                     flux_ld_dict[flux] = \
@@ -734,7 +753,7 @@ class RateCharData(object):
                 if ec_reaction in ec_name:
                     flux_color = self._color_dict[flux]
                     color = hsv_to_rgb(flux_color[0],
-                                       flux_color[1] * 0.65,
+                                       flux_color[1],
                                        flux_color[2])
                     ec_data = self.plot_data[ec_name]
                     categories = ['Elasticity Coefficients'] + \
@@ -760,7 +779,7 @@ class RateCharData(object):
                     flux_color = self._color_dict[flux]
                     color = hsv_to_rgb(flux_color[0],
                                        flux_color[1],
-                                       flux_color[2] * 0.65)
+                                       flux_color[2] * 0.7)
                     rc_data = self.plot_data[rc_name]
                     categories = ['Response Coefficients'] + \
                         flux_ld.categories[1:]
@@ -796,8 +815,8 @@ class RateCharData(object):
                                                    self.plot_data.fixed)
                     flux_color = self._color_dict['J_' + route_reaction]
                     color = hsv_to_rgb(flux_color[0],
-                                       flux_color[1] * 0.75,
-                                       flux_color[2])
+                                       1,
+                                       flux_color[2] * 0.9)
                     prc_data = self.plot_data[prc_name]
                     categories = ['Partial Response Coefficients'] + \
                         flux_ld.categories[1:]
@@ -814,7 +833,7 @@ class RateCharData(object):
 
     def _make_total_flux_ld(self):
         total_flux_ld_dict = {}
-
+        col = self._color_dict['Total Supply']
         total_flux_ld_dict['Total Supply'] = \
             LineData(name='Total Supply',
                      x_data=self.plot_data.scan_range,
@@ -823,8 +842,9 @@ class RateCharData(object):
                                  'Supply',
                                  'Total Supply'],
                      properties={'label': '$%s$' % 'Total\,Supply',
-                                 'color': self._color_dict['Total Supply']})
+                                 'color': hsv_to_rgb(col[0],col[1]*2,col[2])})
 
+        col = self._color_dict['Total Demand']
         total_flux_ld_dict['Total Demand'] = \
             LineData(name='Total Demand',
                      x_data=self.plot_data.scan_range,
@@ -833,7 +853,7 @@ class RateCharData(object):
                                  'Demand',
                                  'Total Demand'],
                      properties={'label': '$%s$' % 'Total\,Demand',
-                                 'color': self._color_dict['Total Demand']})
+                                 'color': hsv_to_rgb(col[0],col[1]*2,col[2])})
 
         self._total_flux_ld_dict = total_flux_ld_dict
 
@@ -864,7 +884,8 @@ class RateCharData(object):
                                           'xlim':  [self.plot_data.scan_min,
                                                     self.plot_data.scan_max],
                                           'ylim':  [self.plot_data.flux_min,
-                                                    self.plot_data.flux_max*2]},
+                                                    self.plot_data.flux_max * 2
+                                                    ]},
                            category_classes=category_classes,
                            fname = path.join(self._working_dir,'figure'))
 
