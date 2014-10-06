@@ -157,7 +157,7 @@ class CCoef(CCBase):
     @property
     def latex_expression(self):
         if not self._latex_expression:
-            self._latex_expression = self.latex_numerator + '/ \\,\\Sigma'
+            self._latex_expression = '(' + self.latex_numerator + ')' + '/ \\,\\Sigma'
         return self._latex_expression
 
     @property
@@ -174,7 +174,7 @@ class CCoef(CCBase):
     #        self._set_control_patterns()
     #    return self._control_patterns
 
-    def parscan(self, parameter, scan_range, init_return=False):
+    def parscan(self, parameter, scan_range, scan_type='percentage', init_return=False):
         """Performs a parameter scan and returns numpy array object
            with the parameter values in the first column and
            percentage contribution of each control pattern
@@ -186,7 +186,12 @@ class CCoef(CCBase):
 
            calls self._recalculate_value() for each value of
            parameter in scan_range"""
-        scan_res = [list() for i in range(len(self.control_patterns) + 1)]
+
+        assert scan_type in ['percentage', 'value']
+        if scan_type is 'percentage':
+            scan_res = [list() for i in range(len(self.control_patterns) + 1)]
+        elif scan_type is 'value':
+            scan_res = [list() for i in range(len(self.control_patterns) + 2)]
         scan_res[0] = scan_range
 
         # print type(scan_res)
@@ -197,15 +202,62 @@ class CCoef(CCBase):
             self.mod.doMca()
             self.mod.SetLoud()
 
-            # self._recalculate_value()
+
             for i, cp in enumerate(self.control_patterns):
                 # print type(scan_res[i+1])
-                scan_res[i + 1].append(cp.percentage)
+                if scan_type is 'percentage':
+                    scan_res[i + 1].append(cp.percentage)
+                elif scan_type is 'value':
+                    scan_res[i + 1].append(cp.value)
+
+            if scan_type is 'value':
+                scan_res[i + 2].append(self.value)
 
         if init_return:
+            self.mod.SetQuiet()
             setattr(self.mod, parameter, init)
+            self.mod.doMca()
+            self.mod.SetLoud()
 
-        return np.array(scan_res, dtype=np.float).transpose()
+        cp_names = [cp.name for cp in self.control_patterns]
+        data = np.array(scan_res, dtype=np.float).transpose()
+        line_data_list = []
+        for i, cp in enumerate(cp_names):
+            ld = LineData(name=cp,
+                          x_data=data[:, 0],
+                          y_data=data[:, 1+i],
+                          categories=[cp])
+            line_data_list.append(ld)
+
+        if scan_type is 'value':
+                ld = LineData(name='$%s$' % self.latex_name,
+                              x_data=data[:, 0],
+                              y_data=data[:,2 + i],
+                              categories=[self.name])
+                line_data_list.append(ld)
+
+        if parameter in self.mod.fixed_species:
+            x_label = '[%s]' % parameter.replace('_', ' ')
+        else:
+            x_label = '%s' % parameter.replace('_', ' ')
+        if scan_type is 'percentage':
+            y_label = 'Percentage Contribution'
+            cat_classes = {'Control Patterns': cp_names}
+        elif scan_type is 'value':
+            y_label = 'Control coefficient/pattern value'
+            cat_classes = {'Control Coefficient/Patterns': cp_names + [self.name]}
+
+
+        scan_fig = ScanFig(line_data_list,
+                           ax_properties={'xlabel': x_label,
+                                          'ylabel': y_label,
+                                          'xscale': 'log',
+                                          'xlim': [np.min(scan_range),
+                                                   np.max(scan_range)],},
+                           category_classes=cat_classes)
+
+        return scan_fig
+
 
     def _recalculate_value(self):
         """Recalculates the control coefficients and control pattern
