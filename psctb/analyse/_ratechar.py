@@ -887,7 +887,7 @@ class RateCharData(object):
                                                     self.plot_data.flux_max * 2
                                                     ]},
                            category_classes=category_classes,
-                           fname = path.join(self._working_dir,'figure'))
+                           fname = path.join(self._working_dir,'rate_char'))
 
         scan_fig.toggle_category('Supply', True)
         scan_fig.toggle_category('Demand', True)
@@ -935,10 +935,20 @@ class RateCharData(object):
         scanner.addUserOutput(*user_output)
         scanner.Run()
 
-        cc_ec_plt = Data2D(self.mod,
+        ax_properties = {'ylabel':'Coefficient Value',
+                         'xlabel': '[%s]' %
+                         self.plot_data.fixed.replace('_', ' '),
+                         'xscale': 'log',
+                         'yscale': 'linear',
+                         'xlim': [self.plot_data.scan_min,self.plot_data.scan_max]}
+
+        cc_ec_data = Data2D(self.mod,
                            user_output,
                            scanner.UserOutputResults,
-                           self._ltxe).plot()
+                           self._ltxe,
+                           self._analysis_method,
+                           ax_properties,
+                           'cc_ec_scan')
 
         prc_data = []
         for i, prc_name in enumerate(prc_names):
@@ -951,23 +961,27 @@ class RateCharData(object):
         prc_out_arr = [scanner.UserOutputResults[:, 0]] + prc_data
         prc_out_arr = np.vstack(prc_out_arr).transpose()
 
-        prc_plt = Data2D(self.mod,
+        prc_data = Data2D(self.mod,
                          [self.plot_data.fixed] + prc_names,
                          prc_out_arr,
-                         self._ltxe).plot()
+                         self._ltxe,
+                         self._analysis_method,
+                         ax_properties,
+                         'prc_scan')
+        prc_data._working_dir = path.split(path.split(self._working_dir)[0])[0]
+        cc_ec_data._working_dir = path.split(path.split(self._working_dir)[0])[0]
+        # for plot in [cc_ec_plt, prc_plt]:
+        #     plot.ax.set_xscale('log')
+        #     plot.ax.set_ylabel('Coefficient Value')
+        #     plot.ax.set_xlim([self.plot_data.scan_min,
+        #                       self.plot_data.scan_max])
 
-        for plot in [cc_ec_plt, prc_plt]:
-            plot.ax.set_xscale('log')
-            plot.ax.set_ylabel('Coefficient Value')
-            plot.ax.set_xlim([self.plot_data.scan_min,
-                              self.plot_data.scan_max])
+        # prc_plt.ax.axvline(self.plot_data.fixed_ss, ls=':', color='gray')
+        # #prc_plt.ax.set_ylim([-5,5])
+        # cc_ec_plt.ax.axvline(self.plot_data.fixed_ss, ls=':', color='gray')
+        # #cc_ec_plt.ax.set_ylim([-5,5])
 
-        prc_plt.ax.axvline(self.plot_data.fixed_ss, ls=':', color='gray')
-        #prc_plt.ax.set_ylim([-5,5])
-        cc_ec_plt.ax.axvline(self.plot_data.fixed_ss, ls=':', color='gray')
-        #cc_ec_plt.ax.set_ylim([-5,5])
-
-        return prc_plt, cc_ec_plt
+        return prc_data, cc_ec_data
 
 ##########################################
 '''
