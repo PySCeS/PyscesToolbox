@@ -1,8 +1,12 @@
 import numpy as np
+from numpy import min, max, float, array
 #from PyscesToolBox import PyscesToolBox as PYCtools
 from sympy import Symbol
 #from IPython.display import Latex
 from ...utils.misc import silence_print
+from ...utils.plotting import Data2D
+from ... import modeltools
+from pysces import ModelMap
 
 
 def cctype(obj):
@@ -219,44 +223,27 @@ class CCoef(CCBase):
             self.mod.doMca()
             self.mod.SetLoud()
 
-        cp_names = [cp.name for cp in self.control_patterns]
-        data = np.array(scan_res, dtype=np.float).transpose()
-        line_data_list = []
-        for i, cp in enumerate(cp_names):
-            ld = LineData(name=cp,
-                          x_data=data[:, 0],
-                          y_data=data[:, 1+i],
-                          categories=[cp])
-            line_data_list.append(ld)
-
         if scan_type is 'value':
-                ld = LineData(name='$%s$' % self.latex_name,
-                              x_data=data[:, 0],
-                              y_data=data[:,2 + i],
-                              categories=[self.name])
-                line_data_list.append(ld)
+            column_names = [parameter] + [cp.name for cp in self.control_patterns] + [self.name]
+            y_label = 'Control coefficient/pattern value'
+        if scan_type is 'percentage':
+            column_names = [parameter] + [cp.name for cp in self.control_patterns]
+            y_label = 'Percentage Contribution'
 
-        if parameter in self.mod.fixed_species:
+        mm = ModelMap(self.mod)
+        species = mm.hasSpecies()
+        if parameter in species:
             x_label = '[%s]' % parameter.replace('_', ' ')
         else:
-            x_label = '%s' % parameter.replace('_', ' ')
-        if scan_type is 'percentage':
-            y_label = 'Percentage Contribution'
-            cat_classes = {'Control Patterns': cp_names}
-        elif scan_type is 'value':
-            y_label = 'Control coefficient/pattern value'
-            cat_classes = {'Control Coefficient/Patterns': cp_names + [self.name]}
-
-
-        scan_fig = ScanFig(line_data_list,
-                           ax_properties={'xlabel': x_label,
-                                          'ylabel': y_label,
-                                          'xscale': 'log',
-                                          'xlim': [np.min(scan_range),
-                                                   np.max(scan_range)],},
-                           category_classes=cat_classes)
-
-        return scan_fig
+            x_label = parameter
+        ax_properties = {'ylabel':y_label,
+                         'xlabel':x_label,
+                         'xscale': 'linear',
+                         'yscale': 'linear',
+                         'xlim': [scan_range[0],scan_range[-1]]}
+        data_array = array(scan_res, dtype=np.float).transpose()
+        data = Data2D(self.mod, column_names, data_array, self._ltxe, 'symca', ax_properties)
+        return data
 
 
     def _recalculate_value(self):
