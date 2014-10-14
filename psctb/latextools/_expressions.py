@@ -39,6 +39,7 @@ class LatexExpr(object):
             prc_subs = {}
             j_subs = {}
             sp_subs = {}
+            par_subs = {}
             mod = self.mod
 
             # For clarity:
@@ -52,6 +53,10 @@ class LatexExpr(object):
             # Fluxes:
             for reaction in mod.reactions:
                 j_subs['J_' + reaction] = 'J_' + min_(reaction)
+
+            # Parameters
+            for par in mod.parameters:
+                par_subs[par] = min_(par)
 
             # Control Coefficients:
             for base_reaction in mod.reactions:
@@ -131,6 +136,7 @@ class LatexExpr(object):
             subs_dict.update(j_subs)
             subs_dict.update(sp_subs)
             subs_dict.update(prc_subs)
+            subs_dict.update(par_subs)
             self._subs_dict = subs_dict
 
         return self._subs_dict
@@ -183,7 +189,10 @@ class LatexExpr(object):
 
         for each in needed_symbols:
             each = str(each)
-            smaller_dict[each] = self.subs_dict[each]
+            if each[:2] == 'CP':
+                smaller_dict[each] = each
+            else:
+                smaller_dict[each] = self.subs_dict[each]
 
         # using smaller_dict here instead of self.subs_dict
         latex_expr = latex(expression.subs(smaller_dict),

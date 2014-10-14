@@ -5,15 +5,21 @@ from IPython.display import display, clear_output
 from matplotlib import pyplot as plt
 from matplotlib import transforms
 from matplotlib import rcParams
-from os import path
+from os import path, mkdir
 from numpy import linspace
 from IPython.html import widgets
 from pysces import ModelMap
 from pysces import output_dir as psc_out_dir
+import pysces
 
 from ..misc import *
 from ...latextools import LatexExpr
 from collections import OrderedDict
+from ... import modeltools
+
+
+exportLAWH = silence_print(pysces.write.exportLabelledArrayWithHeader)
+
 
 """
 This whole module is fd in the a
@@ -57,11 +63,11 @@ class LineData(object):
     """
     An object that contains data that can be used to draw a matplotlib line.
 
-    This object is used to initialise a ``ScanFig`` object together with a 
-    ``Data2D`` object. Once a ``ScanFig`` instance is initialised, the 
+    This object is used to initialise a ``ScanFig`` object together with a
+    ``Data2D`` object. Once a ``ScanFig`` instance is initialised, the
     ``LineData`` objects are saved in a list ``_raw_line_data``. Changing
     any values there will have no effect on the output of the ``ScanFig``
-    instance. 
+    instance.
 
     Parameters
     ----------
@@ -75,8 +81,8 @@ class LineData(object):
         A list of categories that a line falls into. This will be used by
         ScanFig to draw buttons that enable/disable the line.
     properties : dict, optional
-        A dictionary of properties of the line to be drawn. This dictionary 
-        will be used by the generic ``set()`` function of 
+        A dictionary of properties of the line to be drawn. This dictionary
+        will be used by the generic ``set()`` function of
         ``matplotlib.Lines.Line2D`` to set the properties of the line.
 
     See Also
@@ -135,7 +141,27 @@ class LineData(object):
 
 class Data2D(object):
 
-    def __init__(self, mod, column_names, data_array, ltxe=None):
+    def __init__(self,
+                 mod,
+                 column_names,
+                 data_array,
+                 ltxe=None,
+                 analysis_method=None,
+                 ax_properties=None,
+                 file_name=None):
+        self.plot_data = DotDict()
+        self.plot_data['scan_in'] = column_names[0]
+        self.plot_data['scan_out'] = column_names[1:]
+        self.plot_data['scan_range'] = data_array[:, 0]
+        self.plot_data['scan_results'] = data_array[:, 1:]
+        self.plot_data['scan_points'] = len(self.plot_data.scan_range)
+
+
+
+        self._column_names = column_names
+        self._scan_results = data_array
+
+
         self.column_names = column_names
         self.column_names_in = column_names[0]
         self.column_names_out = column_names[1:]
@@ -144,41 +170,59 @@ class Data2D(object):
         self.data_in = data_array[:, 0]
         self.data_out = data_array[:, 1:]
 
-        self.model = mod
+        self.mod = mod
         if not ltxe:
             ltxe = LatexExpr(mod)
         self.ltxe = ltxe
 
-        self.model.doMcaRC()
+        self.mod.doMcaRC()
 
-        self._ax_properties = None
+        if not analysis_method:
+            self._analysis_method = 'DataScan'
+        else:
+            self._analysis_method = analysis_method
+
+        if not file_name:
+            self._fname = 'scan_fig'
+        else:
+            self._fname = file_name
+
+        self._working_dir = modeltools.make_path(self.mod,
+                                                 self._analysis_method)
+        if not ax_properties:
+            self._ax_properties = None
+        else:
+            self._ax_properties = ax_properties
 
         self.category_classes = \
             OrderedDict([('All Coefficients',
                           ['Elasticity Coefficients',
                            'Control Coefficients',
                            'Response Coefficients',
-                           'Partial Response Coefficients']),
+                           'Partial Response Coefficients',
+                           'Control Patterns']),
                          ('All Fluxes/Reactions/Species',
                           ['Fluxes Rates',
                            'Reaction Rates',
                            'Species Concentrations'])])
 
         self.scan_types = \
-            OrderedDict([('Fluxes Rates', [
-                'J_' + reaction for reaction in mod.reactions]),
-                ('Reaction Rates', [
-                    reaction for reaction in mod.reactions]),
-                ('Species Concentrations', mod.species),
-                ('Elasticity Coefficients',
-                 ec_list(mod)),
-                ('Control Coefficients', cc_list(mod)),
-                ('Response Coefficients', rc_list(mod)),
-                ('Partial Response Coefficients', prc_list(mod))])
+        OrderedDict([
+            ('Fluxes Rates',
+                ['J_' + reaction for reaction in mod.reactions]),
+            ('Reaction Rates', [reaction for reaction in mod.reactions]),
+            ('Species Concentrations', mod.species),
+            ('Steady-state Species Concentrations',
+                [sp + '_ss' for sp in mod.species]),
+            ('Elasticity Coefficients', ec_list(mod)),
+            ('Control Coefficients', cc_list(mod)),
+            ('Response Coefficients', rc_list(mod)),
+            ('Partial Response Coefficients', prc_list(mod)),
+            ('Control Patterns', ['CP' + str(n) for n in range(1,len(self.column_names))])
+             ])
 
         self._setup_categories()
         self._setup_lines()
-
         self.category_classes.update(self.scan_types)
 
     def _setup_categories(self):
@@ -214,21 +258,50 @@ class Data2D(object):
         return self._ax_properties
 
     def _x_name(self):
-        mm = ModelMap(self.model)
+        mm = ModelMap(self.mod)
         species = mm.hasSpecies()
         x_name = ''
         if self.column_names_in == 'Time':
             x_name = 'Time (s)'
         elif self.column_names_in in species:
             x_name = '[%s]' % self.column_names_in
-        elif self.column_names_in in self.model.parameters:
+        elif self.column_names_in in self.mod.parameters:
             x_name = self.column_names_in
         return x_name
 
     def plot(self):
-        return ScanFig(self.lines,
-                       category_classes=self.category_classes,
-                       ax_properties=self.ax_properties)
+        scan_fig = ScanFig(self.lines,
+                           category_classes=self.category_classes,
+                           ax_properties=self.ax_properties,
+                           fname=path.join(self._working_dir,
+                                           self.plot_data.scan_in,
+                                           self._fname))
+        return scan_fig
+
+
+    def save_data(self, file_name=None, separator=',', folder=None):
+        if not file_name:
+            if folder:
+                if not path.exists(path.join(folder, self.plot_data.scan_in)):
+                    mkdir(path.join(folder, self.plot_data.scan_in))
+                file_name = path.join(folder,
+                                      self.plot_data.scan_in,
+                                      'scan_data.csv')
+            else:
+                if not path.exists(path.join(self._working_dir, self.plot_data.scan_in)):
+                    mkdir(path.join(self._working_dir, self.plot_data.scan_in))
+                file_name = path.join(self._working_dir, self.plot_data.scan_in,'scan_data.csv')
+        scan_results = self._scan_results
+        column_names = self._column_names
+
+        try:
+            exportLAWH(scan_results,
+                       names=None,
+                       header=column_names,
+                       fname=file_name,
+                       sep=separator)
+        except IOError as e:
+            print e.strerror
 
 
 
@@ -336,7 +409,8 @@ class ScanFig(object):
             fname = self.fname + name_string
         else:
             fname = fname + '.' + fmt
-
+        if not path.exists(path.split(self.fname)[0]):
+            mkdir(path.split(self.fname)[0])
         self._save_counter += 1
 
         self.fig.savefig(fname,
@@ -444,7 +518,7 @@ class ScanFig(object):
         def c_v(val):
 
             if val <= 0:
-                return 1.0
+                return 0.001
             else:
                 return val
 
