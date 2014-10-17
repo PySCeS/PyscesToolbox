@@ -1,4 +1,5 @@
 from sympy.matrices import Matrix
+from sympy import fraction
 
 from ...modeltools import make_path
 from ...latextools import LatexExpr
@@ -247,7 +248,7 @@ class Symca(object):
         #self.CC = cc_objects[1:]
         self._object_populated = True
 
-    def do_symca(self, auto_save=False):
+    def do_symca(self, auto_save=False, internal_fixed = False):
 
         CC_i_num, common_denom_expr = SMCAtools.invert(
             self.ematrix,
@@ -283,18 +284,44 @@ class Symca(object):
             self.species_dependent
         )
 
+        full_dic = {common_denom_expr:[]}
+        for i, each in enumerate(cc_sol):
+            full_dic[common_denom_expr].append((cc_names[i],each))
+        if internal_fixed:
+            simpl_dic = {}
+            for i, each in enumerate(cc_sol):
+                expr = each/common_denom_expr
+                expr = SMCAtools.maxima_factor(expr, '/home/carl/tmp/')
+                num, denom = fraction(expr)
+                if not simpl_dic.has_key(denom):
+                    simpl_dic[denom] = []
+                simpl_dic[denom].append((cc_names[i],num))
+
+
         cc_objects = SMCAtools.spawn_cc_objects(
             self.mod,
-            cc_sol,
-            cc_names,
-            common_denom_expr,
+            full_dic,
             self._ltxe
-        )
+        )[0]
+
 
         for cc in cc_objects:
             self.CC[cc.name] = cc
         self.CC._make_repr('"$" + v.latex_name + "$"', 'v.value', formatter_factory())
-        #self.CC = cc_objects[1:]
+
+        if internal_fixed:
+            simp_objects_list = SMCAtools.spawn_cc_objects(self.mod,
+                                                 simpl_dic,
+                                                 self._ltxe)
+            cnt = 0
+            for block in simp_objects_list:
+                setattr(self,'CC' + str(cnt), DotDict())
+                dd = getattr(self,'CC'+str(cnt))
+                for cc in block:
+                    dd[cc.name] = cc
+                dd._make_repr('"$" + v.latex_name + "$"', 'v.value', formatter_factory())
+                cnt+=1
+
         self._object_populated = True
         self.CC_i_num = CC_i_num
 

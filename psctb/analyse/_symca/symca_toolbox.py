@@ -443,31 +443,33 @@ class SymcaToolBox(object):
         return new_cc_num, (cd_num / fix_denom).expand()
 
     @staticmethod
-    def spawn_cc_objects(mod, cc_sol, cc_names, common_denom_expr, ltxe):
+    def spawn_cc_objects(mod, cc_dic, ltxe):
         sk = StateKeeper(get_state(mod))
-        common_denom = CCBase(
-            mod,
-            'common_denominator',
-            common_denom_expr,
-            ltxe,
-            sk
-        )
-
-        cc_object_list = [common_denom]
-        
-        for i, each in enumerate(cc_names):
-            cc_object_list.append(
-                CCoef(
-                    mod,
-                    str(each),
-                    cc_sol[i],
-                    common_denom,
-                    ltxe,
-                    sk
-                )
+        model_block_CCs = []
+        for denom,names_nums in cc_dic.iteritems():
+            common_denom = CCBase(
+                mod,
+                'common_denominator',
+                denom,
+                ltxe,
+                sk
             )
+            cc_object_list = [common_denom]
 
-        return cc_object_list
+            for name_num in names_nums:
+                cc_object_list.append(
+                    CCoef(
+                        mod,
+                        str(name_num[0]),
+                        name_num[1],
+                        common_denom,
+                        ltxe,
+                        sk
+                    )
+                )
+            model_block_CCs.append(cc_object_list)
+
+        return model_block_CCs
 
     @staticmethod
     def save(cc_list, common_denominator, path_to_pickle):
