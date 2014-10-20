@@ -291,7 +291,7 @@ class Symca(object):
             simpl_dic = {}
             for i, each in enumerate(cc_sol):
                 expr = each/common_denom_expr
-                expr = SMCAtools.maxima_factor(expr, '/home/carl/tmp/')
+                expr = SMCAtools.maxima_factor(expr, self.path_to('temp'))
                 num, denom = fraction(expr)
                 if not simpl_dic.has_key(denom):
                     simpl_dic[denom] = []
