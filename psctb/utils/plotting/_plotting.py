@@ -162,20 +162,20 @@ class Data2D(object):
         self._scan_results = data_array
 
 
-        self.column_names = column_names
-        self.column_names_in = column_names[0]
-        self.column_names_out = column_names[1:]
+        #self.column_names = column_names
+        #self.column_names_in = column_names[0]
+        #.column_names_out = column_names[1:]
 
-        self.data = data_array
-        self.data_in = data_array[:, 0]
-        self.data_out = data_array[:, 1:]
+        #self.data = data_array
+        #self.data_in = data_array[:, 0]
+        #self.data_out = data_array[:, 1:]
 
-        self.mod = mod
+        self._mod = mod
         if not ltxe:
             ltxe = LatexExpr(mod)
-        self.ltxe = ltxe
+        self._ltxe = ltxe
 
-        self.mod.doMcaRC()
+        self._mod.doMcaRC()
 
         if not analysis_method:
             self._analysis_method = 'DataScan'
@@ -187,14 +187,14 @@ class Data2D(object):
         else:
             self._fname = file_name
 
-        self._working_dir = modeltools.make_path(self.mod,
+        self._working_dir = modeltools.make_path(self._mod,
                                                  self._analysis_method)
         if not ax_properties:
-            self._ax_properties = None
+            self._ax_properties_ = None
         else:
-            self._ax_properties = ax_properties
+            self._ax_properties_ = ax_properties
 
-        self.category_classes = \
+        self._category_classes = \
             OrderedDict([('All Coefficients',
                           ['Elasticity Coefficients',
                            'Control Coefficients',
@@ -204,75 +204,76 @@ class Data2D(object):
                          ('All Fluxes/Reactions/Species',
                           ['Fluxes Rates',
                            'Reaction Rates',
-                           'Species Concentrations'])])
+                           'Species Concentrations',
+                           'Steady-State Species Concentrations'])])
 
-        self.scan_types = \
+        self._scan_types = \
         OrderedDict([
             ('Fluxes Rates',
                 ['J_' + reaction for reaction in mod.reactions]),
             ('Reaction Rates', [reaction for reaction in mod.reactions]),
             ('Species Concentrations', mod.species),
-            ('Steady-state Species Concentrations',
+            ('Steady-State Species Concentrations',
                 [sp + '_ss' for sp in mod.species]),
             ('Elasticity Coefficients', ec_list(mod)),
             ('Control Coefficients', cc_list(mod)),
             ('Response Coefficients', rc_list(mod)),
             ('Partial Response Coefficients', prc_list(mod)),
-            ('Control Patterns', ['CP' + str(n) for n in range(1,len(self.column_names))])
+            ('Control Patterns', ['CP' + str(n) for n in range(1,len(self._column_names))])
              ])
 
         self._setup_categories()
         self._setup_lines()
-        self.category_classes.update(self.scan_types)
+        self._category_classes.update(self._scan_types)
 
     def _setup_categories(self):
-        scan_types = self.scan_types
+        scan_types = self._scan_types
         column_categories = {}
-        for column in self.column_names_out:
+        for column in self.plot_data.scan_out:
             column_categories[column] = [column]
             for k, v in scan_types.iteritems():
                 if column in v:
                     column_categories[column].append(k)
                     break
 
-        self.column_categories = column_categories
+        self._column_categories = column_categories
 
     def _setup_lines(self):
         lines = []
-        for i, each in enumerate(self.column_names_out):
+        for i, each in enumerate(self.plot_data.scan_out):
             line = LineData(name=each,
-                            x_data=self.data_in,
-                            y_data=self.data_out[:, i],
-                            categories=self.column_categories[each],
+                            x_data=self.plot_data.scan_range,
+                            y_data=self.plot_data.scan_results[:, i],
+                            categories=self._column_categories[each],
                             properties={'label':
                                         '$%s$' %
-                                        (self.ltxe.expression_to_latex(each)),
+                                        (self._ltxe.expression_to_latex(each)),
                                         'linewidth': 1.6})
             lines.append(line)
-        self.lines = lines
+        self._lines = lines
 
     @property
-    def ax_properties(self):
-        if not self._ax_properties:
-            self._ax_properties = {'xlabel': self._x_name()}
-        return self._ax_properties
+    def _ax_properties(self):
+        if not self._ax_properties_:
+            self._ax_properties_ = {'xlabel': self._x_name()}
+        return self._ax_properties_
 
     def _x_name(self):
-        mm = ModelMap(self.mod)
+        mm = ModelMap(self._mod)
         species = mm.hasSpecies()
         x_name = ''
-        if self.column_names_in == 'Time':
+        if self.plot_data.scan_in == 'Time':
             x_name = 'Time (s)'
-        elif self.column_names_in in species:
-            x_name = '[%s]' % self.column_names_in
-        elif self.column_names_in in self.mod.parameters:
-            x_name = self.column_names_in
+        elif self.plot_data.scan_in in species:
+            x_name = '[%s]' % self.plot_data.scan_in
+        elif self.plot_data.scan_in in self._mod.parameters:
+            x_name = self.plot_data.scan_in
         return x_name
 
     def plot(self):
-        scan_fig = ScanFig(self.lines,
-                           category_classes=self.category_classes,
-                           ax_properties=self.ax_properties,
+        scan_fig = ScanFig(self._lines,
+                           category_classes=self._category_classes,
+                           ax_properties=self._ax_properties,
                            fname=path.join(self._working_dir,
                                            self.plot_data.scan_in,
                                            self._fname))

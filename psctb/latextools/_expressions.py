@@ -49,9 +49,11 @@ class LatexExpr(object):
             # Species:
             for species in mod.species:
                 sp_subs[species] = min_(species)
+                sp_subs[species + '_ss'] = min_(species) + '_ss'
 
             # Fluxes:
             for reaction in mod.reactions:
+                j_subs[reaction] = min_(reaction)
                 j_subs['J_' + reaction] = 'J_' + min_(reaction)
 
             # Parameters
