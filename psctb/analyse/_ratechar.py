@@ -901,13 +901,24 @@ class RateCharData(object):
         ecs = []
         ccs = []
         prc_names = []
+        rc_names = []
+        rc_pos = []
 
         reagent_of = [each[2:] for each in self.plot_data.flux_names]
         all_reactions = reagent_of + \
             getattr(self._model_map, self.plot_data.fixed).isModifierOf()
 
+
+        arl = len(all_reactions)
+        strt = 0
+        stp = arl
         for flux_reaction in self.plot_data.flux_names:
             reaction = flux_reaction[2:]
+            rc_names.append('rcJ%s_%s' % (reaction, self.plot_data.fixed))
+
+            rc_pos.append(range(strt,stp))
+            strt += arl
+            stp += arl
 
             for route_reaction in all_reactions:
 
@@ -942,7 +953,7 @@ class RateCharData(object):
                          'yscale': 'linear',
                          'xlim': [self.plot_data.scan_min,self.plot_data.scan_max]}
 
-        cc_ec_data = Data2D(self.mod,
+        cc_ec_data_obj = Data2D(self.mod,
                            user_output,
                            scanner.UserOutputResults,
                            self._ltxe,
@@ -950,26 +961,30 @@ class RateCharData(object):
                            ax_properties,
                            'cc_ec_scan')
 
-        prc_data = []
+        rc_data = []
         for i, prc_name in enumerate(prc_names):
             outs = scanner.UserOutputResults[:, 1:]
             cc_s_pos = len(prc_names)
             ec_col_data = outs[:, i]
             cc_col_data = outs[:, i + cc_s_pos]
             col = ec_col_data * cc_col_data
-            prc_data.append(col)
-        prc_out_arr = [scanner.UserOutputResults[:, 0]] + prc_data
-        prc_out_arr = np.vstack(prc_out_arr).transpose()
+            rc_data.append(col)
 
-        prc_data = Data2D(self.mod,
-                         [self.plot_data.fixed] + prc_names,
-                         prc_out_arr,
+        temp = np.vstack(rc_data).transpose()
+        rc_data += [np.sum(temp[:,rc_pos[i]],axis=1) for i in range(len(rc_names))]
+
+        rc_out_arr = [scanner.UserOutputResults[:, 0]] + rc_data
+        rc_out_arr = np.vstack(rc_out_arr).transpose()
+
+        rc_data_obj = Data2D(self.mod,
+                         [self.plot_data.fixed] + prc_names + rc_names,
+                         rc_out_arr,
                          self._ltxe,
                          self._analysis_method,
                          ax_properties,
                          'prc_scan')
-        prc_data._working_dir = path.split(path.split(self._working_dir)[0])[0]
-        cc_ec_data._working_dir = path.split(path.split(self._working_dir)[0])[0]
+        rc_data_obj._working_dir = path.split(path.split(self._working_dir)[0])[0]
+        cc_ec_data_obj._working_dir = path.split(path.split(self._working_dir)[0])[0]
         # for plot in [cc_ec_plt, prc_plt]:
         #     plot.ax.set_xscale('log')
         #     plot.ax.set_ylabel('Coefficient Value')
@@ -981,7 +996,7 @@ class RateCharData(object):
         # cc_ec_plt.ax.axvline(self.plot_data.fixed_ss, ls=':', color='gray')
         # #cc_ec_plt.ax.set_ylim([-5,5])
 
-        return prc_data, cc_ec_data
+        return rc_data_obj, cc_ec_data_obj
 
 ##########################################
 '''
