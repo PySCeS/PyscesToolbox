@@ -356,7 +356,9 @@ class ScanFig(object):
         self._save_counter = 0
 
         self.lines
-        plt.close()
+        if rcParams['backend'] == \
+                'module://IPython.kernel.zmq.pylab.backend_inline':
+            plt.close()
         self._save_button_ = None
     @property
     def _save_button(self):
