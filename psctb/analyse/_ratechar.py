@@ -17,6 +17,7 @@ from ..utils.misc import silence_print
 from ..utils.misc import DotDict
 from ..utils.misc import formatter_factory
 from collections import OrderedDict
+from random import shuffle
 
 
 exportLAWH = silence_print(pysces.write.exportLabelledArrayWithHeader)
@@ -303,6 +304,13 @@ class RateCharData(object):
         self._make_all_coefficient_lines()
         self._attach_all_coefficients_to_self()
         self._make_all_summary()
+        self._make_all_line_data()
+
+    def _change_colour_order(self,order=None):
+        if not order:
+            order = self._color_dict_.keys()
+            shuffle(order)
+        self._color_dict_ = dict(zip(order,self._color_dict_.values()))
         self._make_all_line_data()
 
     def _make_all_line_data(self):
@@ -677,14 +685,16 @@ class RateCharData(object):
     @property
     def _color_dict(self):
         if not self._color_dict_:
-            num_of_cols = len(self.mod.reactions) + 2
-            cmap = get_cmap('Set2')(
-                np.linspace(0, 1.0, num_of_cols))[:, :3]
-            color_list = [rgb_to_hsv(*cmap[i, :]) for i in range(num_of_cols)]
             fix_map = getattr(self._model_map, self.plot_data.fixed)
             relavent_reactions = fix_map.isProductOf() + \
                                  fix_map.isSubstrateOf() + \
                                  fix_map.isModifierOf()
+            num_of_cols = len(relavent_reactions) + 3
+            cmap = get_cmap('Set2')(
+                np.linspace(0, 1.0, num_of_cols))[:, :3]
+            color_list = [rgb_to_hsv(*cmap[i, :]) for i in range(num_of_cols)]
+
+
             relavent_reactions.sort()
             color_dict = dict(
                 zip(['Total Supply'] +
@@ -693,7 +703,7 @@ class RateCharData(object):
                     color_list))
             # just to darken the colors a bit
             for k, v in color_dict.iteritems():
-                color_dict[k] = [v[0], v[1], v[2] * 0.9]
+                color_dict[k] = [v[0], 1, v[2]]
 
             self._color_dict_ = color_dict
 
@@ -716,7 +726,7 @@ class RateCharData(object):
             latex_expr = self._ltxe.expression_to_latex(flux)
             flux_color = self._color_dict[flux]
             color = hsv_to_rgb(flux_color[0],
-                               1,
+                               flux_color[1],
                                flux_color[2])
             for dem in demand_blocks:
                 if dem == flux:
@@ -750,10 +760,10 @@ class RateCharData(object):
         for ec_name in self.plot_data.ec_names:
             for flux, flux_ld in self._flux_ld_dict.iteritems():
                 ec_reaction = flux[2:]
-                if ec_reaction in ec_name:
+                if 'ec' + ec_reaction + '_' + self.plot_data.fixed in ec_name:
                     flux_color = self._color_dict[flux]
                     color = hsv_to_rgb(flux_color[0],
-                                       flux_color[1],
+                                       flux_color[1]*0.8,
                                        flux_color[2])
                     ec_data = self.plot_data[ec_name]
                     categories = ['Elasticity Coefficients'] + \
@@ -775,7 +785,7 @@ class RateCharData(object):
         for rc_name in self.plot_data.rc_names:
             for flux, flux_ld in self._flux_ld_dict.iteritems():
                 rc_flux = 'J' + flux[2:]
-                if rc_flux in rc_name:
+                if 'rc' + rc_flux + '_'  in rc_name:
                     flux_color = self._color_dict[flux]
                     color = hsv_to_rgb(flux_color[0],
                                        flux_color[1],
@@ -808,15 +818,15 @@ class RateCharData(object):
         for prc_name in self.plot_data.prc_names:
             for flux, flux_ld in self._flux_ld_dict.iteritems():
                 prc_flux = 'J' + flux[2:]
-                if prc_flux in prc_name:
+                if 'prc' + prc_flux + '_' + self.plot_data.fixed in prc_name:
 
                     route_reaction = get_prc_route(prc_name,
                                                    prc_flux,
                                                    self.plot_data.fixed)
                     flux_color = self._color_dict['J_' + route_reaction]
                     color = hsv_to_rgb(flux_color[0],
-                                       1,
-                                       flux_color[2] * 0.9)
+                                       flux_color[1],
+                                       flux_color[2])
                     prc_data = self.plot_data[prc_name]
                     categories = ['Partial Response Coefficients'] + \
                         flux_ld.categories[1:]
@@ -842,7 +852,7 @@ class RateCharData(object):
                                  'Supply',
                                  'Total Supply'],
                      properties={'label': '$%s$' % 'Total\,Supply',
-                                 'color': hsv_to_rgb(col[0],col[1]*2,col[2])})
+                                 'color': hsv_to_rgb(col[0],col[1],col[2])})
 
         col = self._color_dict['Total Demand']
         total_flux_ld_dict['Total Demand'] = \
@@ -853,7 +863,7 @@ class RateCharData(object):
                                  'Demand',
                                  'Total Demand'],
                      properties={'label': '$%s$' % 'Total\,Demand',
-                                 'color': hsv_to_rgb(col[0],col[1]*2,col[2])})
+                                 'color': hsv_to_rgb(col[0],col[1],col[2])})
 
         self._total_flux_ld_dict = total_flux_ld_dict
 
