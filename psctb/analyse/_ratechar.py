@@ -704,10 +704,10 @@ class RateCharData(object):
 
         flux_ld_dict = {}
 
-        demand_blocks = getattr(
-            self._model_map, self.plot_data.fixed).isSubstrateOf()
-        supply_blocks = getattr(
-            self._model_map, self.plot_data.fixed).isProductOf()
+        demand_blocks = ['J_' + dem_reac for dem_reac in getattr(
+            self._model_map, self.plot_data.fixed).isSubstrateOf()]
+        supply_blocks = ['J_' + sup_reac for sup_reac in getattr(
+            self._model_map, self.plot_data.fixed).isProductOf()]
 
         for flux in self.plot_data.flux_names:
             flux_col = self.plot_data.flux_names.index(flux)
@@ -719,7 +719,7 @@ class RateCharData(object):
                                1,
                                flux_color[2])
             for dem in demand_blocks:
-                if dem in flux:
+                if dem == flux:
                     flux_ld_dict[flux] = \
                         LineData(name=flux,
                                  x_data=x_data,
@@ -731,7 +731,7 @@ class RateCharData(object):
                                              'color': color})
                     break
             for sup in supply_blocks:
-                if sup in flux:
+                if sup == flux:
                     flux_ld_dict[flux] = \
                         LineData(name=flux,
                                  x_data=x_data,
