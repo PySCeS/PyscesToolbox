@@ -727,7 +727,7 @@ class RateCharData(object):
             flux_color = self._color_dict[flux]
             color = hsv_to_rgb(flux_color[0],
                                flux_color[1],
-                               flux_color[2])
+                               flux_color[2]*0.9)
             for dem in demand_blocks:
                 if dem == flux:
                     flux_ld_dict[flux] = \
@@ -763,7 +763,7 @@ class RateCharData(object):
                 if 'ec' + ec_reaction + '_' + self.plot_data.fixed in ec_name:
                     flux_color = self._color_dict[flux]
                     color = hsv_to_rgb(flux_color[0],
-                                       flux_color[1]*0.8,
+                                       flux_color[1]*0.5,
                                        flux_color[2])
                     ec_data = self.plot_data[ec_name]
                     categories = ['Elasticity Coefficients'] + \
@@ -825,7 +825,7 @@ class RateCharData(object):
                                                    self.plot_data.fixed)
                     flux_color = self._color_dict['J_' + route_reaction]
                     color = hsv_to_rgb(flux_color[0],
-                                       flux_color[1],
+                                       flux_color[1]*0.5,
                                        flux_color[2])
                     prc_data = self.plot_data[prc_name]
                     categories = ['Partial Response Coefficients'] + \
@@ -852,7 +852,8 @@ class RateCharData(object):
                                  'Supply',
                                  'Total Supply'],
                      properties={'label': '$%s$' % 'Total\,Supply',
-                                 'color': hsv_to_rgb(col[0],col[1],col[2])})
+                                 'color': hsv_to_rgb(col[0],col[1],col[2]*0.9),
+                                 'ls':'--'})
 
         col = self._color_dict['Total Demand']
         total_flux_ld_dict['Total Demand'] = \
@@ -863,7 +864,8 @@ class RateCharData(object):
                                  'Demand',
                                  'Total Demand'],
                      properties={'label': '$%s$' % 'Total\,Demand',
-                                 'color': hsv_to_rgb(col[0],col[1],col[2])})
+                                 'color': hsv_to_rgb(col[0],col[1],col[2]*0.9),
+                                 'ls':'--'})
 
         self._total_flux_ld_dict = total_flux_ld_dict
 
