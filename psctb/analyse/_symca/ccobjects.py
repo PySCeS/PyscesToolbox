@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import min, max, float, array
+from numpy import min, max, float, array, float64
 #from PyscesToolBox import PyscesToolBox as PYCtools
 from sympy import Symbol
 #from IPython.display import Latex
@@ -26,6 +26,12 @@ def get_state(mod, do_state=False):
 def silent_mca(mod):
     mod.doMca()
 
+def get_value_eval(expression,subs_dict):
+    for k,v in subs_dict.iteritems():
+        subs_dict[k] = float64(v)
+    ans = eval(expression,{},subs_dict)
+    return ans
+
 
 class StateKeeper:
     def __init__(self, state):
@@ -50,6 +56,7 @@ class CCBase(object):
         self._state_keeper = state_keeper
         self.name = name
         self._latex_name = '\\Sigma'
+        self._str_expression = str(self.expression)
 
         self._value = None
         self._latex_expression = None
@@ -88,11 +95,12 @@ class CCBase(object):
 
     def _calc_value(self):
         """Calculates the value of the expression"""
-        symbols = self.expression.atoms(Symbol)
-        subsdic = {}
-        for symbol in symbols:
-            subsdic[symbol] = getattr(self.mod, str(symbol))
-        self._value = self.expression.subs(subsdic)
+        keys = self.expression.atoms(Symbol)
+        subsdict = {}
+        for key in keys:
+            str_key = str(key)
+            subsdict[str_key] = getattr(self.mod, str_key)
+        self._value = get_value_eval(self._str_expression,subsdict)
 
     def __repr__(self):
         return self.expression.__repr__()
@@ -250,8 +258,13 @@ class CCoef(CCBase):
         """Recalculates the control coefficients and control pattern
            values. calls _calc_value() for self and each control
            pattern. Useful for when model parameters change"""
+        keys = self.expression.atoms(Symbol)
+        subsdict = {}
+        for key in keys:
+            str_key = str(key)
+            subsdict[str_key] = getattr(self.mod, str_key)
         for pattern in self.control_patterns:
-            pattern._calc_value()
+            pattern._calc_value(subsdict)
         self._calc_value()
 
     def _calc_value(self):
@@ -314,12 +327,23 @@ class CPattern(CCBase):
         self.expression = self.numerator / denominator.expression
         self.denominator_object = denominator
         self.parent = parent
+        self._str_expression = str(self.expression)
 
         self._latex_numerator = None
         self._latex_expression_full = None
         self._latex_expression = None
         self._latex_name = None
         self._percentage = None
+
+    def _calc_value(self,subsdict=None):
+        """Calculates the value of the expression"""
+        if subsdict is None:
+            keys = self.expression.atoms(Symbol)
+            subsdict = {}
+            for key in keys:
+                str_key = str(key)
+                subsdict[str_key] = getattr(self.mod, str_key)
+        self._value = get_value_eval(self._str_expression,subsdict)
 
     @property
     def latex_numerator(self):
