@@ -56,8 +56,8 @@ class CCBase(object):
         self._state_keeper = state_keeper
         self.name = name
         self._latex_name = '\\Sigma'
-        self._str_expression = str(self.expression)
 
+        self._str_expression_ = None
         self._value = None
         self._latex_expression = None
         self._state_ = get_state(mod)
@@ -73,6 +73,13 @@ class CCBase(object):
     @property
     def latex_name(self):
         return self._latex_name
+
+    @property
+    def _str_expression(self):
+        if not self._str_expression_:
+            self._str_expression_ = str(self.expression)
+        return self._str_expression_
+
 
     @property
     def value(self):
@@ -327,7 +334,7 @@ class CPattern(CCBase):
         self.expression = self.numerator / denominator.expression
         self.denominator_object = denominator
         self.parent = parent
-        self._str_expression = str(self.expression)
+
 
         self._latex_numerator = None
         self._latex_expression_full = None
