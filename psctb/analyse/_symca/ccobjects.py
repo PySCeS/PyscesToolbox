@@ -47,20 +47,18 @@ class CCBase(object):
 
     """The base object for the control coefficients and control patterns"""
 
-    def __init__(self, mod, name, expression, ltxe, state_keeper):
+    def __init__(self, mod, name, expression, ltxe):
         super(CCBase, self).__init__()
 
         self.expression = expression
         self.mod = mod
         self._ltxe = ltxe
-        self._state_keeper = state_keeper
         self.name = name
         self._latex_name = '\\Sigma'
 
         self._str_expression_ = None
         self._value = None
         self._latex_expression = None
-        self._state_ = get_state(mod)
 
     @property
     def latex_expression(self):
@@ -85,14 +83,7 @@ class CCBase(object):
     def value(self):
         """The value property. Calls self._calc_value() when self._value
         is None and returns self._value"""
-        new_ss = get_state(self.mod)
-        state_changed = new_ss != self._state_
-        if state_changed:
-            self._state_keeper.do_mca_state(self.mod, new_ss)
-            self._calc_value()
-            self._state_ = new_ss
-        elif not self._value:
-            self._calc_value()
+        self._calc_value()
         return self._value
 
     def _repr_latex_(self):
@@ -141,8 +132,8 @@ class CCoef(CCBase):
 
     """The object the stores control coefficients. Inherits from CCBase"""
 
-    def __init__(self, mod, name, expression, denominator, ltxe, state_keeper):
-        super(CCoef, self).__init__(mod, name, expression, ltxe, state_keeper)
+    def __init__(self, mod, name, expression, denominator, ltxe):
+        super(CCoef, self).__init__(mod, name, expression, ltxe)
         self.numerator = expression
         self.denominator = denominator.expression
         self.expression = self.numerator / denominator.expression
@@ -265,6 +256,11 @@ class CCoef(CCBase):
         """Recalculates the control coefficients and control pattern
            values. calls _calc_value() for self and each control
            pattern. Useful for when model parameters change"""
+        self._calc_value()
+
+    def _calc_value(self):
+        """Calculates the numeric value of the control pattern from the
+           values of its control patterns."""
         keys = self.expression.atoms(Symbol)
         subsdict = {}
         for key in keys:
@@ -272,12 +268,7 @@ class CCoef(CCBase):
             subsdict[str_key] = getattr(self.mod, str_key)
         for pattern in self.control_patterns:
             pattern._calc_value(subsdict)
-        self._calc_value()
-
-    def _calc_value(self):
-        """Calculates the numeric value of the control pattern from the
-           values of its control patterns."""
-        self._value = sum([pattern.value for pattern in self.control_patterns])
+        self._value = sum([pattern._value for pattern in self.control_patterns])
 
     def _set_control_patterns(self):
         """Divides control coefficient into control patterns and saves
@@ -293,8 +284,7 @@ class CCoef(CCBase):
                           pattern,
                           self.denominator_object,
                           self,
-                          self._ltxe,
-                          self._state_keeper)
+                          self._ltxe)
             setattr(self, name, cp)
             cps.append(cp)
         self.control_patterns = cps
@@ -322,13 +312,11 @@ class CPattern(CCBase):
                  expression,
                  denominator,
                  parent,
-                 ltxe,
-                 state_keeper):
+                 ltxe):
         super(CPattern, self).__init__(mod,
                                        name,
                                        expression,
-                                       ltxe,
-                                       state_keeper)
+                                       ltxe)
         self.numerator = expression
         self.denominator = denominator.expression
         self.expression = self.numerator / denominator.expression

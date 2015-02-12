@@ -6,7 +6,7 @@ import sys
 #from re import sub
 from sympy import Symbol, sympify, nsimplify, fraction, S
 from sympy.matrices import Matrix, diag, NonSquareMatrixError
-from .ccobjects import CCBase, CCoef, StateKeeper, get_state
+from .ccobjects import CCBase, CCoef
 
 import cPickle as pickle
 
@@ -444,15 +444,14 @@ class SymcaToolBox(object):
 
     @staticmethod
     def spawn_cc_objects(mod, cc_dic, ltxe):
-        sk = StateKeeper(get_state(mod))
+
         model_block_CCs = []
         for denom,names_nums in cc_dic.iteritems():
             common_denom = CCBase(
                 mod,
                 'common_denominator',
                 denom,
-                ltxe,
-                sk
+                ltxe
             )
             cc_object_list = [common_denom]
 
@@ -463,8 +462,7 @@ class SymcaToolBox(object):
                         str(name_num[0]),
                         name_num[1],
                         common_denom,
-                        ltxe,
-                        sk
+                        ltxe
                     )
                 )
             model_block_CCs.append(cc_object_list)
