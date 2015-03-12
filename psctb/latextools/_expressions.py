@@ -29,6 +29,36 @@ class LatexExpr(object):
         self.mod = mod
         self._subs_dict = None
         self._prc_subs = None
+        self._added_tk = False
+        self._tk_subs = None
+
+    def add_term_types(self, term_types):
+        self._term_types = term_types
+
+    def _add_tk_subs(self):
+        if not self._subs_dict:
+            self.subs_dict
+        mod = self.mod
+        j_subs = {}
+        pec_subs = {}
+        for term in self._term_types:
+            # Fluxes:
+            for reaction in mod.reactions:
+                j_subs['J_%s_%s' % (reaction, term)] = 'J__%s_%s' % (min_(term),
+                                                                     min_(reaction))
+            for top_reaction in mod.reactions:
+                for var_par in mod.species + mod.parameters:
+                    o_ec = 'pec%s_%s_%s' % (min_(top_reaction),
+                                            min_(var_par),
+                                            min_(term))
+                    n_ec = 'varepsilon__%s_%s__%s' % (min_(top_reaction),
+                                                      min_(var_par),
+                                                      min_(term))
+                    pec_subs[o_ec] = n_ec
+
+        self._subs_dict.update(j_subs)
+        self._subs_dict.update(pec_subs)
+        self._added_tk = True
 
     @property
     def subs_dict(self):
@@ -176,6 +206,37 @@ class LatexExpr(object):
 
         return self._prc_subs
 
+    @property
+    def tk_subs(self):
+        if not self._tk_subs:
+
+            mod = self.mod
+            tk_subs = {}
+            pec_subs = {}
+            j_subs = {}
+            for term_type in self._term_types:
+                for top_reaction in mod.reactions:
+                    for base_param in mod.parameters + mod.species:
+                        o_pec = '\\varepsilon^{%s %s}_{%s}' % (min_(top_reaction),
+                                                               min_(term_type),
+                                                               min_(base_param))
+
+                        n_pec = '\\varepsilon^{{%s}_{%s}}_{%s}' % (min_(top_reaction),
+                                                                   min_(
+                                                                       term_type),
+                                                                   min_(base_param))
+                        pec_subs[o_pec] = n_pec
+
+                    o_j = 'J^{%s}_{%s}' % (min_(term_type), min_(top_reaction))
+                    n_j = 'J_{{%s}_{%s}}' % (
+                        min_(top_reaction), min_(term_type))
+                    j_subs[o_j] = n_j
+
+            tk_subs.update(pec_subs)
+            tk_subs.update(j_subs)
+            self._tk_subs = tk_subs
+        return self._tk_subs
+
     def expression_to_latex(self, expression):
         if type(expression) == str:
             expression = sympify(expression)
@@ -188,6 +249,9 @@ class LatexExpr(object):
         # faster!!! Ok only over 100X
         needed_symbols = expression.atoms(Symbol)
         smaller_dict = {}
+
+        if self._term_types and not self._added_tk:
+            self._add_tk_subs()
 
         for each in needed_symbols:
             each = str(each)
@@ -202,5 +266,9 @@ class LatexExpr(object):
 
         for k, v in self.prc_subs.iteritems():
             latex_expr = latex_expr.replace(k, v)
+
+        if self._added_tk:
+            for k, v in self.tk_subs.iteritems():
+                latex_expr = latex_expr.replace(k, v)
 
         return latex_expr
