@@ -1,8 +1,10 @@
 from os import path, mkdir
 from pysces import model, model_dir, output_dir
-import cStringIO,string
+import cStringIO
+import string
 
-__all__ = ['get_model_name','make_path']
+__all__ = ['get_model_name', 'make_path']
+
 
 def get_model_name(mod):
     """Returns the name of a model 'mod' sans the extension
@@ -13,20 +15,21 @@ def get_model_name(mod):
     """
     return path.split(mod.ModelFile)[1][:-4]
 
-def make_path(mod,analysis_method,subdirs = []):
+
+def make_path(mod, analysis_method, subdirs=[]):
     """
     make_path(mod,analysis_method,subdirs = [])
 
-    This function is used to create directories 
+    This function is used to create directories
     (if they don't exist) to write analysis
-    results to and return the path name. The 
+    results to and return the path name. The
     return value will be:
 
     /path/to/Pysces/model_name/analysis_method/subdir1/subdir2/
 
     Arguments:
     ==========
-    mod             - The model being analysed 
+    mod             - The model being analysed
     analysis_method - The tool being used to analyse the model
     subdirs         - An optional list of subdirectories
 
@@ -34,7 +37,7 @@ def make_path(mod,analysis_method,subdirs = []):
     """
 
     model_name = get_model_name(mod)
-    
+
     model_path = path.join(output_dir,
                            model_name)
 
@@ -42,10 +45,10 @@ def make_path(mod,analysis_method,subdirs = []):
                               model_name,
                               analysis_method)
 
-    dirs = [model_path,analysis_path]
+    dirs = [model_path, analysis_path]
 
-    for i,each in enumerate(subdirs):
-        tpth = path.join(dirs[1+i], each)
+    for i, each in enumerate(subdirs):
+        tpth = path.join(dirs[1 + i], each)
         dirs.append(tpth)
 
     for each in dirs:
@@ -53,5 +56,3 @@ def make_path(mod,analysis_method,subdirs = []):
             mkdir(each)
 
     return dirs[-1] + '/'
-
-

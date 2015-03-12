@@ -1,6 +1,6 @@
-#try:
+# try:
 from setuptools import setup, find_packages
-#except ImportError:
+# except ImportError:
 #    from distutils.core import setup
 packages = find_packages()
 config = {

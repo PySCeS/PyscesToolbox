@@ -403,7 +403,7 @@ class DotDict(dict):
                                    formatter=formatter))
                     cur_list = []
                 elif (i + 1) == len(lst):
-                    #print 'Final'
+                    # print 'Final'
                     cur_list.append(each)
                     tables.append(
                         html_table(cur_list,

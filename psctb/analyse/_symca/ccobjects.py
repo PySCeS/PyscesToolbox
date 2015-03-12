@@ -26,14 +26,16 @@ def get_state(mod, do_state=False):
 def silent_mca(mod):
     mod.doMca()
 
-def get_value_eval(expression,subs_dict):
-    for k,v in subs_dict.iteritems():
+
+def get_value_eval(expression, subs_dict):
+    for k, v in subs_dict.iteritems():
         subs_dict[k] = float64(v)
-    ans = eval(expression,{},subs_dict)
+    ans = eval(expression, {}, subs_dict)
     return ans
 
 
 class StateKeeper:
+
     def __init__(self, state):
         self._last_state_for_mca = state
 
@@ -78,7 +80,6 @@ class CCBase(object):
             self._str_expression_ = str(self.expression)
         return self._str_expression_
 
-
     @property
     def value(self):
         """The value property. Calls self._calc_value() when self._value
@@ -98,7 +99,7 @@ class CCBase(object):
         for key in keys:
             str_key = str(key)
             subsdict[str_key] = getattr(self.mod, str_key)
-        self._value = get_value_eval(self._str_expression,subsdict)
+        self._value = get_value_eval(self._str_expression, subsdict)
 
     def __repr__(self):
         return self.expression.__repr__()
@@ -167,7 +168,8 @@ class CCoef(CCBase):
     @property
     def latex_expression(self):
         if not self._latex_expression:
-            self._latex_expression = '(' + self.latex_numerator + ')' + '/ \\,\\Sigma'
+            self._latex_expression = '(' + \
+                self.latex_numerator + ')' + '/ \\,\\Sigma'
         return self._latex_expression
 
     @property
@@ -212,7 +214,6 @@ class CCoef(CCBase):
             self.mod.doMca()
             self.mod.SetLoud()
 
-
             for i, cp in enumerate(self.control_patterns):
                 # print type(scan_res[i+1])
                 if scan_type is 'percentage':
@@ -230,10 +231,12 @@ class CCoef(CCBase):
             self.mod.SetLoud()
 
         if scan_type is 'value':
-            column_names = [parameter] + [cp.name for cp in self.control_patterns] + [self.name]
+            column_names = [
+                parameter] + [cp.name for cp in self.control_patterns] + [self.name]
             y_label = 'Control coefficient/pattern value'
         if scan_type is 'percentage':
-            column_names = [parameter] + [cp.name for cp in self.control_patterns]
+            column_names = [parameter] + \
+                [cp.name for cp in self.control_patterns]
             y_label = 'Percentage Contribution'
 
         mm = ModelMap(self.mod)
@@ -242,15 +245,15 @@ class CCoef(CCBase):
             x_label = '[%s]' % parameter.replace('_', ' ')
         else:
             x_label = parameter
-        ax_properties = {'ylabel':y_label,
-                         'xlabel':x_label,
+        ax_properties = {'ylabel': y_label,
+                         'xlabel': x_label,
                          'xscale': 'linear',
                          'yscale': 'linear',
-                         'xlim': [scan_range[0],scan_range[-1]]}
+                         'xlim': [scan_range[0], scan_range[-1]]}
         data_array = array(scan_res, dtype=np.float).transpose()
-        data = Data2D(self.mod, column_names, data_array, self._ltxe, 'symca', ax_properties)
+        data = Data2D(
+            self.mod, column_names, data_array, self._ltxe, 'symca', ax_properties)
         return data
-
 
     def _recalculate_value(self):
         """Recalculates the control coefficients and control pattern
@@ -268,7 +271,8 @@ class CCoef(CCBase):
             subsdict[str_key] = getattr(self.mod, str_key)
         for pattern in self.control_patterns:
             pattern._calc_value(subsdict)
-        self._value = sum([pattern._value for pattern in self.control_patterns])
+        self._value = sum(
+            [pattern._value for pattern in self.control_patterns])
 
     def _set_control_patterns(self):
         """Divides control coefficient into control patterns and saves
@@ -323,14 +327,13 @@ class CPattern(CCBase):
         self.denominator_object = denominator
         self.parent = parent
 
-
         self._latex_numerator = None
         self._latex_expression_full = None
         self._latex_expression = None
         self._latex_name = None
         self._percentage = None
 
-    def _calc_value(self,subsdict=None):
+    def _calc_value(self, subsdict=None):
         """Calculates the value of the expression"""
         if subsdict is None:
             keys = self.expression.atoms(Symbol)
@@ -338,7 +341,7 @@ class CPattern(CCBase):
             for key in keys:
                 str_key = str(key)
                 subsdict[str_key] = getattr(self.mod, str_key)
-        self._value = get_value_eval(self._str_expression,subsdict)
+        self._value = get_value_eval(self._str_expression, subsdict)
 
     @property
     def latex_numerator(self):

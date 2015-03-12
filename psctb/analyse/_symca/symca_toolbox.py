@@ -446,7 +446,7 @@ class SymcaToolBox(object):
     def spawn_cc_objects(mod, cc_dic, ltxe):
 
         model_block_CCs = []
-        for denom,names_nums in cc_dic.iteritems():
+        for denom, names_nums in cc_dic.iteritems():
             common_denom = CCBase(
                 mod,
                 'common_denominator',

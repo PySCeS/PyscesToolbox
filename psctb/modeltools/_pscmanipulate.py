@@ -1,13 +1,15 @@
 from os import path, mkdir
 from pysces import model, model_dir, output_dir
-import cStringIO,string
-from ._paths import get_model_name  
+import cStringIO
+import string
+from ._paths import get_model_name
 
 __all__ = ['psc_to_str',
            'mod_to_str',
            'strip_fixed',
            'augment_fix_sting',
            'fix_metabolite']
+
 
 def psc_to_str(name):
     """
@@ -21,7 +23,7 @@ def psc_to_str(name):
     """
     if name[-4:] != '.psc':
         name += '.psc'
-    F = file(path.join(pysces.PyscesModel.MODEL_DIR, name),'r')
+    F = file(path.join(pysces.PyscesModel.MODEL_DIR, name), 'r')
     fstr = F.read()
     F.close()
     return fstr
@@ -75,7 +77,7 @@ def strip_fixed(fstr):
     return Fhead, Fo.read()
 
 
-def augment_fix_sting( OrigFix, fix):
+def augment_fix_sting(OrigFix, fix):
     """
     augment_fix_sting(OrigFix, fix)
 
@@ -89,7 +91,7 @@ def augment_fix_sting( OrigFix, fix):
     return OrigFix + ' %s' % fix
 
 
-def fix_metabolite(mod, fix, model_name = 0):
+def fix_metabolite(mod, fix, model_name=0):
     """
     fix_metabolite(mod,fix,modelname)
 
@@ -113,5 +115,5 @@ def fix_metabolite(mod, fix, model_name = 0):
     fix_head, mod_str_sans_fix = strip_fixed(mod_str)
     new_fix_head = augment_fix_sting(fix_head, fix)
     new_mod = model(model_name, loader="string", fString=new_fix_head
-        +'\n'+mod_str_sans_fix)
+                    + '\n' + mod_str_sans_fix)
     return new_mod

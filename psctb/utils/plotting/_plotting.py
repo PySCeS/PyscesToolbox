@@ -1,6 +1,6 @@
-#TODO:
-#There are cases where path.join would be more appropriate (for cross platform
-#compatability)
+# TODO:
+# There are cases where path.join would be more appropriate (for cross platform
+# compatability)
 from IPython.display import display, clear_output
 from matplotlib import pyplot as plt
 from matplotlib import transforms
@@ -156,11 +156,8 @@ class Data2D(object):
         self.plot_data['scan_results'] = data_array[:, 1:]
         self.plot_data['scan_points'] = len(self.plot_data.scan_range)
 
-
-
         self._column_names = column_names
         self._scan_results = data_array
-
 
         #self.column_names = column_names
         #self.column_names_in = column_names[0]
@@ -208,19 +205,20 @@ class Data2D(object):
                            'Steady-State Species Concentrations'])])
 
         self._scan_types = \
-        OrderedDict([
-            ('Fluxes Rates',
-                ['J_' + reaction for reaction in mod.reactions]),
-            ('Reaction Rates', [reaction for reaction in mod.reactions]),
-            ('Species Concentrations', mod.species),
-            ('Steady-State Species Concentrations',
-                [sp + '_ss' for sp in mod.species]),
-            ('Elasticity Coefficients', ec_list(mod)),
-            ('Control Coefficients', cc_list(mod)),
-            ('Response Coefficients', rc_list(mod)),
-            ('Partial Response Coefficients', prc_list(mod)),
-            ('Control Patterns', ['CP' + str(n) for n in range(1,len(self._column_names))])
-             ])
+            OrderedDict([
+                ('Fluxes Rates',
+                 ['J_' + reaction for reaction in mod.reactions]),
+                ('Reaction Rates', [reaction for reaction in mod.reactions]),
+                ('Species Concentrations', mod.species),
+                ('Steady-State Species Concentrations',
+                 [sp + '_ss' for sp in mod.species]),
+                ('Elasticity Coefficients', ec_list(mod)),
+                ('Control Coefficients', cc_list(mod)),
+                ('Response Coefficients', rc_list(mod)),
+                ('Partial Response Coefficients', prc_list(mod)),
+                ('Control Patterns', ['CP' + str(n)
+                                      for n in range(1, len(self._column_names))])
+            ])
 
         self._setup_categories()
         self._setup_lines()
@@ -279,7 +277,6 @@ class Data2D(object):
                                            self._fname))
         return scan_fig
 
-
     def save_data(self, file_name=None, separator=',', folder=None):
         if not file_name:
             if folder:
@@ -291,7 +288,8 @@ class Data2D(object):
             else:
                 if not path.exists(path.join(self._working_dir, self.plot_data.scan_in)):
                     mkdir(path.join(self._working_dir, self.plot_data.scan_in))
-                file_name = path.join(self._working_dir, self.plot_data.scan_in,'scan_data.csv')
+                file_name = path.join(
+                    self._working_dir, self.plot_data.scan_in, 'scan_data.csv')
         scan_results = self._scan_results
         column_names = self._column_names
 
@@ -303,7 +301,6 @@ class Data2D(object):
                        sep=separator)
         except IOError as e:
             print e.strerror
-
 
 
 class ScanFig(object):
@@ -351,7 +348,7 @@ class ScanFig(object):
         if fname:
             self.fname = fname
         else:
-            self.fname = path.join(psc_out_dir,'ScanFig')
+            self.fname = path.join(psc_out_dir, 'ScanFig')
 
         self._save_counter = 0
 
@@ -360,6 +357,7 @@ class ScanFig(object):
                 'module://IPython.kernel.zmq.pylab.backend_inline':
             plt.close()
         self._save_button_ = None
+
     @property
     def _save_button(self):
         if not self._save_button_:
@@ -369,7 +367,6 @@ class ScanFig(object):
             self._save_button_.description = 'Save'
             self._save_button_.on_click(save)
         return self._save_button_
-
 
     def show(self):
         """
@@ -422,7 +419,6 @@ class ScanFig(object):
                          bbox_extra_artists=(self.ax.get_legend(),),
                          bbox_inches='tight')
 
-
     @property
     def _widgets(self):
         if not self._widgets_:
@@ -446,10 +442,11 @@ class ScanFig(object):
                     if each in v:
                         widget_classes[k].children += (w),
 
-            #this is needed to sort widgets according to alphabetical order
+            # this is needed to sort widgets according to alphabetical order
             for k, v in widget_classes.iteritems():
                 children_list = list(v.children)
-                names = [getattr(widg,'description') for widg in children_list]
+                names = [getattr(widg, 'description')
+                         for widg in children_list]
                 names.sort()
 
                 new_children_list = []
@@ -621,8 +618,8 @@ class ScanFig(object):
             for i, each in enumerate(self._raw_line_data):
                 line, = self.ax.plot(each.x, each.y)
 
-                #set width to a default width of 2
-                #bc the default value of one is too low
+                # set width to a default width of 2
+                # bc the default value of one is too low
                 line.set_linewidth(2)
                 if each.properties:
                     line.set(**each.properties)
