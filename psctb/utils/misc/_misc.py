@@ -16,21 +16,73 @@ __all__ = ['cc_list',
 
 
 def is_number(suspected_number):
-    # We make the assumption that most numbers
-    # can be converted to ints
+    """
+    Test if an object is a number
+
+    Arguments
+    ---------
+    suspected_number: object
+        This can be any object which might be a number.
+
+    Returns
+    -------
+    boolean
+        True if object is a number, else false
+
+    """
+
+    # We make the assumption that most numbers can be converted to ints.
     number = False
     try:
         int(suspected_number)
         number = True
-    except:
+    except ValueError:
         pass
     return number
 
 
-def formatter_factory(max_val=None,
-                      min_val=None,
+def formatter_factory(min_val=None,
+                      max_val=None,
                       default_fmt=None,
                       outlier_fmt=None):
+    """Returns a custom `html_table` object cell content formatter function.
+
+    Arguments
+    ---------
+    min_val : int or float, optional (Default : 0.001)
+        The minimum value for float display cutoff.
+    max_val : int of float, optionan (Default : 10000)
+        The maximim value for float display cutoff.
+    default_fmt : str, options (Default : '%.3f')
+        The default format for any number within the range of min_val to
+        max_val.
+    outlier_fmt : str, optional (Default : '%.3e')
+        The format for any number not in the range of min_val to max_val
+
+    Returns
+    -------
+    formatter : function
+        A function which formats input for `html_table` using the values set
+        up by this function.
+
+    Examples
+    --------
+    >>> f = formatter_factory(min_val=1,
+                              max_val=10,
+                              default_fmt='%.2f',
+                              outlier_fmt='%.2e')
+    >>> f(1)
+    '1.00'
+    >>> f(5.235)
+    '5.24'
+    >>> f(10)
+    '10.00'
+    >>> f(0.99842)
+    '9.98e-01'
+    >>> f('abc')
+    'abc'
+
+    """
     if not max_val:
         max_val = 10000
     if not min_val:
@@ -60,6 +112,47 @@ def html_table(matrix_or_array_like,
                caption=None,
                style=None,
                formatter=None):
+    """Constructs an html compatable table from 2D list, numpy array or sympy
+    matrix.
+
+    Arguments
+    ---------
+    matrix_or_array_like : list of lists or array or matrix
+        A compatable object to be converted to an html table
+    float_fmt : str, optional (Default : '%.2f')
+        The formatter string for numbers. This formatter will be applied to all
+        numbers. This optional argument is only used when the argument
+        `formatter` is None. Usefull for simple tables where different types
+        of formatting is not needed.
+    raw : boolean, optional (Default : False)
+        If True a raw html string will be returned, otherwise an IPython `HTML`
+        object will be returned.
+    first_row_headers : boolean, optional (Default : False)
+        If True elemnts in the fist row in `matrix_or_array_like` will be
+        considered as part of a header and will get the <th></th> tag,
+        otherwise there will be no header.
+    caption : str, optional (Default : None)
+        An optional caption for the table.
+    style : str, optional (Default : None)
+        An optional html table style
+    formatter: function, optional (Default : None)
+        An optional `formatter` function. If none float_fmt will be used to
+        format numbers.
+
+    Returns
+    -------
+    str
+        A string containing an html table.
+    OR
+    HTML
+        An IPython notebook `HTML` object.
+
+
+    See Also
+    --------
+    'formatter_factory' : Creates formatter function
+
+    """
 
     raw_table = matrix_or_array_like
 
@@ -101,8 +194,8 @@ def silence_print(func):
     This function is *very* useful for silencing pysces functions that
     print a lot of unneeded output.
 
-    Parameters
-    ----------
+    Arguments
+    ---------
     func : function
         A function that talks too much
     Returns
@@ -127,15 +220,15 @@ def cc_list(mod):
     The list contains both flux and species control coefficients and control
     coefficients follow the syntax of 'cc_controlled_controller'.
 
-    Parameters
-    ----------
+    Arguments
+    ---------
     mod : PysMod
         The Pysces model contains the reactions and species which is used to
         contruct the control coefficient list.
 
     Returns
     -------
-    values : list
+    list of str
         The cc_list is sorted alphabetically.
 
     See Also
@@ -163,15 +256,15 @@ def ec_list(mod):
     The list contains both species and parameter elasticity coefficients and
     elasticity coefficients follow the syntax of 'ec_reaction_sp-or-param'.
 
-    Parameters
-    ----------
+    Arguments
+    ---------
     mod : PysMod
         The Pysces model contains the reactions, species and parameters
         which is used to contruct the elasticity coefficient list.
 
     Returns
     -------
-    values : list
+    list of str
         The ec_list is sorted alphabetically.
 
     See Also
@@ -198,15 +291,15 @@ def rc_list(mod):
     The list contains both species and flux response coefficients and
     response coefficients follow the syntax of 'rc_responder_parameter'.
 
-    Parameters
-    ----------
+    Arguments
+    ---------
     mod : PysMod
         The Pysces model contains the reactions, species and parameters
         which is used to contruct the response coefficient list.
 
     Returns
     -------
-    values : list
+    list of str
         The rc_list is sorted alphabetically.
 
     See Also
@@ -234,15 +327,15 @@ def prc_list(mod):
     partial response coefficients follow the syntax of
     'prc_responder_parameter_route'.
 
-    Parameters
-    ----------
+    Arguments
+    ---------
     mod : PysMod
         The Pysces model contains the reactions, species and parameters
         which is used to contruct the partial response coefficient list.
 
     Returns
     -------
-    values : list
+    list of str
         The prc_list is sorted alphabetically.
 
     See Also
@@ -364,7 +457,7 @@ class DotDict(dict):
 
     def _setall_init(self):
         """
-        Internal function that populates the self namespace on
+        Internal method that populates the self namespace on
         initialisation. Throws exception if any of the keys are
         reserved.
         """
@@ -379,6 +472,32 @@ class DotDict(dict):
             self.__setitem__(k, v)
 
     def _make_repr(self, key, value, formatter=None):
+        """
+        Internal method makes a _repr_html_ method and attaches it to self so
+        that values contained in self can be displayed as an html table in the
+        IPython notebook.
+
+        Arguments
+        ---------
+        key : str
+            A string that will be evaluated indicating how to represent the
+            dictionary keys. If 'k' is passed, the key will be displayed as is.
+        value : str
+            A string that will be evaluated indicating how to represent
+            dictionary values. If 'v' is passed, the value will be displayed as
+            is.
+        formatter : function, optional (Default : None)
+            A formatter function that formats numbers. If none, the default
+            function produced by `formatter_factory` will be used.
+
+        See Also
+        --------
+        formatter_factory
+
+
+        """
+        if not formatter:
+            formatter = formatter_factory()
 
         def representation(the_self=self):
             keys = self.keys()
