@@ -29,7 +29,7 @@ __all__ = ['LineData',
            'Data2D']
 
 
-def add_legend_viewlim(ax, **kwargs):
+def _add_legend_viewlim(ax, **kwargs):
     """ Reset the legend in ax to only display lines that are
     currently visible in plot area """
     # THIS FUNCTION COMES FROM
@@ -69,8 +69,8 @@ class LineData(object):
     any values there will have no effect on the output of the ``ScanFig``
     instance.
 
-    Parameters
-    ----------
+    Arguments
+    ---------
     name : str
         The name of the line. Will be used as a label if none is specified.
     x_data : array_like
@@ -363,7 +363,7 @@ class ScanFig(object):
         if not self._save_button_:
             def save(clicked):
                 self.save()
-            self._save_button_ = widgets.ButtonWidget()
+            self._save_button_ = widgets.Button()
             self._save_button_.description = 'Save'
             self._save_button_.on_click(save)
         return self._save_button_
@@ -383,7 +383,7 @@ class ScanFig(object):
         adjust_figure
         """
 
-        add_legend_viewlim(
+        _add_legend_viewlim(
             self.ax,
             bbox_to_anchor=(0, -0.17),
             ncol=3,
@@ -424,7 +424,7 @@ class ScanFig(object):
         if not self._widgets_:
             widget_classes = OrderedDict()
             for k in self.category_classes.iterkeys():
-                widget_classes[k] = widgets.ContainerWidget()
+                widget_classes[k] = widgets.HBox()
 
             def oc(cat):
                 def on_change(name, value):
@@ -433,7 +433,7 @@ class ScanFig(object):
                 return on_change
 
             for each in self.categories:
-                w = widgets.ToggleButtonWidget()
+                w = widgets.ToggleButton()
                 w.description = each
                 w.value = self.categories_status[each]
                 on_change = oc(each)
@@ -523,26 +523,26 @@ class ScanFig(object):
                 return val
 
         if not self._figure_widgets_:
-            min_x = widgets.FloatTextWidget()
-            max_x = widgets.FloatTextWidget()
+            min_x = widgets.FloatText()
+            max_x = widgets.FloatText()
             min_x.value, max_x.value = self.ax.get_xlim()
             min_x.description = 'min'
             max_x.description = 'max'
 
-            min_y = widgets.FloatTextWidget()
-            max_y = widgets.FloatTextWidget()
+            min_y = widgets.FloatText()
+            max_y = widgets.FloatText()
             min_y.value, max_y.value = self.ax.get_ylim()
             min_y.description = 'min'
             max_y.description = 'max'
 
-            log_x = widgets.CheckboxWidget()
-            log_y = widgets.CheckboxWidget()
+            log_x = widgets.Checkbox()
+            log_y = widgets.Checkbox()
             log_x.value = convert_scale(self.ax.get_xscale())
             log_y.value = convert_scale(self.ax.get_yscale())
             log_x.description = 'x_log'
             log_y.description = 'y_log'
 
-            apply_btn = widgets.ButtonWidget()
+            apply_btn = widgets.Button()
             apply_btn.description = 'Apply'
 
             def set_values(clicked):
@@ -565,10 +565,10 @@ class ScanFig(object):
 
             apply_btn.on_click(set_values)
 
-            x_lims = widgets.ContainerWidget(children=[min_x, max_x])
-            y_lims = widgets.ContainerWidget(children=[min_y, max_y])
-            lin_log = widgets.ContainerWidget(children=[log_x, log_y])
-            apply_con = widgets.ContainerWidget(children=[apply_btn])
+            x_lims = widgets.HBox(children=[min_x, max_x])
+            y_lims = widgets.HBox(children=[min_y, max_y])
+            lin_log = widgets.HBox(children=[log_x, log_y])
+            apply_con = widgets.HBox(children=[apply_btn])
 
             _figure_widgets_ = OrderedDict()
             _figure_widgets_['X axis limits'] = x_lims
@@ -669,28 +669,28 @@ class ScanFig(object):
         self.show()
         for k, v in self._widgets.iteritems():
             if len(v.children) > 0:
-                head = widgets.LatexWidget(value=k)
+                head = widgets.Latex(value=k)
                 display(head)
                 display(v)
-                v.remove_class('vbox')
-                v.add_class('hbox')
-                v.set_css({'flex-wrap': 'wrap'})
-        display(widgets.LatexWidget(value='$~$'))
+                # v.remove_class('vbox')
+                # v.add_class('hbox')
+                # v.set_css({'flex-wrap': 'wrap'})
+        display(widgets.Latex(value='$~$'))
         display(self._save_button)
-        self._save_button.remove_class('vbox')
-        self._save_button.add_class('hbox')
+        # self._save_button.remove_class('vbox')
+        # self._save_button.add_class('hbox')
 
     def adjust_figure(self):
         self.show()
         for k, v in self._figure_widgets.iteritems():
             if len(v.children) > 0:
-                head = widgets.LatexWidget(value=k)
+                head = widgets.Latex(value=k)
                 display(head)
                 display(v)
-                v.remove_class('vbox')
-                v.add_class('hbox')
-                v.set_css({'flex-wrap': 'wrap'})
-        display(widgets.LatexWidget(value='$~$'))
+                # v.remove_class('vbox')
+                # v.add_class('hbox')
+                # v.set_css({'flex-wrap': 'wrap'})
+        display(widgets.Latex(value='$~$'))
         display(self._save_button)
-        self._save_button.remove_class('vbox')
-        self._save_button.add_class('hbox')
+        # self._save_button.remove_class('vbox')
+        # self._save_button.add_class('hbox')

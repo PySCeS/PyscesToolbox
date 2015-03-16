@@ -535,7 +535,7 @@ class RateCharData(object):
         # and then getting the min/max non-NaN
         # PS flux max is the max of the totals
 
-        with np.errstate(invalid='ignore'):
+        with np.errstate(all='ignore'):
 
             self.plot_data.flux_max = np.nanmax(10 ** np.log10(totals))
             self.plot_data.flux_min = np.nanmin(10 ** np.log10(n_z_f))

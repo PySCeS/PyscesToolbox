@@ -31,6 +31,7 @@ class LatexExpr(object):
         self._prc_subs = None
         self._added_tk = False
         self._tk_subs = None
+        self._term_types = None
 
     def add_term_types(self, term_types):
         self._term_types = term_types
