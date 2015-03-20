@@ -1,11 +1,11 @@
-# TODO:
-# There are cases where path.join would be more appropriate (for cross platform
-# compatability)
+# TODO  There are cases where path.join would be more appropriate (for cross platform compatability)
+from os import path, mkdir
+from collections import OrderedDict
+
 from IPython.display import display, clear_output
 from matplotlib import pyplot as plt
 from matplotlib import transforms
 from matplotlib import rcParams
-from os import path, mkdir
 from numpy import linspace
 from IPython.html import widgets
 from pysces import ModelMap
@@ -14,12 +14,10 @@ import pysces
 
 from ..misc import *
 from ...latextools import LatexExpr
-from collections import OrderedDict
 from ... import modeltools
 
 
 exportLAWH = silence_print(pysces.write.exportLabelledArrayWithHeader)
-
 
 """
 This whole module is fd in the a
@@ -41,7 +39,7 @@ def _add_legend_viewlim(ax, **kwargs):
     for line in ax.lines:
         line_label = line.get_label()
         cond = line.get_visible() and \
-            line_label and not line_label.startswith("_")
+               line_label and not line_label.startswith("_")
         if cond:
             line_bbox = transforms.Bbox.unit()
             line_bbox.update_from_data_xy(line.get_xydata())
@@ -50,7 +48,7 @@ def _add_legend_viewlim(ax, **kwargs):
                 label_objs.append(line)
                 label_texts.append(line_label)
     if label_objs:
-        return ax.legend(label_objs, label_texts,  **kwargs)
+        return ax.legend(label_objs, label_texts, **kwargs)
 
     elif ax.get_legend():
         ax.get_legend().set_visible(False)
@@ -59,7 +57,6 @@ def _add_legend_viewlim(ax, **kwargs):
 
 
 class LineData(object):
-
     """
     An object that contains data that can be used to draw a matplotlib line.
 
@@ -69,8 +66,8 @@ class LineData(object):
     any values there will have no effect on the output of the ``ScanFig``
     instance.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     name : str
         The name of the line. Will be used as a label if none is specified.
     x_data : array_like
@@ -117,7 +114,7 @@ class LineData(object):
         for k, v in self.properties.iteritems():
             setattr(self, k, v)
 
-    def add_property(key, value):
+    def add_property(self, key, value):
         """
         Adds a property to the ``properties`` dictionary of the
         ``LineData`` object.
@@ -140,6 +137,50 @@ class LineData(object):
 
 
 class Data2D(object):
+    """
+    An object that wraps results from a PySCeS parameter scan.
+
+    Results from a parameter scan used to initialise this object which in turn
+    is used to create a ``ScanFig`` object.
+
+    Parameters
+    ----------
+    mod : PysMod
+        The model for which the parameter scan was performed.
+    column_names : list of str
+        The names of each column in the data_array. Columns should be arranged
+        with the input values (scan_in) in the first column and the output
+        values (scan_out) in the columns that follow.
+    data_array : ndarray
+        An array containing results from a parameter scan. Arranged as
+        described above.
+    ltxe : LatexExpr, optional (Default : None)
+        A LatexExpr object that is used to convert PySCeS compatible
+        expressions to LaTeX math. If None is supplied a new LatexExpr object
+        will be instantiated, but when working with multiple objects that make
+        use of the LatexExpr class, it saves memory to share a single
+        instance between them.
+    analysis_method : str, Optional (Default : None)
+        A string that indicates the name of the analysis method used to
+        generate the results that populate ``Data2D``. This will determine
+        where results are saved by ``Data2D`` as well as any ``ScanFig``
+        objects that are produced by it.
+    ax_properties : dict, Optional (Default : None)
+        A dictionary of properties that will be used by ``ScanFig`` to adjust
+        the appearance of plots. These properties should compatible with
+        ``matplotlib.axes.AxesSubplot'' object in a way that it's ``set``
+        method can be used to change its properties. If none, a default
+        ``ScanFig`` object is produced by the ``plot`` method.
+    file_name : str, Optional (Default : None)
+        The name that should be prepended to files produced any ``ScanFig``
+        objects produced by ``Data2D``. If None, defaults to 'scan_fig'.
+
+    See Also
+    --------
+    ScanFig
+    Data2D
+    RateChar
+    """
 
     def __init__(self,
                  mod,
@@ -159,7 +200,7 @@ class Data2D(object):
         self._column_names = column_names
         self._scan_results = data_array
 
-        #self.column_names = column_names
+        # self.column_names = column_names
         #self.column_names_in = column_names[0]
         #.column_names_out = column_names[1:]
 
@@ -191,6 +232,32 @@ class Data2D(object):
         else:
             self._ax_properties_ = ax_properties
 
+        # So in order for ScanFig to have all those nice buttons that are
+        # organised so nicely we need to set it up beforehand. Basically
+        # each different line has different categories of lines that it falls
+        # into. Then each each of these categories falls into a category class.
+        # Each ``_category_classes`` key represents a category class and the
+        # value is a list of categories that fall into a class.
+        #
+        # The dictionary ``_scan_types`` contains the different categories that
+        # a line can fall into (in addition to the category containing itself).
+        # Here a keys is a category and value is a list of lines in this
+        # category.
+        #
+        # Buttons will be arranged so that a category class is a label under
+        # which all the buttons that toggle a certain category is arranged
+        # under. For instance under the lable 'All Coefficients' will be the
+        # buttons 'Elasticity Coefficients', 'Control Coefficients',
+        # 'Response Coefficients etc.
+        #
+        # We also add _scan_types to the ``_category_classes`` so that each
+        # individual line has its own button.
+        # There will therefore be a button called 'Control Coefficients' that
+        # fall under the 'All Coefficients' category class label as well as a
+        # label for the category class called 'Control Coefficients' under
+        # which all the  different control coefficient buttons will be
+        # arranged.
+
         self._category_classes = \
             OrderedDict([('All Coefficients',
                           ['Elasticity Coefficients',
@@ -217,7 +284,8 @@ class Data2D(object):
                 ('Response Coefficients', rc_list(mod)),
                 ('Partial Response Coefficients', prc_list(mod)),
                 ('Control Patterns', ['CP' + str(n)
-                                      for n in range(1, len(self._column_names))])
+                                      for n in
+                                      range(1, len(self._column_names))])
             ])
 
         self._setup_categories()
@@ -225,6 +293,19 @@ class Data2D(object):
         self._category_classes.update(self._scan_types)
 
     def _setup_categories(self):
+        """
+        This method sets up the categories for each data column stored by this
+        object. These categories are stored in a dictionary as
+        ``self._column_categories``.
+
+        Each line falls into its own category as well as another category
+        depending on what type of data it represents. So 'Species1' will
+        fall into the category 'Species1' as well as 'Species Concentrations'
+        Therefore the ``ScanFig`` buttons labelled 'Species1' and 'Species
+        Concentrations' need to be toggled on for the line representing
+        the parameter scan results of Species1 to be visible on the
+        ``ScanFig`` figure.
+        """
         scan_types = self._scan_types
         column_categories = {}
         for column in self.plot_data.scan_out:
@@ -237,6 +318,15 @@ class Data2D(object):
         self._column_categories = column_categories
 
     def _setup_lines(self):
+        """
+        Sets up ``LineData`` objects that will be used to populate ``ScanFig``
+        objects created by the ``plot`` method of ``Data2D``. These objects
+        are stored in a list: ``self._lines``
+
+        ``ScanFig`` takes a list of ``LineData`` objects as an argument and
+        this method sets up that list. The ``self._column_categories``
+        dictionary is used here.
+        """
         lines = []
         for i, each in enumerate(self.plot_data.scan_out):
             line = LineData(name=each,
@@ -244,14 +334,21 @@ class Data2D(object):
                             y_data=self.plot_data.scan_results[:, i],
                             categories=self._column_categories[each],
                             properties={'label':
-                                        '$%s$' %
-                                        (self._ltxe.expression_to_latex(each)),
+                                            '$%s$' %
+                                            (self._ltxe.expression_to_latex(
+                                                each)),
                                         'linewidth': 1.6})
             lines.append(line)
         self._lines = lines
 
     @property
     def _ax_properties(self):
+        """
+        Internal property of ``Data2D``. If no ``ax_properties`` argument is
+        specified in __init__ this property defines the xlabel of the
+        ``ScanFig`` object depending on the value of ``self.scan_in``.
+
+        """
         if not self._ax_properties_:
             self._ax_properties_ = {'xlabel': self._x_name()}
         return self._ax_properties_
@@ -269,6 +366,15 @@ class Data2D(object):
         return x_name
 
     def plot(self):
+        """
+        Creates a ``ScanFig`` object using the data stored in the current
+        instance of ``Data2D``
+
+        Returns
+        -------
+        ``ScanFig``
+            A `ScanFig`` object that is used to visualise results.
+        """
         scan_fig = ScanFig(self._lines,
                            category_classes=self._category_classes,
                            ax_properties=self._ax_properties,
@@ -278,6 +384,29 @@ class Data2D(object):
         return scan_fig
 
     def save_data(self, file_name=None, separator=',', folder=None):
+        """
+        Saves data stores in current instance of ``Data2D`` as a comma
+        separated file.
+
+        Parameters
+        ----------
+        file_name : str, Optional (Default : None)
+            The file name, extension and path under which data should be saved.
+            If None the name will default to scan_data.csv and will be saved
+            either under the directory specified under the directory specified
+            in ``folder``.
+        separator : str, Optional (Default : ',')
+            The symbol which should be used to separate values in the output
+            file.
+        folder : str, Optional (Default : None)
+            The folder under which the file should be saved. Only comes into
+            consideration if file_name is None. If None the file will be saved
+            under the the folder specified in the ``self._working_dir`` field,
+            which itself is determined by the ``analysis_method`` parameter of
+            __init__.
+        """
+        # TODO Change this method so new file outputs don't overwrite previous files (maybe output as scan_data0.csv, scan_data1.csv etc.)
+
         if not file_name:
             if folder:
                 if not path.exists(path.join(folder, self.plot_data.scan_in)):
@@ -286,7 +415,8 @@ class Data2D(object):
                                       self.plot_data.scan_in,
                                       'scan_data.csv')
             else:
-                if not path.exists(path.join(self._working_dir, self.plot_data.scan_in)):
+                if not path.exists(
+                        path.join(self._working_dir, self.plot_data.scan_in)):
                     mkdir(path.join(self._working_dir, self.plot_data.scan_in))
                 file_name = path.join(
                     self._working_dir, self.plot_data.scan_in, 'scan_data.csv')
@@ -304,12 +434,11 @@ class Data2D(object):
 
 
 class ScanFig(object):
-
     def __init__(self, line_data_list,
                  category_classes=None,
                  fig_properties=None,
                  ax_properties=None,
-                 fname=None,):
+                 fname=None, ):
 
         super(ScanFig, self).__init__()
 
@@ -363,6 +492,7 @@ class ScanFig(object):
         if not self._save_button_:
             def save(clicked):
                 self.save()
+
             self._save_button_ = widgets.Button()
             self._save_button_.description = 'Save'
             self._save_button_.on_click(save)
@@ -430,6 +560,7 @@ class ScanFig(object):
                 def on_change(name, value):
                     self.toggle_category(cat, value)
                     self.show()
+
                 return on_change
 
             for each in self.categories:
@@ -653,7 +784,6 @@ class ScanFig(object):
 
             for each in other_cats:
                 if line in self.categories[each]:
-
                     other_cat_stats.append(self.categories_status[each])
                     in_other_cats = True
             # If a line is never in any other categories

@@ -7,8 +7,8 @@ __all__ = ['get_model_name', 'make_path']
 def get_model_name(mod):
     """Returns the file name of a pysces model object sans the file extension.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     mod : PysMod
         Model of interest.
 
@@ -33,8 +33,8 @@ def make_path(mod, analysis_method, subdirs=[]):
 
     /path/to/Pysces/model_name/analysis_method/subdir1/subdir2/
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     mod : PysMod
         The model being analysed.
     analysis_method : str

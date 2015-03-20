@@ -13,13 +13,17 @@ __all__ = ['psc_to_str',
 
 def psc_to_str(name):
     """
-    psc_to_str(name)
+    Takes a filename and returns a path of where this file should be found.
 
-    Read psc file and return as string
+    Parameters
+    ----------
+    name : str
+        A string containing a filename.
 
-    Arguments:
-    ==========
-    name - string containing filename
+    Returns
+    -------
+    str
+        A string indicating the path to a psc file.
     """
     if name[-4:] != '.psc':
         name += '.psc'
@@ -31,13 +35,18 @@ def psc_to_str(name):
 
 def mod_to_str(mod):
     """
-    mod_to_str(name)
+    Converts an instantiated PySCeS model to a string.
 
-    Write PySCeS model out to string
+    Parameters
+    ----------
+    mod : PysMod
+        A Pysces model.
 
-    Arguments:
-    ==========
-    mod - instantiated PySCeS model
+    Returns
+    -------
+    str
+        A string representation of the contents of a PySCeS model file.
+
     """
     F = cStringIO.StringIO()
     mod.showModel(filename=F)
@@ -48,19 +57,23 @@ def mod_to_str(mod):
 
 def strip_fixed(fstr):
     """
-    strip_fixed(fstr)
+    Take a psc file string and return two strings: (1) The file header
+    containing the "FIX: " line and (2) the remainder of file.
 
-    Take a psc file string and return (Fhead, stripped_fstr)
-    where Fhead is the file header containing the "FIX: " line
-    and stripped_fstr is remainder of file as string
+    Parameters
+    ----------
+    fstr : str
+        String representation of psc file.
 
-    Arguments:
-    ==========
-    fstr - string representation of psc file
+    Returns
+    -------
+    tuple of str
+        1st element contains file header, second the remainder of the file.
 
-    See also:
-    =========
-    psc_to_str(name)
+    See also
+    --------
+    psc_to_str
+    mod_to_str
     """
     Fi = cStringIO.StringIO()
     Fi.write(fstr)
@@ -79,36 +92,47 @@ def strip_fixed(fstr):
 
 def augment_fix_sting(OrigFix, fix):
     """
-    augment_fix_sting(OrigFix, fix)
+    Adds a species to a psc file header.
 
-    Add fix to FixString
+    Parameters
+    ----------
+    OrigFix : str
+        A psc file header
+    fix : str
+        Additional species to add to psc file header.
 
-    Arguments:
-    ==========
-    OrigFix - original FixString
-    fix     - additional species to add to FixString
+    Returns
+    -------
+    str
+        A new psc file header that contains the contents of the original
+        together with the new fixed species.
     """
     return OrigFix + ' %s' % fix
 
 
-def fix_metabolite(mod, fix, model_name=0):
+def fix_metabolite(mod, fix, model_name=None):
     """
-    fix_metabolite(mod,fix,modelname)
-
     Fix a metabolite in a model and return a new model with the fixed
     metabolite.
 
-    Arguments:
-    ==========
-    mod         - The original model
-    fix         - The metabolite to fix
-    model_name  - The file name to use when saving the model (in psc/orca).
-                  The default value is original_model_name_fix.
-    """
+    Parameters
+    ----------
+    mod : PysMod
+        The original model.
+    fix : str
+        The metabolite to fix.
+    model_name : str, optional (Default : none)
+        The file name to use when saving the model (in psc/orca).
+        If None it defaults to original_model_name_fix.
 
+    Returns
+    -------
+    PysMod
+        A new model instance with an additional fixed species.
+    """
     assert fix in mod.species, "\nInvalid fixed species."
 
-    if model_name == 0:
+    if model_name is None:
         model_name = get_model_name(mod) + '_' + fix
 
     mod_str = mod_to_str(mod)

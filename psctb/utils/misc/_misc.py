@@ -19,8 +19,8 @@ def is_number(suspected_number):
     """
     Test if an object is a number
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     suspected_number: object
         This can be any object which might be a number.
 
@@ -47,8 +47,8 @@ def formatter_factory(min_val=None,
                       outlier_fmt=None):
     """Returns a custom `html_table` object cell content formatter function.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     min_val : int or float, optional (Default : 0.001)
         The minimum value for float display cutoff.
     max_val : int of float, optionan (Default : 10000)
@@ -115,8 +115,8 @@ def html_table(matrix_or_array_like,
     """Constructs an html compatable table from 2D list, numpy array or sympy
     matrix.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     matrix_or_array_like : list of lists or array or matrix
         A compatable object to be converted to an html table
     float_fmt : str, optional (Default : '%.2f')
@@ -194,13 +194,14 @@ def silence_print(func):
     This function is *very* useful for silencing pysces functions that
     print a lot of unneeded output.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     func : function
-        A function that talks too much
+        A function that talks too much.
+
     Returns
     -------
-    values: function
+    function
         A very quiet function
     """
 
@@ -220,8 +221,8 @@ def cc_list(mod):
     The list contains both flux and species control coefficients and control
     coefficients follow the syntax of 'cc_controlled_controller'.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     mod : PysMod
         The Pysces model contains the reactions and species which is used to
         contruct the control coefficient list.
@@ -256,8 +257,8 @@ def ec_list(mod):
     The list contains both species and parameter elasticity coefficients and
     elasticity coefficients follow the syntax of 'ec_reaction_sp-or-param'.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     mod : PysMod
         The Pysces model contains the reactions, species and parameters
         which is used to contruct the elasticity coefficient list.
@@ -291,8 +292,8 @@ def rc_list(mod):
     The list contains both species and flux response coefficients and
     response coefficients follow the syntax of 'rc_responder_parameter'.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     mod : PysMod
         The Pysces model contains the reactions, species and parameters
         which is used to contruct the response coefficient list.
@@ -327,8 +328,8 @@ def prc_list(mod):
     partial response coefficients follow the syntax of
     'prc_responder_parameter_route'.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     mod : PysMod
         The Pysces model contains the reactions, species and parameters
         which is used to contruct the partial response coefficient list.
@@ -477,8 +478,8 @@ class DotDict(dict):
         that values contained in self can be displayed as an html table in the
         IPython notebook.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         key : str
             A string that will be evaluated indicating how to represent the
             dictionary keys. If 'k' is passed, the key will be displayed as is.
