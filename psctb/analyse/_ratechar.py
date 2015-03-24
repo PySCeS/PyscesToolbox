@@ -6,7 +6,6 @@ from os import path, mkdir
 from pysces.PyscesModelMap import ModelMap
 from pysces import Scanner
 import pysces
-from collections import OrderedDict
 from matplotlib.pyplot import get_cmap
 from colorsys import hsv_to_rgb, rgb_to_hsv
 

@@ -168,7 +168,7 @@ class Data2D(object):
     ax_properties : dict, Optional (Default : None)
         A dictionary of properties that will be used by ``ScanFig`` to adjust
         the appearance of plots. These properties should compatible with
-        ``matplotlib.axes.AxesSubplot'' object in a way that it's ``set``
+        ``matplotlib.axes.AxesSubplot'' object in a way that its ``set``
         method can be used to change its properties. If none, a default
         ``ScanFig`` object is produced by the ``plot`` method.
     file_name : str, Optional (Default : None)
@@ -233,7 +233,7 @@ class Data2D(object):
             self._ax_properties_ = ax_properties
 
         # So in order for ScanFig to have all those nice buttons that are
-        # organised so nicely we need to set it up beforehand. Basically
+        # organised so well we need to set it up beforehand. Basically
         # each different line has different categories of lines that it falls
         # into. Then each each of these categories falls into a category class.
         # Each ``_category_classes`` key represents a category class and the
@@ -350,9 +350,10 @@ class Data2D(object):
 
         """
         if not self._ax_properties_:
-            self._ax_properties_ = {'xlabel': self._x_name()}
+            self._ax_properties_ = {'xlabel': self._x_name}
         return self._ax_properties_
 
+    @property
     def _x_name(self):
         mm = ModelMap(self._mod)
         species = mm.hasSpecies()
@@ -434,6 +435,51 @@ class Data2D(object):
 
 
 class ScanFig(object):
+    """
+    Uses data in the form of a list of LineData objects to display interactive
+    plots.
+
+    Interactive plots can be customised in terms of which data is visible at
+    any one time by simply clicking a button to toggle a line. Matplotlib
+    figures are used internally, therefore ScanFig figures can be altered
+    by changing the properties of the internal figure.
+
+    Parameters
+    ----------
+    line_data_list : list of LineData objects
+        A LineData object contains the information needed to draw a single
+        curve on a matplotlib figure. Here a list of these objects are used
+        to populate the internal matplotlib figure with the various curves
+        that represent the results of a parameter scan or simulation.
+    category_classes : dict, Optional (Default : None)
+        Each line on a ScanFig plot falls into a different category. Each of
+        these categories in turn fall into a different class. Each category
+        represents a button which toggles the lines which fall into the
+        category while the button is arranged under a label which is
+        represented by a category class. Each key in this dict is a category
+        class and the value is a list of categories that fall into this class.
+        If None all categories will fall into the same class.
+    fig_properties : dict, Optional (Default : None)
+        A dictionary of properties that will be used to adjust the appearance
+        of the figure. These properties should compatible with
+        ``matplotlib.figure.Figure'' object in a way that its ``set``
+        method can be used to change its properties. If None, default
+        matplotlib figure properties will be used.
+    ax_properties : dict, Optional (Default : None)
+        A dictionary of properties that will be used to adjust the appearance
+        of plot axes. These properties should compatible with
+        ``matplotlib.axes.AxesSubplot'' object in a way that its ``set``
+        method can be used to change its properties. If None default matplotlib
+        axes properties will be used.
+    fname : str, Optional (Default : None)
+        The file name under which figures should be saved. If None, the name
+        "ScanFig" will be used when save is used with default parameters.
+
+    See Also
+    --------
+    LineData
+    Data2D
+    """
     def __init__(self, line_data_list,
                  category_classes=None,
                  fig_properties=None,
@@ -500,12 +546,14 @@ class ScanFig(object):
 
     def show(self):
         """
-        Shows the figure.
+        Displays the figure.
 
         Depending on the matplotlib backend this function will either display
         the figure inline if running in an ``IPython`` notebook with the
-        ``--pylab=inline`` switch or it will display the figure as determined
-        by the ``rcParams['backend']`` option of ``matplotlib``.
+        ``--pylab=inline`` switch or with the %matplotlib inline IPython line
+        magic, alternately it will display the figure as determined by the
+        ``rcParams['backend']`` option of ``matplotlib``. Either the inline or
+        nbagg backends are recommended.
 
         See Also
         --------
@@ -528,6 +576,10 @@ class ScanFig(object):
             self.fig.show()
 
     def save(self, fname=None, dpi=None, fmt=None):
+        """
+
+
+        """
         if not fmt:
             fmt = 'svg'
 
