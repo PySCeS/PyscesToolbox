@@ -180,11 +180,80 @@ class CCoef(CCBase):
             )
         return self._latex_name
 
-    #@property
-    # def control_patterns(self):
-    #    if not self._control_patterns:
-    #        self._set_control_patterns()
-    #    return self._control_patterns
+    def _perscan(self, parameter, scan_range):
+
+        scan_res = [list() for i in range(len(self.control_patterns) + 1)]
+        scan_res[0] = scan_range
+
+        for parvalue in scan_range:
+            setattr(self.mod, parameter, parvalue)
+            self.mod.SetQuiet()
+            self.mod.doMca()
+            self.mod.SetLoud()
+            for i, cp in enumerate(self.control_patterns):
+                    scan_res[i + 1].append(cp.percentage)
+
+        return scan_res
+
+
+    def _valscan(self, parameter, scan_range):
+
+        scan_res = [list() for i in range(len(self.control_patterns) + 2)]
+        scan_res[0] = scan_range
+
+        for parvalue in scan_range:
+            setattr(self.mod, parameter, parvalue)
+            self.mod.SetQuiet()
+            self.mod.doMca()
+            self.mod.SetLoud()
+
+            for i, cp in enumerate(self.control_patterns):
+                scan_res[i + 1].append(cp.value)
+
+            scan_res[i + 2].append(self.value)
+
+        return scan_res
+
+    def par_scan(self, parameter, scan_range, scan_type='percentage', init_return=False):
+
+        assert scan_type in ['percentage', 'value']
+        init = getattr(self.mod, parameter)
+
+        if scan_type is 'percentage':
+            column_names = [parameter] + \
+                [cp.name for cp in self.control_patterns]
+            y_label = 'Control pattern percentage contribution'
+            scan_res = self._perscan(parameter,scan_range)
+        elif scan_type is 'value':
+            column_names = [
+                parameter] + [cp.name for cp in self.control_patterns] + [self.name]
+            y_label = 'Control coefficient/pattern value'
+            scan_res = self._valscan(parameter,scan_range)
+
+        if init_return:
+            self.mod.SetQuiet()
+            setattr(self.mod, parameter, init)
+            self.mod.doMca()
+            self.mod.SetLoud()
+
+        mm = ModelMap(self.mod)
+        species = mm.hasSpecies()
+        if parameter in species:
+            x_label = '[%s]' % parameter.replace('_', ' ')
+        else:
+            x_label = parameter
+        ax_properties = {'ylabel': y_label,
+                         'xlabel': x_label,
+                         'xscale': 'linear',
+                         'yscale': 'linear',
+                         'xlim': [scan_range[0], scan_range[-1]]}
+        data_array = array(scan_res, dtype=np.float).transpose()
+        data = Data2D(
+            self.mod, column_names, data_array, self._ltxe, 'symca', ax_properties)
+
+
+        return data
+
 
     def parscan(self, parameter, scan_range, scan_type='percentage', init_return=False):
         """Performs a parameter scan and returns numpy array object
@@ -199,14 +268,18 @@ class CCoef(CCBase):
            calls self._recalculate_value() for each value of
            parameter in scan_range"""
 
+        # Check that the scan_type is correct
         assert scan_type in ['percentage', 'value']
+        # For a percentage scan there is one column for the scan_range (scan_in)
+        # as well as a column for each control pattern
         if scan_type is 'percentage':
             scan_res = [list() for i in range(len(self.control_patterns) + 1)]
+        # The same is true for a value scan, but the total (control coefficient
+        # value) is also included.
         elif scan_type is 'value':
             scan_res = [list() for i in range(len(self.control_patterns) + 2)]
         scan_res[0] = scan_range
 
-        # print type(scan_res)
         init = getattr(self.mod, parameter)
         for parvalue in scan_range:
             setattr(self.mod, parameter, parvalue)
