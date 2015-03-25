@@ -51,8 +51,8 @@ def formatter_factory(min_val=None,
     ----------
     min_val : int or float, optional (Default : 0.001)
         The minimum value for float display cutoff.
-    max_val : int of float, optionan (Default : 10000)
-        The maximim value for float display cutoff.
+    max_val : int of float, optional (Default : 10000)
+        The maximum value for float display cutoff.
     default_fmt : str, options (Default : '%.3f')
         The default format for any number within the range of min_val to
         max_val.
@@ -95,7 +95,7 @@ def formatter_factory(min_val=None,
     def formatter(to_format):
         fmt = '%s'
         if is_number(to_format):
-            if abs(int(to_format)) == 0:
+            if abs(to_format) == 0:
                 fmt = default_fmt
             elif abs(to_format) >= max_val or abs(to_format) < min_val:
                 fmt = outlier_fmt
@@ -106,29 +106,29 @@ def formatter_factory(min_val=None,
 
 
 def html_table(matrix_or_array_like,
-               float_fmt='%.2f',
+               float_fmt=None,
                raw=False,
                first_row_headers=False,
                caption=None,
                style=None,
                formatter=None):
-    """Constructs an html compatable table from 2D list, numpy array or sympy
+    """Constructs an html compatible table from 2D list, numpy array or sympy
     matrix.
 
     Parameters
     ----------
     matrix_or_array_like : list of lists or array or matrix
-        A compatable object to be converted to an html table
+        A compatible object to be converted to an html table
     float_fmt : str, optional (Default : '%.2f')
         The formatter string for numbers. This formatter will be applied to all
         numbers. This optional argument is only used when the argument
-        `formatter` is None. Usefull for simple tables where different types
+        `formatter` is None. Useful for simple tables where different types
         of formatting is not needed.
     raw : boolean, optional (Default : False)
         If True a raw html string will be returned, otherwise an IPython `HTML`
         object will be returned.
     first_row_headers : boolean, optional (Default : False)
-        If True elemnts in the fist row in `matrix_or_array_like` will be
+        If True elements in the fist row in `matrix_or_array_like` will be
         considered as part of a header and will get the <th></th> tag,
         otherwise there will be no header.
     caption : str, optional (Default : None)
@@ -155,6 +155,8 @@ def html_table(matrix_or_array_like,
     """
 
     raw_table = matrix_or_array_like
+    if not float_fmt:
+        float_fmt = '%.2f'
 
     if not formatter:
         formatter = formatter_factory(default_fmt=float_fmt,
@@ -225,7 +227,7 @@ def cc_list(mod):
     ----------
     mod : PysMod
         The Pysces model contains the reactions and species which is used to
-        contruct the control coefficient list.
+        construct the control coefficient list.
 
     Returns
     -------
@@ -261,7 +263,7 @@ def ec_list(mod):
     ----------
     mod : PysMod
         The Pysces model contains the reactions, species and parameters
-        which is used to contruct the elasticity coefficient list.
+        which is used to construct the elasticity coefficient list.
 
     Returns
     -------
@@ -296,7 +298,7 @@ def rc_list(mod):
     ----------
     mod : PysMod
         The Pysces model contains the reactions, species and parameters
-        which is used to contruct the response coefficient list.
+        which is used to construct the response coefficient list.
 
     Returns
     -------
@@ -332,7 +334,7 @@ def prc_list(mod):
     ----------
     mod : PysMod
         The Pysces model contains the reactions, species and parameters
-        which is used to contruct the partial response coefficient list.
+        which is used to construct the partial response coefficient list.
 
     Returns
     -------
@@ -362,7 +364,7 @@ def prc_list(mod):
 class PseudoDotDict:
 
     """
-    A class that acts like a dictionary with dot accessable elements.
+    A class that acts like a dictionary with dot accessible elements.
 
     This class is not subsclassed from ``dict`` like DotDict, but rather wraps
     dictionary functionality.

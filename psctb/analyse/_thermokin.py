@@ -3,7 +3,7 @@ from re import match, findall
 from os import path
 
 from sympy import Symbol, sympify, diff
-from numpy import float64
+from numpy import float64, log
 
 from ..utils.misc import DotDict, formatter_factory
 from ..latextools import LatexExpr
@@ -97,6 +97,17 @@ def get_term_types_from_raw_data(raw_data_dict):
         for k in v.iterkeys():
             term_types.add(k)
     return term_types
+
+def get_repr_latex(obj):
+    if obj.value == 0:
+        fmt = '$%s = %s = %.3f$'
+    elif abs(obj.value) < 0.001 or abs(obj.value) > 10000:
+        fmt = '$%s = %s = %.3e$'
+    else:
+        fmt = '$%s = %s = %.3f$'
+    return fmt % (obj.latex_name,
+                  obj.latex_expression,
+                  obj.value)
 
 
 class ThermoKin(object):
@@ -203,13 +214,7 @@ class rate_eqn(object):
             self.mca_data.update(each.mca_data)
 
     def _repr_latex_(self):
-        if abs(self.value) > 0.001:
-            fmt = '$%s = %s = %.3f$'
-        else:
-            fmt = '$%s = %s = %.3e$'
-        return fmt % (self.latex_name,
-                      self.latex_expression,
-                      self.value)
+        return get_repr_latex(self)
 
     @property
     def value(self):
@@ -251,13 +256,7 @@ class term(object):
 
 
     def _repr_latex_(self):
-        if abs(self.value) > 0.001:
-            fmt = '$%s = %s = %.3f$'
-        else:
-            fmt = '$%s = %s = %.3e$'
-        return fmt % (self.latex_name,
-                      self.latex_expression,
-                      self.value)
+        return get_repr_latex(self)
 
     @property
     def value(self):
@@ -293,6 +292,12 @@ class rate_term(term):
         self.mca_data._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                   formatter_factory())
         self._populate_mca_data()
+        self._percentage = None
+
+    @property
+    def percentage(self):
+        per = (log(self.value)/log(self._parent.value)) * 100
+        return per
 
     def _populate_mca_data(self):
         var_pars = self.mod.species + self.mod.parameters
