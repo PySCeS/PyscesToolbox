@@ -3,7 +3,7 @@ from numpy import min, max, float, array, float64
 #from PyscesToolBox import PyscesToolBox as PYCtools
 from sympy import Symbol
 #from IPython.display import Latex
-from ...utils.misc import silence_print, DotDict
+from ...utils.misc import silence_print, DotDict, formatter_factory
 from ...utils.plotting import Data2D
 from ... import modeltools
 from pysces import ModelMap
@@ -214,7 +214,7 @@ class CCoef(CCBase):
 
         return scan_res
 
-    def par_scan(self, parameter, scan_range, scan_type='percentage', init_return=False):
+    def par_scan(self, parameter, scan_range, scan_type='percentage', init_return=True):
 
         assert scan_type in ['percentage', 'value']
         init = getattr(self.mod, parameter)
@@ -280,6 +280,7 @@ class CCoef(CCBase):
            expression"""
         patterns = self.numerator.as_coeff_add()[1]
         cps = DotDict()
+        cps._make_repr('v.name', 'v.value', formatter_factory())
         for i, pattern in enumerate(patterns):
             name = 'CP' + str(1 + i)
             cp = CPattern(self.mod,
