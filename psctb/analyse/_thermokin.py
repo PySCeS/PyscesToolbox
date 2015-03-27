@@ -3,11 +3,15 @@ from re import match, findall
 from os import path
 
 from sympy import Symbol, sympify, diff
-from numpy import float64, log
+from numpy import float64, log, array, float, NaN, nanmin, nanmax
 
-from ..utils.misc import DotDict, formatter_factory
+from ..utils.misc import DotDict, formatter_factory, find_min, find_max
 from ..latextools import LatexExpr
 from ..modeltools import make_path
+from ..utils.plotting import Data2D
+from ..utils.misc import do_safe_state
+
+from pysces import ModelMap
 
 
 def read_files(path):
@@ -98,6 +102,7 @@ def get_term_types_from_raw_data(raw_data_dict):
             term_types.add(k)
     return term_types
 
+
 def get_repr_latex(obj):
     if obj.value == 0:
         fmt = '$%s = %s = %.3f$'
@@ -141,7 +146,7 @@ class ThermoKin(object):
             own_val = reaction.value
             is_eq = round(mod_val, 10) == round(own_val, 10)
             print '%s\t\t%.10f\t%.10f\t%s' % (
-            reaction.name, own_val, mod_val, is_eq)
+                reaction.name, own_val, mod_val, is_eq)
         for reaction in self.reactions:
             for var_par in self.mod.parameters + self.mod.species:
                 ec_name = 'ec%s_%s' % (reaction.rname, var_par)
@@ -149,7 +154,7 @@ class ThermoKin(object):
                 own_val = reaction.mca_data[ec_name].value
                 is_eq = round(mod_val, 10) == round(own_val, 10)
                 print '%s\t\t%.10f\t%.10f\t%s' % (
-                ec_name, own_val, mod_val, is_eq)
+                    ec_name, own_val, mod_val, is_eq)
 
 
     def _populate_object(self):
@@ -158,22 +163,21 @@ class ThermoKin(object):
         self.reactions._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                   formatter_factory())
         for reaction, terms_dict in self._raw_data.iteritems():
-            reqn_obj = rate_eqn(self.mod,
-                                reaction,
-                                terms_dict,
-                                self._ltxe)
+            reqn_obj = RateEqn(self.mod,
+                               reaction,
+                               terms_dict,
+                               self._ltxe)
             setattr(self, reaction, reqn_obj)
             self.reactions[reaction] = reqn_obj
 
 
-
-class rate_eqn(object):
+class RateEqn(object):
     def __init__(self, mod, name, term_dict, ltxe):
-        super(rate_eqn, self).__init__()
+        super(RateEqn, self).__init__()
         self.mod = mod
         self.terms = DotDict()
         self.terms._make_repr('"$" + v.latex_name + "$"', 'v.value',
-                                  formatter_factory())
+                              formatter_factory())
         self.expression = 1
         self.name = 'J_' + name
         self._rname = name
@@ -182,12 +186,12 @@ class rate_eqn(object):
         for val in term_dict.itervalues():
             self.expression = self.expression * (sympify(val))
         for term_name, expression in term_dict.iteritems():
-            term = rate_term(parent=self,
-                             mod=self.mod,
-                             name='J_%s_%s' % (self._rname, term_name),
-                             rname=term_name,
-                             expression=expression,
-                             ltxe=self._ltxe)
+            term = RateTerm(parent=self,
+                            mod=self.mod,
+                            name='J_%s_%s' % (self._rname, term_name),
+                            rname=term_name,
+                            expression=expression,
+                            ltxe=self._ltxe)
             setattr(self, term_name, term)
             self.terms[term_name] = term
 
@@ -208,7 +212,7 @@ class rate_eqn(object):
             each = sympify(each)
             ec = diff(self.expression, each) * (each / self.expression)
             ec_name = 'ec%s_%s' % (self._rname, each)
-            self.mca_data[ec_name] = term(self, self.mod, ec_name, ec,
+            self.mca_data[ec_name] = Term(self, self.mod, ec_name, ec,
                                           self._ltxe)
         for each in self.terms.itervalues():
             self.mca_data.update(each.mca_data)
@@ -240,10 +244,144 @@ class rate_eqn(object):
             each._calc_value(subs_dict)
         self._value = mult([each._value for each in self.terms.itervalues()])
 
+    def _perscan(self, parameter, scan_range):
+        scan_res = [list() for i in range(len(self.terms.values()) + 1)]
+        scan_res[0] = scan_range
 
-class term(object):
+        for parvalue in scan_range:
+            state_valid = do_safe_state(self.mod, parameter, parvalue)
+            for i, term in enumerate(self.terms.values()):
+                if state_valid:
+                    scan_res[i + 1].append(term.percentage)
+                else:
+                    scan_res[i + 1].append(NaN)
+
+        return scan_res
+
+    def _valscan(self, parameter, scan_range):
+        scan_res = [list() for i in range(len(self.terms.values()) + 2)]
+        scan_res[0] = scan_range
+
+        for parvalue in scan_range:
+            state_valid = do_safe_state(self.mod, parameter, parvalue)
+            for i, term in enumerate(self.terms.values()):
+                if state_valid:
+                    scan_res[i + 1].append(term.value)
+                else:
+                    scan_res[i + 1].append(NaN)
+            if state_valid:
+                scan_res[i + 2].append(self.value)
+            else:
+                scan_res[i + 2].append(NaN)
+        return scan_res
+
+    def _evalscan(self, parameter, scan_range):
+        mca_objects = self._get_mca_objects(parameter)
+
+        scan_res = [list() for i in range(len(mca_objects) + 1)]
+        scan_res[0] = scan_range
+
+        for parvalue in scan_range:
+            state_valid =  do_safe_state(self.mod,parameter,parvalue,type='mca')
+            for i, term in enumerate(mca_objects):
+                if state_valid:
+                    scan_res[i+1].append(term.value)
+                else:
+                    scan_res[i+1].append(NaN)
+        return  scan_res
+
+
+
+
+
+    def par_scan(self, parameter, scan_range, scan_type='value',
+                 init_return=True):
+
+        assert scan_type in ['percentage', 'value', 'elasticity']
+        init = getattr(self.mod, parameter)
+
+        additional_cat_classes = {
+        'All Fluxes/Reactions/Species': ['Term Rates']}
+        additional_cats = {
+        'Term Rates': [term.name for term in self.terms.values()]}
+
+        if scan_type is 'percentage':
+            column_names = [parameter] + [term.name for term in
+                                          self.terms.values()]
+            y_label = 'Term Percentage Contribution'
+            scan_res = self._perscan(parameter, scan_range)
+            yscale = 'linear'
+            data_array = array(scan_res, dtype=float).transpose()
+            ylim = [nanmin(data_array), find_max(data_array) * 1.1]
+        elif scan_type is 'value':
+            column_names = [parameter] + [term.name for term in
+                                          self.terms.values()] + [self.name]
+            y_label = 'Reation/Term rate'
+            scan_res = self._valscan(parameter, scan_range)
+            yscale = 'log'
+            data_array = array(scan_res, dtype=float).transpose()
+            ylim = [find_min(data_array), find_max(data_array) * 2]
+        elif scan_type is 'elasticity':
+            mca_objects = self._get_mca_objects(parameter)
+            column_names = [parameter] + [obj.name for obj in mca_objects]
+
+            y_label = '$\\varepsilon^{%s}_{%s}$' % (self._rname, parameter)
+            scan_res = self._evalscan(parameter, scan_range)
+            yscale = 'linear'
+            data_array = array(scan_res, dtype=float).transpose()
+            ylim = [nanmin(data_array), nanmax(data_array) * 1.1]
+            additional_cat_classes = {
+            'All Coefficients': ['Term Elasticities']}
+            additional_cats = {
+            'Term Elasticities': [elas.name for elas in mca_objects][:-1]}
+
+
+        if init_return:
+            self.mod.SetQuiet()
+            setattr(self.mod, parameter, init)
+            self.mod.doMca()
+            self.mod.SetLoud()
+
+        mm = ModelMap(self.mod)
+        species = mm.hasSpecies()
+        if parameter in species:
+            x_label = '[%s]' % parameter.replace('_', ' ')
+        else:
+            x_label = parameter
+
+        ax_properties = {'ylabel': y_label,
+                         'xlabel': x_label,
+                         'xscale': 'log',
+                         'yscale': yscale,
+                         'xlim': [find_min(scan_range), find_max(scan_range)],
+                         'ylim': ylim}
+
+
+        data = Data2D(mod = self.mod,
+                      column_names=column_names,
+                      data_array=data_array,
+                      ltxe=self._ltxe,
+                      analysis_method='thermokin',
+                      ax_properties=ax_properties,
+                      additional_cat_classes=additional_cat_classes,
+                      additional_cats=additional_cats)
+
+        return data
+
+
+    def _get_mca_objects(self,parameter):
+        terms = self.terms.keys()
+        reaction_name = self._rname
+        mca_objects = []
+        for term in terms:
+            mca_objects.append(self.mca_data['pec%s_%s_%s' % (reaction_name,parameter,term)])
+        mca_objects.append(self.mca_data['ec%s_%s' % (reaction_name,parameter)])
+        return mca_objects
+
+
+class Term(object):
     def __init__(self, parent, mod, name, expression, ltxe):
-        super(term, self).__init__()
+        super(Term, self).__init__()
         self.name = name
         self.expression = sympify(expression).factor()
         self._str_expression = str(self.expression)
@@ -283,20 +421,20 @@ class term(object):
         self._value = get_value_eval(self._str_expression, subs_dict)
 
 
-class rate_term(term):
+class RateTerm(Term):
     def __init__(self, parent, mod, name, rname, expression, ltxe):
-        super(rate_term, self).__init__(parent, mod, name, expression, ltxe)
+        super(RateTerm, self).__init__(parent, mod, name, expression, ltxe)
         self.expression = sympify(expression)
         self._rname = rname
         self.mca_data = DotDict()
         self.mca_data._make_repr('"$" + v.latex_name + "$"', 'v.value',
-                                  formatter_factory())
+                                 formatter_factory())
         self._populate_mca_data()
         self._percentage = None
 
     @property
     def percentage(self):
-        per = (log(self.value)/log(self._parent.value)) * 100
+        per = (log(self.value) / log(self._parent.value)) * 100
         return per
 
     def _populate_mca_data(self):
@@ -305,7 +443,7 @@ class rate_term(term):
             each = sympify(each)
             ec_name = 'pec%s_%s_%s' % (self._parent._rname, each, self._rname)
             ec = diff(self.expression, each) * (each / self.expression)
-            self.mca_data[ec_name] = term(self._parent, self.mod, ec_name, ec,
+            self.mca_data[ec_name] = Term(self._parent, self.mod, ec_name, ec,
                                           self._ltxe)
 
 

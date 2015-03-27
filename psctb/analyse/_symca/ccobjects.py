@@ -1,12 +1,12 @@
 import numpy as np
-from numpy import min, max, float, array, float64
-#from PyscesToolBox import PyscesToolBox as PYCtools
+from numpy import array, float64, nanmin, nanmax
 from sympy import Symbol
-#from IPython.display import Latex
-from ...utils.misc import silence_print, DotDict, formatter_factory
-from ...utils.plotting import Data2D
-from ... import modeltools
 from pysces import ModelMap
+from numpy import NaN
+
+from ...utils.misc import silence_print, DotDict, formatter_factory, \
+    do_safe_state, find_min, find_max
+from ...utils.plotting import Data2D
 
 
 def cctype(obj):
@@ -21,10 +21,10 @@ def get_state(mod, do_state=False):
         [getattr(mod, s + '_ss') for s in mod.species]
     return ss
 
-
-@silence_print
-def silent_mca(mod):
-    mod.doMca()
+#
+# @silence_print
+# def silent_mca(mod):
+#     mod.doMca()
 
 
 def get_value_eval(expression, subs_dict):
@@ -33,16 +33,16 @@ def get_value_eval(expression, subs_dict):
     ans = eval(expression, {}, subs_dict)
     return ans
 
-
-class StateKeeper:
-
-    def __init__(self, state):
-        self._last_state_for_mca = state
-
-    def do_mca_state(self, mod, state):
-        if state != self._last_state_for_mca:
-            silent_mca(mod)
-            self._last_state_for_mca = state
+#
+# class StateKeeper:
+#
+#     def __init__(self, state):
+#         self._last_state_for_mca = state
+#
+#     def do_mca_state(self, mod, state):
+#         if state != self._last_state_for_mca:
+#             silent_mca(mod)
+#             self._last_state_for_mca = state
 
 
 class CCBase(object):
@@ -186,12 +186,12 @@ class CCoef(CCBase):
         scan_res[0] = scan_range
 
         for parvalue in scan_range:
-            setattr(self.mod, parameter, parvalue)
-            self.mod.SetQuiet()
-            self.mod.doMca()
-            self.mod.SetLoud()
+            state_valid = do_safe_state(self.mod, parameter, parvalue,type='mca')
             for i, cp in enumerate(self.control_patterns.values()):
+                if state_valid:
                     scan_res[i + 1].append(cp.percentage)
+                else:
+                    scan_res[i + 1].append(NaN)
 
         return scan_res
 
@@ -202,15 +202,16 @@ class CCoef(CCBase):
         scan_res[0] = scan_range
 
         for parvalue in scan_range:
-            setattr(self.mod, parameter, parvalue)
-            self.mod.SetQuiet()
-            self.mod.doMca()
-            self.mod.SetLoud()
-
+            state_valid = do_safe_state(self.mod, parameter, parvalue,type='mca')
             for i, cp in enumerate(self.control_patterns.values()):
-                scan_res[i + 1].append(cp.value)
-
-            scan_res[i + 2].append(self.value)
+                if state_valid:
+                    scan_res[i + 1].append(cp.value)
+                else:
+                    scan_res[i + 1].append(NaN)
+            if state_valid:
+                scan_res[i + 2].append(self.value)
+            else:
+                scan_res[i + 2].append(NaN)
 
         return scan_res
 
@@ -224,11 +225,15 @@ class CCoef(CCBase):
                 [cp.name for cp in self.control_patterns.values()]
             y_label = 'Control pattern percentage contribution'
             scan_res = self._perscan(parameter,scan_range)
+            data_array = array(scan_res, dtype=np.float).transpose()
+            ylim = [nanmin(data_array), nanmax(data_array) * 1.1]
         elif scan_type is 'value':
             column_names = [
                 parameter] + [cp.name for cp in self.control_patterns.values()] + [self.name]
             y_label = 'Control coefficient/pattern value'
             scan_res = self._valscan(parameter,scan_range)
+            data_array = array(scan_res, dtype=np.float).transpose()
+            ylim = [nanmin(data_array), nanmax(data_array) * 1.1]
 
         if init_return:
             self.mod.SetQuiet()
@@ -246,8 +251,9 @@ class CCoef(CCBase):
                          'xlabel': x_label,
                          'xscale': 'linear',
                          'yscale': 'linear',
-                         'xlim': [scan_range[0], scan_range[-1]]}
-        data_array = array(scan_res, dtype=np.float).transpose()
+                         'xlim': [find_min(scan_range), find_max(scan_range)],
+                         'ylim': ylim}
+
         data = Data2D(
             self.mod, column_names, data_array, self._ltxe, 'symca', ax_properties)
 

@@ -1,6 +1,7 @@
+from numpy.ma import log10
 import sys
 import os
-from numpy import array as np_array
+from numpy import array, errstate, nanmin, nanmax, nonzero
 from IPython.display import HTML
 
 __all__ = ['cc_list',
@@ -12,7 +13,38 @@ __all__ = ['cc_list',
            'PseudoDotDict',
            'is_number',
            'formatter_factory',
-           'html_table']
+           'html_table',
+           'do_safe_state',
+           'find_min',
+           'find_max']
+
+def find_min(array_like):
+    no_zeros = array_like[nonzero(array_like)]
+    with errstate(all='ignore'):
+        min = nanmin(10 ** log10(no_zeros))
+    return min
+
+
+def find_max(array_like):
+    no_zeros = array_like[nonzero(array_like)]
+    with errstate(all='ignore'):
+        max = nanmax(10 ** log10(no_zeros))
+    return max
+
+def do_safe_state(mod, parameter, value, type='ss'):
+    setattr(mod, parameter, value)
+    mod.SetQuiet()
+    mod.doState()
+    if mod.__StateOK__:
+        if type is 'mca':
+            mod.EvalEvar()
+            mod.EvalEpar()
+            mod.EvalCC()
+        ret = True
+    else:
+        ret = False
+    mod.SetLoud()
+    return ret
 
 
 def is_number(suspected_number):
@@ -102,6 +134,7 @@ def formatter_factory(min_val=None,
             else:
                 fmt = default_fmt
         return fmt % to_format
+
     return formatter
 
 
@@ -163,7 +196,7 @@ def html_table(matrix_or_array_like,
                                       outlier_fmt=float_fmt)
 
     if 'sympy.matrices' in str(type(matrix_or_array_like)):
-        raw_table = np_array(raw_table)
+        raw_table = array(raw_table)
     if style:
         html_table = ['<table  style="%s">' % style]
     else:
@@ -213,6 +246,7 @@ def silence_print(func):
         returns = func(*args, **kwargs)
         sys.stdout = stdout
         return returns
+
     return wrapper
 
 
@@ -362,7 +396,6 @@ def prc_list(mod):
 
 
 class PseudoDotDict:
-
     """
     A class that acts like a dictionary with dot accessible elements.
 
@@ -419,7 +452,6 @@ class PseudoDotDict:
 
 
 class DotDict(dict):
-
     """A class that inherits from ``dict``.
 
     The DotDict class has the same functionality as ``dict`` but with the added

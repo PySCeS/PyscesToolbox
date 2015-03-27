@@ -189,7 +189,9 @@ class Data2D(object):
                  ltxe=None,
                  analysis_method=None,
                  ax_properties=None,
-                 file_name=None):
+                 file_name=None,
+                 additional_cat_classes=None,
+                 additional_cats=None):
         self.plot_data = DotDict()
         self.plot_data['scan_in'] = column_names[0]
         self.plot_data['scan_out'] = column_names[1:]
@@ -266,14 +268,23 @@ class Data2D(object):
                            'Partial Response Coefficients',
                            'Control Patterns']),
                          ('All Fluxes/Reactions/Species',
-                          ['Fluxes Rates',
+                          ['Flux Rates',
                            'Reaction Rates',
                            'Species Concentrations',
                            'Steady-State Species Concentrations'])])
 
+        if additional_cat_classes:
+            for k,v in additional_cat_classes.iteritems():
+                if k in self._category_classes:
+                    lst = self._category_classes[k]
+                    new_lst = list(set(lst + v))
+                    self._category_classes[k] = new_lst
+                else:
+                    self._category_classes[k] = v
+
         self._scan_types = \
             OrderedDict([
-                ('Fluxes Rates',
+                ('Flux Rates',
                  ['J_' + reaction for reaction in mod.reactions]),
                 ('Reaction Rates', [reaction for reaction in mod.reactions]),
                 ('Species Concentrations', mod.species),
@@ -287,6 +298,15 @@ class Data2D(object):
                                       for n in
                                       range(1, len(self._column_names))])
             ])
+
+        if additional_cats:
+            for k,v in additional_cats.iteritems():
+                if k in self._scan_types:
+                    lst = self._scan_types[k]
+                    new_lst = list(set(lst + v))
+                    self._scan_types[k] = new_lst
+                else:
+                    self._scan_types[k] = v
 
         self._setup_categories()
         self._setup_lines()
