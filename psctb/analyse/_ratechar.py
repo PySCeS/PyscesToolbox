@@ -536,7 +536,7 @@ class RateCharData(object):
 
         with np.errstate(all='ignore'):
 
-            self.plot_data.flux_max = np.nanmax(10 ** np.log10(totals))
+            self.plot_data.flux_max = np.nanmax(10 ** np.log10(n_z_t))
             self.plot_data.flux_min = np.nanmin(10 ** np.log10(n_z_f))
             self.plot_data.scan_max = np.nanmax(10 ** np.log10(n_z_s))
             self.plot_data.scan_min = np.nanmin(10 ** np.log10(n_z_s))
