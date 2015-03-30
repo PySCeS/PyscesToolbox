@@ -712,7 +712,7 @@ class ScanFig(object):
                     return 'log'
                 elif val is False:
                     return 'linear'
-            elif type(val) == str:
+            else:
                 if val == 'log':
                     return True
                 elif val == 'linear':
