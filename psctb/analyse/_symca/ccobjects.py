@@ -226,14 +226,14 @@ class CCoef(CCBase):
             y_label = 'Control pattern percentage contribution'
             scan_res = self._perscan(parameter,scan_range)
             data_array = array(scan_res, dtype=np.float).transpose()
-            ylim = [nanmin(data_array), nanmax(data_array) * 1.1]
+            ylim = [nanmin(data_array[:,1:]), nanmax(data_array[:,1:]) * 1.1]
         elif scan_type is 'value':
             column_names = [
                 parameter] + [cp.name for cp in self.control_patterns.values()] + [self.name]
             y_label = 'Control coefficient/pattern value'
             scan_res = self._valscan(parameter,scan_range)
             data_array = array(scan_res, dtype=np.float).transpose()
-            ylim = [nanmin(data_array), nanmax(data_array) * 1.1]
+            ylim = [nanmin(data_array[:,1:]), nanmax(data_array[:,1:]) * 1.1]
 
         if init_return:
             self.mod.SetQuiet()

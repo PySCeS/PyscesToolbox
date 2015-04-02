@@ -320,7 +320,7 @@ class RateEqn(object):
             scan_res = self._valscan(parameter, scan_range)
             yscale = 'log'
             data_array = array(scan_res, dtype=float).transpose()
-            ylim = [find_min(data_array), find_max(data_array) * 2]
+            ylim = [find_min(data_array[:,1:]), find_max(data_array[:,1:]) * 2]
         elif scan_type is 'elasticity':
             mca_objects = self._get_mca_objects(parameter)
             column_names = [parameter] + [obj.name for obj in mca_objects]
@@ -329,7 +329,7 @@ class RateEqn(object):
             scan_res = self._evalscan(parameter, scan_range)
             yscale = 'linear'
             data_array = array(scan_res, dtype=float).transpose()
-            ylim = [nanmin(data_array), nanmax(data_array) * 1.1]
+            ylim = [nanmin(data_array[:,1:]), nanmax(data_array[:,1:]) * 1.1]
             additional_cat_classes = {
             'All Coefficients': ['Term Elasticities']}
             additional_cats = {
