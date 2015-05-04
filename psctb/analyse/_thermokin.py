@@ -4,6 +4,7 @@ from os import path
 
 from sympy import Symbol, sympify, diff
 from numpy import float64, log, array, float, NaN, nanmin, nanmax
+from pysces import ModelMap
 
 from ..utils.misc import DotDict, formatter_factory, find_min, find_max
 from ..latextools import LatexExpr
@@ -11,11 +12,13 @@ from ..modeltools import make_path
 from ..utils.plotting import Data2D
 from ..utils.misc import do_safe_state
 
-from pysces import ModelMap
+
+class FormatException(Exception):
+    pass
 
 
-def read_files(path):
-    with open(path) as f:
+def read_files(path_to_file):
+    with open(path_to_file) as f:
         lines = f.readlines()
     return lines
 
@@ -26,13 +29,14 @@ def strip_other(raw_lines):
 
 def correct_fmt(lines):
     errors_in = []
-    for line in lines:
+    for i, line in enumerate(lines):
         if not match('!T{\w*}{\w*} .*', line):
-            errors_in.append(line)
+            errors_in.append(str(i))
     if len(errors_in) == 0:
         return True
     else:
-        return errors_in
+        error_str = ', '.join(errors_in)
+        raise FormatException('Incorrect syntax in lines:' + error_str)
 
 
 def construct_dict(lines):
@@ -44,7 +48,7 @@ def construct_dict(lines):
         expr = findall('(?<=\w} ).*', line)[0]
 
         inner_dict = {t_name: expr}
-        if outer_dict.has_key(r_name):
+        if r_name in outer_dict:
             outer_dict[r_name].update(inner_dict)
         else:
             outer_dict[r_name] = inner_dict
@@ -76,16 +80,12 @@ def get_reqn_path(mod):
     return path.join(mod.ModelDir, fname_ext)
 
 
-def get_term_dict_from_path(path):
-    raw_lines = read_files(path)
+def get_term_dict_from_path(path_to_read):
+    raw_lines = read_files(path_to_read)
     clean_lines = strip_other(raw_lines)
-    if correct_fmt(clean_lines) == True:
+    if correct_fmt(clean_lines):
         term_dict = construct_dict(clean_lines)
         return term_dict
-    else:
-        print 'Errors in following lines'
-        for each in correct_fmt(clean_lines): print each
-        return None
 
 
 def mult(lst):
@@ -155,7 +155,6 @@ class ThermoKin(object):
                 is_eq = round(mod_val, 10) == round(own_val, 10)
                 print '%s\t\t%.10f\t%.10f\t%s' % (
                     ec_name, own_val, mod_val, is_eq)
-
 
     def _populate_object(self):
         reacts = []
@@ -245,7 +244,7 @@ class RateEqn(object):
         self._value = mult([each._value for each in self.terms.itervalues()])
 
     def _perscan(self, parameter, scan_range):
-        scan_res = [list() for i in range(len(self.terms.values()) + 1)]
+        scan_res = [list() for _ in range(len(self.terms.values()) + 1)]
         scan_res[0] = scan_range
 
         for parvalue in scan_range:
@@ -259,7 +258,7 @@ class RateEqn(object):
         return scan_res
 
     def _valscan(self, parameter, scan_range):
-        scan_res = [list() for i in range(len(self.terms.values()) + 2)]
+        scan_res = [list() for _ in range(len(self.terms.values()) + 2)]
         scan_res[0] = scan_range
 
         for parvalue in scan_range:
@@ -278,21 +277,18 @@ class RateEqn(object):
     def _evalscan(self, parameter, scan_range):
         mca_objects = self._get_mca_objects(parameter)
 
-        scan_res = [list() for i in range(len(mca_objects) + 1)]
+        scan_res = [list() for _ in range(len(mca_objects) + 1)]
         scan_res[0] = scan_range
 
         for parvalue in scan_range:
-            state_valid =  do_safe_state(self.mod,parameter,parvalue,type='mca')
+            state_valid = do_safe_state(self.mod, parameter, parvalue,
+                                        type='mca')
             for i, term in enumerate(mca_objects):
                 if state_valid:
-                    scan_res[i+1].append(term.value)
+                    scan_res[i + 1].append(term.value)
                 else:
-                    scan_res[i+1].append(NaN)
-        return  scan_res
-
-
-
-
+                    scan_res[i + 1].append(NaN)
+        return scan_res
 
     def par_scan(self, parameter, scan_range, scan_type='value',
                  init_return=True):
@@ -301,9 +297,9 @@ class RateEqn(object):
         init = getattr(self.mod, parameter)
 
         additional_cat_classes = {
-        'All Fluxes/Reactions/Species': ['Term Rates']}
+            'All Fluxes/Reactions/Species': ['Term Rates']}
         additional_cats = {
-        'Term Rates': [term.name for term in self.terms.values()]}
+            'Term Rates': [term.name for term in self.terms.values()]}
 
         if scan_type is 'percentage':
             column_names = [parameter] + [term.name for term in
@@ -320,7 +316,8 @@ class RateEqn(object):
             scan_res = self._valscan(parameter, scan_range)
             yscale = 'log'
             data_array = array(scan_res, dtype=float).transpose()
-            ylim = [find_min(data_array[:,1:]), find_max(data_array[:,1:]) * 2]
+            ylim = [find_min(data_array[:, 1:]),
+                    find_max(data_array[:, 1:]) * 2]
         elif scan_type is 'elasticity':
             mca_objects = self._get_mca_objects(parameter)
             column_names = [parameter] + [obj.name for obj in mca_objects]
@@ -329,12 +326,11 @@ class RateEqn(object):
             scan_res = self._evalscan(parameter, scan_range)
             yscale = 'linear'
             data_array = array(scan_res, dtype=float).transpose()
-            ylim = [nanmin(data_array[:,1:]), nanmax(data_array[:,1:]) * 1.1]
+            ylim = [nanmin(data_array[:, 1:]), nanmax(data_array[:, 1:]) * 1.1]
             additional_cat_classes = {
-            'All Coefficients': ['Term Elasticities']}
+                'All Coefficients': ['Term Elasticities']}
             additional_cats = {
-            'Term Elasticities': [elas.name for elas in mca_objects][:-1]}
-
+                'Term Elasticities': [elas.name for elas in mca_objects][:-1]}
 
         if init_return:
             self.mod.SetQuiet()
@@ -356,8 +352,7 @@ class RateEqn(object):
                          'xlim': [find_min(scan_range), find_max(scan_range)],
                          'ylim': ylim}
 
-
-        data = Data2D(mod = self.mod,
+        data = Data2D(mod=self.mod,
                       column_names=column_names,
                       data_array=data_array,
                       ltxe=self._ltxe,
@@ -365,17 +360,17 @@ class RateEqn(object):
                       ax_properties=ax_properties,
                       additional_cat_classes=additional_cat_classes,
                       additional_cats=additional_cats)
-
         return data
 
-
-    def _get_mca_objects(self,parameter):
+    def _get_mca_objects(self, parameter):
         terms = self.terms.keys()
         reaction_name = self._rname
         mca_objects = []
         for term in terms:
-            mca_objects.append(self.mca_data['pec%s_%s_%s' % (reaction_name,parameter,term)])
-        mca_objects.append(self.mca_data['ec%s_%s' % (reaction_name,parameter)])
+            mca_objects.append(self.mca_data[
+                'pec%s_%s_%s' % (reaction_name, parameter, term)])
+        mca_objects.append(
+            self.mca_data['ec%s_%s' % (reaction_name, parameter)])
         return mca_objects
 
 
@@ -392,7 +387,6 @@ class Term(object):
         self._latex_expression = None
         self._ltxe = ltxe
 
-
     def _repr_latex_(self):
         return get_repr_latex(self)
 
@@ -400,7 +394,6 @@ class Term(object):
     def value(self):
         self._calc_value()
         return self._value
-
 
     @property
     def latex_name(self):

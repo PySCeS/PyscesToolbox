@@ -16,4 +16,4 @@ config = {
     'name': 'PyscesToolbox'
 }
 
-setup(**config)
+setup(**config, requires=['sympy', 'numpy', 'pysces'])
