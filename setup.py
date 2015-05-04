@@ -10,10 +10,10 @@ config = {
     'download_url': 'TBA',
     'author_email': 'exe0cdc@gmail.com',
     'version': '0.1',
-    'install_requires': ['pysces', 'sympy'],
+    'install_requires': ['sympy', 'numpy', 'pysces'],
     'packages': packages,
     'scripts': [],
     'name': 'PyscesToolbox'
 }
 
-setup(**config, requires=['sympy', 'numpy', 'pysces'])
+setup(**config)
