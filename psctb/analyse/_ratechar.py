@@ -21,7 +21,6 @@ from random import shuffle
 
 exportLAWH = silence_print(pysces.write.exportLabelledArrayWithHeader)
 
-
 __all__ = ['RateChar']
 
 
@@ -36,7 +35,6 @@ def strip_nan_from_scan(array_like):
 
 
 class RateChar(object):
-
     def __init__(self, mod, min_concrange_factor=100,
                  max_concrange_factor=100,
                  scan_points=256,
@@ -175,7 +173,7 @@ class RateChar(object):
     @silence_print
     def _fix_at_ss(self, fixed):
         # fixes the metabolite at the steady_state
-        #(calls psctb.modeltools.fix_metabolite)
+        # (calls psctb.modeltools.fix_metabolite)
         # and returns both the ss value and the fixed model
         self.mod.doState()
         fixed_ss = getattr(self.mod, fixed + '_ss')
@@ -191,7 +189,7 @@ class RateChar(object):
 
     def save(self, file_name=None):
         if not file_name:
-            file_name = self._working_dir + 'save_data.pickle'
+            file_name = path.join(self._working_dir, 'save_data.pickle')
 
         rcd_data_list = []
 
@@ -216,7 +214,7 @@ class RateChar(object):
 
     def load(self, file_name=None):
         if not file_name:
-            file_name = self._working_dir + 'save_data.pickle'
+            file_name = path.join(self._working_dir + 'save_data.pickle')
 
         try:
             with open(file_name) as f:
@@ -239,7 +237,6 @@ class RateChar(object):
 
 
 class RateCharData(object):
-
     def __init__(self,
                  fixed_ss,
                  fixed_mod,
@@ -289,8 +286,10 @@ class RateCharData(object):
         self._color_dict_ = None
         self._data_setup()
         self.mca_data._ltxe = ltxe
-        self.mca_data._make_repr('"$" + self._ltxe.expression_to_latex(k) + "$"', 'v', formatter_factory())
-        #del self.plot_data
+        self.mca_data._make_repr(
+            '"$" + self._ltxe.expression_to_latex(k) + "$"', 'v',
+            formatter_factory())
+        # del self.plot_data
         #del self.mca_data
 
     def _data_setup(self):
@@ -305,11 +304,11 @@ class RateCharData(object):
         self._make_all_summary()
         self._make_all_line_data()
 
-    def _change_colour_order(self,order=None):
+    def _change_colour_order(self, order=None):
         if not order:
             order = self._color_dict_.keys()
             shuffle(order)
-        self._color_dict_ = dict(zip(order,self._color_dict_.values()))
+        self._color_dict_ = dict(zip(order, self._color_dict_.values()))
         self._make_all_line_data()
 
     def _make_all_line_data(self):
@@ -326,8 +325,6 @@ class RateCharData(object):
 
         self._line_data_dict.update(self._ec_ld_dict)
         self._line_data_dict.update(self._rc_ld_dict)
-
-
 
         del self._flux_ld_dict
         del self._ec_ld_dict
@@ -400,7 +397,8 @@ class RateCharData(object):
         for flux_reaction in reagent_of:
             for route_reaction in all_reactions:
                 ec = getattr(self.mod,
-                             'ec%s_%s' % (route_reaction, self.plot_data.fixed))
+                             'ec%s_%s' % (
+                                 route_reaction, self.plot_data.fixed))
 
                 cc = getattr(self.mod,
                              'ccJ%s_%s' % (flux_reaction, route_reaction))
@@ -501,6 +499,7 @@ class RateCharData(object):
         except IOError as e:
             print e.strerror
 
+    # TODO fix this method so that folder is a parameter only her
     def save_results(self, folder=None, separator=','):
         self._save_flux_data(separator=separator, folder=folder)
         self._save_summary(separator=separator, folder=folder)
@@ -520,7 +519,7 @@ class RateCharData(object):
             np.nonzero(self.plot_data.scan_range)]
 
         totals = np.vstack([self.plot_data.total_demand,
-                                self.plot_data.total_supply])
+                            self.plot_data.total_supply])
         n_z_t = totals[np.nonzero(totals)]
         # and that the array is not now somehow empty
         # although if this happens-you have bigger problems
@@ -602,7 +601,8 @@ class RateCharData(object):
 
         reagent_of = [each[2:] for each in self.plot_data.flux_names]
         all_reactions = reagent_of + \
-            getattr(self._model_map, self.plot_data.fixed).isModifierOf()
+                        getattr(self._model_map,
+                                self.plot_data.fixed).isModifierOf()
 
         for flux_reaction in self.plot_data.flux_names:
 
@@ -610,9 +610,9 @@ class RateCharData(object):
             reaction = flux_reaction[2:]
 
             for route_reaction in all_reactions:
-
                 ec = getattr(
-                    self.mod, 'ec' + route_reaction + '_' + self.plot_data.fixed)
+                    self.mod,
+                    'ec' + route_reaction + '_' + self.plot_data.fixed)
                 cc = getattr(self.mod, 'ccJ' + reaction + '_' + route_reaction)
                 slope = ec * cc
 
@@ -634,7 +634,6 @@ class RateCharData(object):
         elasts = []
 
         for each in self.plot_data.flux_names:
-
             reaction = each[2:]
             name = 'ec' + reaction + '_' + self.plot_data.fixed
 
@@ -693,7 +692,6 @@ class RateCharData(object):
                 np.linspace(0, 1.0, num_of_cols))[:, :3]
             color_list = [rgb_to_hsv(*cmap[i, :]) for i in range(num_of_cols)]
 
-
             relavent_reactions.sort()
             color_dict = dict(
                 zip(['Total Supply'] +
@@ -726,7 +724,7 @@ class RateCharData(object):
             flux_color = self._color_dict[flux]
             color = hsv_to_rgb(flux_color[0],
                                flux_color[1],
-                               flux_color[2]*0.9)
+                               flux_color[2] * 0.9)
             for dem in demand_blocks:
                 if dem == flux:
                     flux_ld_dict[flux] = \
@@ -762,11 +760,11 @@ class RateCharData(object):
                 if 'ec' + ec_reaction + '_' + self.plot_data.fixed in ec_name:
                     flux_color = self._color_dict[flux]
                     color = hsv_to_rgb(flux_color[0],
-                                       flux_color[1]*0.5,
+                                       flux_color[1] * 0.5,
                                        flux_color[2])
                     ec_data = self.plot_data[ec_name]
                     categories = ['Elasticity Coefficients'] + \
-                        flux_ld.categories[1:]
+                                 flux_ld.categories[1:]
                     latex_expr = self._ltxe.expression_to_latex(ec_name)
 
                     ec_ld_dict[ec_name] = \
@@ -784,14 +782,14 @@ class RateCharData(object):
         for rc_name in self.plot_data.rc_names:
             for flux, flux_ld in self._flux_ld_dict.iteritems():
                 rc_flux = 'J' + flux[2:]
-                if 'rc' + rc_flux + '_'  in rc_name:
+                if 'rc' + rc_flux + '_' in rc_name:
                     flux_color = self._color_dict[flux]
                     color = hsv_to_rgb(flux_color[0],
                                        flux_color[1],
                                        flux_color[2] * 0.7)
                     rc_data = self.plot_data[rc_name]
                     categories = ['Response Coefficients'] + \
-                        flux_ld.categories[1:]
+                                 flux_ld.categories[1:]
                     latex_expr = self._ltxe.expression_to_latex(rc_name)
 
                     rc_ld_dict[rc_name] = \
@@ -818,17 +816,16 @@ class RateCharData(object):
             for flux, flux_ld in self._flux_ld_dict.iteritems():
                 prc_flux = 'J' + flux[2:]
                 if 'prc' + prc_flux + '_' + self.plot_data.fixed in prc_name:
-
                     route_reaction = get_prc_route(prc_name,
                                                    prc_flux,
                                                    self.plot_data.fixed)
                     flux_color = self._color_dict['J_' + route_reaction]
                     color = hsv_to_rgb(flux_color[0],
-                                       flux_color[1]*0.5,
+                                       flux_color[1] * 0.5,
                                        flux_color[2])
                     prc_data = self.plot_data[prc_name]
                     categories = ['Partial Response Coefficients'] + \
-                        flux_ld.categories[1:]
+                                 flux_ld.categories[1:]
                     latex_expr = self._ltxe.expression_to_latex(prc_name)
 
                     prc_ld_dict[prc_name] = \
@@ -851,8 +848,9 @@ class RateCharData(object):
                                  'Supply',
                                  'Total Supply'],
                      properties={'label': '$%s$' % 'Total\,Supply',
-                                 'color': hsv_to_rgb(col[0],col[1],col[2]*0.9),
-                                 'ls':'--'})
+                                 'color': hsv_to_rgb(col[0], col[1],
+                                                     col[2] * 0.9),
+                                 'ls': '--'})
 
         col = self._color_dict['Total Demand']
         total_flux_ld_dict['Total Demand'] = \
@@ -863,8 +861,9 @@ class RateCharData(object):
                                  'Demand',
                                  'Total Demand'],
                      properties={'label': '$%s$' % 'Total\,Demand',
-                                 'color': hsv_to_rgb(col[0],col[1],col[2]*0.9),
-                                 'ls':'--'})
+                                 'color': hsv_to_rgb(col[0], col[1],
+                                                     col[2] * 0.9),
+                                 'ls': '--'})
 
         self._total_flux_ld_dict = total_flux_ld_dict
 
@@ -887,18 +886,19 @@ class RateCharData(object):
 
         scan_fig = ScanFig(line_data_list,
                            ax_properties={'xlabel': '[%s]' %
-                                          self.plot_data.fixed.replace(
-                                              '_', ' '),
+                                                    self.plot_data.fixed.replace(
+                                                        '_', ' '),
                                           'ylabel': 'Rate',
                                           'xscale': 'log',
                                           'yscale': 'log',
-                                          'xlim':  [self.plot_data.scan_min,
-                                                    self.plot_data.scan_max],
-                                          'ylim':  [self.plot_data.flux_min,
-                                                    self.plot_data.flux_max * 2
-                                                    ]},
+                                          'xlim': [self.plot_data.scan_min,
+                                                   self.plot_data.scan_max],
+                                          'ylim': [self.plot_data.flux_min,
+                                                   self.plot_data.flux_max * 2
+                                                   ]},
                            category_classes=category_classes,
-                           fname = path.join(self._working_dir,'rate_char'))
+                           base_name=self._analysis_method,
+                           working_dir=self._working_dir)
 
         scan_fig.toggle_category('Supply', True)
         scan_fig.toggle_category('Demand', True)
@@ -917,8 +917,8 @@ class RateCharData(object):
 
         reagent_of = [each[2:] for each in self.plot_data.flux_names]
         all_reactions = reagent_of + \
-            getattr(self._model_map, self.plot_data.fixed).isModifierOf()
-
+                        getattr(self._model_map,
+                                self.plot_data.fixed).isModifierOf()
 
         arl = len(all_reactions)
         strt = 0
@@ -927,12 +927,11 @@ class RateCharData(object):
             reaction = flux_reaction[2:]
             rc_names.append('rcJ%s_%s' % (reaction, self.plot_data.fixed))
 
-            rc_pos.append(range(strt,stp))
+            rc_pos.append(range(strt, stp))
             strt += arl
             stp += arl
 
             for route_reaction in all_reactions:
-
                 ec = 'ec' + route_reaction + '_' + self.plot_data.fixed
                 cc = 'ccJ' + reaction + '_' + route_reaction
 
@@ -957,20 +956,21 @@ class RateCharData(object):
         scanner.addUserOutput(*user_output)
         scanner.Run()
 
-        ax_properties = {'ylabel':'Coefficient Value',
+        ax_properties = {'ylabel': 'Coefficient Value',
                          'xlabel': '[%s]' %
-                         self.plot_data.fixed.replace('_', ' '),
+                                   self.plot_data.fixed.replace('_', ' '),
                          'xscale': 'log',
                          'yscale': 'linear',
-                         'xlim': [self.plot_data.scan_min,self.plot_data.scan_max]}
+                         'xlim': [self.plot_data.scan_min,
+                                  self.plot_data.scan_max]}
 
         cc_ec_data_obj = Data2D(self.mod,
-                           user_output,
-                           scanner.UserOutputResults,
-                           self._ltxe,
-                           self._analysis_method,
-                           ax_properties,
-                           'cc_ec_scan')
+                                user_output,
+                                scanner.UserOutputResults,
+                                self._ltxe,
+                                self._analysis_method,
+                                ax_properties,
+                                'cc_ec_scan')
 
         rc_data = []
         for i, prc_name in enumerate(prc_names):
@@ -982,30 +982,21 @@ class RateCharData(object):
             rc_data.append(col)
 
         temp = np.vstack(rc_data).transpose()
-        rc_data += [np.sum(temp[:,rc_pos[i]],axis=1) for i in range(len(rc_names))]
+        rc_data += [np.sum(temp[:, rc_pos[i]], axis=1) for i in
+                    range(len(rc_names))]
 
         rc_out_arr = [scanner.UserOutputResults[:, 0]] + rc_data
         rc_out_arr = np.vstack(rc_out_arr).transpose()
 
         rc_data_obj = Data2D(self.mod,
-                         [self.plot_data.fixed] + prc_names + rc_names,
-                         rc_out_arr,
-                         self._ltxe,
-                         self._analysis_method,
-                         ax_properties,
-                         'prc_scan')
-        rc_data_obj._working_dir = path.split(path.split(self._working_dir)[0])[0]
-        cc_ec_data_obj._working_dir = path.split(path.split(self._working_dir)[0])[0]
-        # for plot in [cc_ec_plt, prc_plt]:
-        #     plot.ax.set_xscale('log')
-        #     plot.ax.set_ylabel('Coefficient Value')
-        #     plot.ax.set_xlim([self.plot_data.scan_min,
-        #                       self.plot_data.scan_max])
-
-        # prc_plt.ax.axvline(self.plot_data.fixed_ss, ls=':', color='gray')
-        # #prc_plt.ax.set_ylim([-5,5])
-        # cc_ec_plt.ax.axvline(self.plot_data.fixed_ss, ls=':', color='gray')
-        # #cc_ec_plt.ax.set_ylim([-5,5])
+                             [self.plot_data.fixed] + prc_names + rc_names,
+                             rc_out_arr,
+                             self._ltxe,
+                             self._analysis_method,
+                             ax_properties,
+                             'prc_scan')
+        rc_data_obj._working_dir = path.split(self._working_dir)[0]
+        cc_ec_data_obj._working_dir = path.split(self._working_dir)[0]
 
         return rc_data_obj, cc_ec_data_obj
 

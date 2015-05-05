@@ -6,9 +6,8 @@ from ...latextools import LatexExpr
 from .symca_toolbox import SymcaToolBox as SMCAtools
 from ...utils.misc import DotDict
 from ...utils.misc import formatter_factory
-#from LatexOut import LatexOut
+from os import path
 
-import logging
 
 all = ['Symca']
 
@@ -25,11 +24,6 @@ class Symca(object):
         self._working_dir = make_path(self.mod, self._analysis_method)
         self._ltxe = LatexExpr(mod)
 
-        logging.basicConfig(
-            filename=self._working_dir + 'symca.log',
-            level=logging.DEBUG
-        )
-        print self._working_dir + 'symca.log'
 
         self._object_populated = False
         self.CC = DotDict()
@@ -232,12 +226,12 @@ class Symca(object):
 
             SMCAtools.save(CC,
                            self.CC.common_denominator,
-                           self._working_dir + 'save_data.pickle'
+                           path.join(self._working_dir,'save_data.pickle')
                            )
 
     def load(self):
         cc_objects = SMCAtools.load(self.mod,
-                                    self._working_dir + 'save_data.pickle'
+                                    path.join(self._working_dir,'save_data.pickle')
                                     )
 
         for cc in cc_objects:

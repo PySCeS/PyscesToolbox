@@ -1,7 +1,7 @@
-from os import path, mkdir
+from os import path, mkdir, listdir
 from pysces import output_dir
 
-__all__ = ['get_model_name', 'make_path']
+__all__ = ['get_model_name', 'make_path', 'next_suffix']
 
 
 def get_model_name(mod):
@@ -20,6 +20,41 @@ def get_model_name(mod):
     """
     return path.split(mod.ModelFile)[1][:-4]
 
+def next_suffix(directory, base_name, ext=None):
+    """Returns the number of the next suffix to be appended to a base file name
+    when saving a file.
+
+    This function checks a ``directory`` for files containing ``base_name`` and
+    returns a number that is equal to the suffix of a file named ``base_name``
+    with the largest suffix plus one.
+
+    Parameters
+    ----------
+    directory : str
+        The directory to inspect for files.
+    base_name : str
+        The base name (sans suffix) to check for.
+
+    Returns
+    -------
+    int
+        The next suffix to write
+    """
+
+    #find all files in dir, exclude subdirs
+    files = [each for each in listdir(directory) if path.isfile(path.join(directory,each))]
+    #start counting at zero
+    next_num = 0
+    if not ext:
+        ext = ''
+    for each in files:
+        if base_name in each and ext in each:
+            start = len(base_name + '_')
+            end = start + 1
+            num = int(each[start:end])
+            if num >= next_num:
+                next_num = num+1
+    return next_num
 
 def make_path(mod, analysis_method, subdirs=[]):
     """Creates paths based on model name and analysis type.
@@ -75,4 +110,4 @@ def make_path(mod, analysis_method, subdirs=[]):
         if not path.exists(each):
             mkdir(each)
 
-    return dirs[-1] + '/'
+    return dirs[-1]
