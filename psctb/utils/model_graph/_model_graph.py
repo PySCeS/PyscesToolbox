@@ -1,5 +1,6 @@
 import json
 from os import path
+from time import sleep
 
 from IPython.display import display
 from IPython.html import widgets
@@ -94,10 +95,12 @@ class ModelGraph(object):
         self._force_directed_graph.on_trait_change(save_json, 'gnode_json')
 
     def _save_image_setup(self):
-        def save_image(sender):
-            self._save()
+        def save_image(sender, content):
+            if 'button_click' in content:
+                if content['button_click'] == 'save_image':
+                    self.save()
 
-        self._force_directed_graph.on_trait_change(save_image, 'svg_image')
+        self._force_directed_graph.on_msg(save_image)
 
 
     def _make_species_nodes(self):
@@ -264,7 +267,7 @@ class ModelGraph(object):
     def width(self, value):
         self._force_directed_graph.width = value
 
-    def _save(self, file_name=None):
+    def save(self, file_name=None):
         """Saves the image.
 
         Saves the image to either the default working directory or to an a
@@ -278,14 +281,9 @@ class ModelGraph(object):
         -------
         None
         """
-        # TODO fix image saving : description in comments below.
-        # at the moment the save_image button lies on the javascript side
-        # and a click dumps the svg to python
-        # and as soon as this happens _save is run automatically. Unfortunately
-        # this means that unless the button is clicked no new svg is sent to python
-        # and the same image gets saved over and over. To counter this I need some
-        # python side method that calls the dump json method in javasctipt
+
         svg = self._force_directed_graph.svg_image
+
         file_name = modeltools.get_file_path(working_dir=self._working_dir,
                                              internal_filename=self._base_name,
                                              fmt='svg',
@@ -328,13 +326,14 @@ class ModelGraph(object):
         self._make_substrate_links()
         self._make_modifier_links()
         self._force_directed_graph.show_color_legend = False
+        self._force_directed_graph.show_color_legend = True
         for sym in symbols:
             self.change_link_properties(str(sym),
                                         {'strokewidth': '20px',
                                          'marker_end': 'arrowheadlarge',
                                          'stroke': colors[cat]},
                                         only_overwrite=True)
-        self._force_directed_graph.show_color_legend = True
+
         self._base_name = cp.parent.name + '_' + cp.name
 
 
@@ -353,13 +352,14 @@ class ModelGraph(object):
                 self._make_substrate_links()
                 self._make_modifier_links()
                 self._force_directed_graph.show_color_legend = False
+                self._force_directed_graph.show_color_legend = True
                 for sym in symbols:
                     self.change_link_properties(str(sym),
                                                 {'strokewidth': '20px',
                                                  'marker_end': 'arrowheadlarge',
                                                  'stroke': colors[cat]},
                                                 only_overwrite=True)
-                self._force_directed_graph.show_color_legend = True
+
 
                 CP_repr.value = cp._repr_latex_()
 
