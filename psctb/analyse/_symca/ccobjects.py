@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import array, float64, nanmin, nanmax
+from ...utils.model_graph import ModelGraph
 from sympy import Symbol
 from pysces import ModelMap
 from numpy import NaN
@@ -57,6 +58,7 @@ class CCBase(object):
         self._ltxe = ltxe
         self.name = name
         self._latex_name = '\\Sigma'
+        self._analysis_method = 'symca'
 
         self._str_expression_ = None
         self._value = None
@@ -254,8 +256,13 @@ class CCoef(CCBase):
                          'xlim': [find_min(scan_range), find_max(scan_range)],
                          'ylim': ylim}
 
-        data = Data2D(
-            self.mod, column_names, data_array, self._ltxe, 'symca', ax_properties)
+        data = Data2D(mod = self.mod,
+                      column_names=column_names,
+                      data_array=data_array,
+                      ltxe=self._ltxe,
+                      analysis_method='symca',
+                      ax_properties=ax_properties,
+                      file_name=self.name)
 
         return data
 
@@ -310,6 +317,15 @@ class CCoef(CCBase):
         elif all(negcomp):
             all_same = True
         return all_same
+
+    def highlight_patterns(self,width=None, height=None):
+
+        mg = ModelGraph(mod=self.mod,analysis_method=self._analysis_method)
+        if height:
+            mg.height = height
+        if width:
+            mg.width = width
+        mg.highlight_cc(self)
 
 
 class CPattern(CCBase):

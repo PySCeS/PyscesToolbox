@@ -208,8 +208,11 @@ class RateChar(object):
 
 
     def save_results(self, folder=None, separator=',', ):
+        base_folder = folder
         for species in self.mod.species:
-            getattr(self, species).save_results(folder=folder,
+            if folder:
+                folder = path.join(base_folder,species)
+            getattr(self, species).save_all_results(folder=folder,
                                                 separator=separator)
 
     def load(self, file_name=None):
@@ -411,16 +414,11 @@ class RateCharData(object):
 
         self._prc_summary = prcs
 
-    def _save_summary(self, file_name=None, separator=',', folder=None):
-        if not file_name:
-            if folder:
-                if not path.exists(path.join(folder, self.plot_data.fixed)):
-                    mkdir(path.join(folder, self.plot_data.fixed))
-                file_name = path.join(folder,
-                                      self.plot_data.fixed,
-                                      'mca_summary.cvs')
-            else:
-                file_name = path.join(self._working_dir, 'mca_summary.cvs')
+    def save_summary(self, file_name=None, separator=','):
+        file_name = modeltools.get_file_path(working_dir=self._working_dir,
+                                             internal_filename= 'mca_summary',
+                                             fmt='csv',
+                                             file_name=file_name,)
 
         keys = self.mca_data.keys()
         keys.sort()
@@ -436,17 +434,12 @@ class RateCharData(object):
         except IOError as e:
             print e.strerror
 
-    def _save_flux_data(self, file_name=None, separator=',', folder=None):
-        if not file_name:
-            if folder:
-                if not path.exists(path.join(folder, self.plot_data.fixed)):
-                    mkdir(path.join(folder, self.plot_data.fixed))
-                file_name = path.join(folder,
-                                      self.plot_data.fixed,
-                                      'flux_data.csv')
-            else:
-                file_name = path.join(self._working_dir,
-                                      'flux_data.csv')
+    def save_flux_results(self, file_name=None, separator=','):
+        file_name = modeltools.get_file_path(working_dir=self._working_dir,
+                                             internal_filename= 'flux_results',
+                                             fmt='csv',
+                                             file_name=file_name,)
+
 
         scan_points = self.plot_data.scan_points
         all_cols = np.hstack([
@@ -464,7 +457,7 @@ class RateCharData(object):
         except IOError as e:
             print e.strerror
 
-    def _save_coefficient_data(self,
+    def save_coefficient_results(self,
                                coefficient,
                                file_name=None,
                                separator=',',
@@ -472,16 +465,13 @@ class RateCharData(object):
         assert_message = 'coefficient must be one of "ec", "rc" or "prc"'
 
         assert coefficient in ['rc', 'ec', 'prc'], assert_message
-        if not file_name:
-            if folder:
-                if not path.exists(path.join(folder, self.plot_data.fixed)):
-                    mkdir(path.join(folder, self.plot_data.fixed))
-                file_name = path.join(folder,
-                                      self.plot_data.fixed,
-                                      coefficient + '_data.csv')
-            else:
-                file_name = path.join(self._working_dir,
-                                      coefficient + '_data.csv')
+
+        base_name = coefficient + '_results'
+        file_name = modeltools.get_file_path(working_dir=self._working_dir,
+                                             internal_filename= base_name,
+                                             fmt='csv',
+                                             file_name=file_name,)
+
 
         results = getattr(self.plot_data, coefficient + '_data')
         names = getattr(self.plot_data, coefficient + '_names')
@@ -500,13 +490,27 @@ class RateCharData(object):
             print e.strerror
 
     # TODO fix this method so that folder is a parameter only her
-    def save_results(self, folder=None, separator=','):
-        self._save_flux_data(separator=separator, folder=folder)
-        self._save_summary(separator=separator, folder=folder)
+    def save_all_results(self, folder=None, separator=','):
+        if not folder:
+            folder = self._working_dir
+
+        file_name = modeltools.get_file_path(working_dir=folder,
+                                             internal_filename= 'flux_results',
+                                             fmt='csv')
+        self.save_flux_results(separator=separator, file_name=file_name)
+
+        file_name = modeltools.get_file_path(working_dir=folder,
+                                             internal_filename= 'mca_summary',
+                                             fmt='csv')
+        self.save_summary(separator=separator, file_name=file_name)
         for each in ['ec', 'rc', 'prc']:
-            self._save_coefficient_data(coefficient=each,
+            base_name = each + '_results'
+            file_name = modeltools.get_file_path(working_dir=folder,
+                                             internal_filename= base_name,
+                                             fmt='csv')
+            self.save_coefficient_results(coefficient=each,
                                         separator=separator,
-                                        folder=folder)
+                                        file_name=file_name)
 
     def _min_max_setup(self):
         # Negative minimum linear values mean nothing

@@ -432,19 +432,12 @@ class Data2D(object):
             which itself is determined by the ``analysis_method`` parameter of
             __init__.
         """
+        file_name = modeltools.get_file_path(working_dir = self._working_dir,
+                                             internal_filename = self._fname,
+                                             fmt = 'csv',
+                                             fixed = self.plot_data.scan_in,
+                                             file_name = file_name)
 
-        if not file_name:
-            if not path.exists(
-                    path.join(self._working_dir, self.plot_data.scan_in)):
-                mkdir(path.join(self._working_dir, self.plot_data.scan_in))
-            dir = path.join(self._working_dir, self.plot_data.scan_in)
-            suffix = str(modeltools.next_suffix(dir,self._fname,'csv'))
-            file_name = path.join(dir, self._fname + '_'+ suffix+'.csv')
-        else:
-            if path.splitext(file_name)[1] == '':
-                file_name = file_name + '.csv'
-            if not path.exists(path.split(file_name)[0]):
-                mkdir(path.split(file_name)[0])
         scan_results = self._scan_results
         column_names = self._column_names
 
@@ -546,9 +539,9 @@ class ScanFig(object):
             self.category_classes = {'': [k for k in self.categories]}
 
         if base_name:
-            self.base_name = base_name
+            self._base_name = base_name
         else:
-            self.base_name =  'scan_fig'
+            self._base_name =  'scan_fig'
 
         if working_dir:
             self._working_dir = working_dir
@@ -605,7 +598,7 @@ class ScanFig(object):
         else:
             self.fig.show()
 
-    def save(self, fname=None, dpi=None, fmt=None):
+    def save(self, file_name=None, dpi=None, fmt=None):
         """
 
 
@@ -616,21 +609,13 @@ class ScanFig(object):
         if not dpi:
             dpi = 180
 
-        if not fname:
-            if not path.exists(self._working_dir):
-                mkdir(self._working_dir)
-            next_suffix = str(modeltools.next_suffix(self._working_dir,self.base_name,fmt))
-            name_string = '_' + str(next_suffix) + '.' + fmt
-            fname = path.join(self._working_dir,self.base_name + name_string)
-        else:
-            if path.splitext(fname)[1] == '':
-                fname = fname + '.' + fmt
-            else:
-                fmt =path.splitext(fname)[1][1:]
-            if not path.exists(path.split(fname)[0]):
-                mkdir(path.split(fname)[0])
+        file_name = modeltools.get_file_path(working_dir = self._working_dir,
+                                             internal_filename= self._base_name,
+                                             fmt = fmt,
+                                             file_name = file_name)
+        fmt = modeltools.get_fmt(file_name)
 
-        self.fig.savefig(fname,
+        self.fig.savefig(file_name,
                          format=fmt,
                          dpi=dpi,
                          bbox_extra_artists=(self.ax.get_legend(),),
