@@ -100,7 +100,6 @@ def get_file_path(working_dir, internal_filename, fmt, fixed=None,
         else:
             save_path = working_dir
         if not path.exists(save_path):
-            pass
             mkdir(save_path)
         suffix = ''
         if write_suffix:
