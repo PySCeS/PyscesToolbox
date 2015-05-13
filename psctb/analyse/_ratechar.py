@@ -1,13 +1,13 @@
-import numpy as np
-import cPickle as pickle
+from os import path
+from colorsys import hsv_to_rgb, rgb_to_hsv
+from collections import OrderedDict
+from random import shuffle
 
-from os import path, mkdir
-
+import numpy
 from pysces.PyscesModelMap import ModelMap
 from pysces import Scanner
 import pysces
 from matplotlib.pyplot import get_cmap
-from colorsys import hsv_to_rgb, rgb_to_hsv
 
 from .. import modeltools
 from ..latextools import LatexExpr
@@ -15,8 +15,6 @@ from ..utils.plotting import ScanFig, LineData, Data2D
 from ..utils.misc import silence_print
 from ..utils.misc import DotDict
 from ..utils.misc import formatter_factory
-from collections import OrderedDict
-from random import shuffle
 
 
 exportLAWH = silence_print(pysces.write.exportLabelledArrayWithHeader)
@@ -27,7 +25,7 @@ __all__ = ['RateChar']
 def strip_nan_from_scan(array_like):
     # this function assumes that column
     # zero contains valid data (the scan input)
-    t_f = list(np.isnan(array_like[:, 1]))
+    t_f = list(numpy.isnan(array_like[:, 1]))
     start = t_f.index(False)
     end = len(t_f) - t_f[::-1].index(False)
 
@@ -188,55 +186,59 @@ class RateChar(object):
         return fixed_mod, fixed_ss
 
     def save(self, file_name=None):
-        if not file_name:
-            file_name = path.join(self._working_dir, 'save_data.pickle')
+        file_name = modeltools.get_file_path(working_dir=self._working_dir,
+                                             internal_filename='save_data',
+                                             fmt='npz',
+                                             file_name=file_name,
+                                             write_suffix=False)
 
-        rcd_data_list = []
-
+        to_save = {}
         for species in self.mod.species:
-            rcd = getattr(self, species)
-            if rcd:
-                rcd_data = [rcd._column_names,
-                            rcd._scan_results]
-                rcd_data_list.append(rcd_data)
+            species_object = getattr(self, species)
 
-        try:
-            with open(file_name, 'w') as f:
-                pickle.dump(rcd_data_list, f)
-        except IOError as e:
-            print e.strerror
+            column_array = numpy.array(species_object._column_names)
+            scan_results = species_object._scan_results
+
+            to_save['col_{0}'.format(species)] = column_array
+            to_save['res_{0}'.format(species)] = scan_results
+        numpy.savez(file_name, **to_save)
 
 
     def save_results(self, folder=None, separator=',', ):
         base_folder = folder
         for species in self.mod.species:
             if folder:
-                folder = path.join(base_folder,species)
+                folder = path.join(base_folder, species)
             getattr(self, species).save_all_results(folder=folder,
-                                                separator=separator)
+                                                    separator=separator)
 
     def load(self, file_name=None):
-        if not file_name:
-            file_name = path.join(self._working_dir + 'save_data.pickle')
+        file_name = modeltools.get_file_path(working_dir=self._working_dir,
+                                             internal_filename='save_data',
+                                             fmt='npz',
+                                             file_name=file_name,
+                                             write_suffix=False)
 
+        loaded_data = {}
         try:
-            with open(file_name) as f:
-                rcd_data_list = pickle.load(f)
-
-            for rcd_data in rcd_data_list:
-                fixed_species = rcd_data[0][0]
-                fixed_mod, fixed_ss = self._fix_at_ss(fixed_species)
-                rcd = RateCharData(fixed_ss,
-                                   fixed_mod,
-                                   self.mod,
-                                   rcd_data[0],
-                                   rcd_data[1],
-                                   self._model_map,
-                                   self._ltxe)
-                setattr(self, fixed_species, rcd)
-
+            with numpy.load(file_name) as data_file:
+                for k, v in data_file.iteritems():
+                    loaded_data[k] = v
         except IOError as e:
-            print e.strerror
+            raise e
+
+        for species in self.mod.species:
+            column_names = [str(each) for each in
+                            list(loaded_data['col_{0}'.format(species)])]
+            scan_results = loaded_data['res_{0}'.format(species)]
+            fixed_species = species
+            fixed_mod, fixed_ss = self._fix_at_ss(fixed_species)
+            rcd = RateCharData(fixed_ss=fixed_ss,
+                               fixed_mod=fixed_mod,
+                               basemod=self.mod, column_names=column_names,
+                               scan_results=scan_results,
+                               model_map=self._model_map, ltxe=self._ltxe)
+            setattr(self, fixed_species, rcd)
 
 
 class RateCharData(object):
@@ -293,7 +295,7 @@ class RateCharData(object):
             '"$" + self._ltxe.expression_to_latex(k) + "$"', 'v',
             formatter_factory())
         # del self.plot_data
-        #del self.mca_data
+        # del self.mca_data
 
     def _data_setup(self):
         # reset value to do mcarc
@@ -416,14 +418,14 @@ class RateCharData(object):
 
     def save_summary(self, file_name=None, separator=','):
         file_name = modeltools.get_file_path(working_dir=self._working_dir,
-                                             internal_filename= 'mca_summary',
+                                             internal_filename='mca_summary',
                                              fmt='csv',
-                                             file_name=file_name,)
+                                             file_name=file_name, )
 
         keys = self.mca_data.keys()
         keys.sort()
-        values = np.array([self.mca_data[k]
-                           for k in keys]).reshape(len(keys), 1)
+        values = numpy.array([self.mca_data[k]
+                              for k in keys]).reshape(len(keys), 1)
 
         try:
             exportLAWH(values,
@@ -436,13 +438,12 @@ class RateCharData(object):
 
     def save_flux_results(self, file_name=None, separator=','):
         file_name = modeltools.get_file_path(working_dir=self._working_dir,
-                                             internal_filename= 'flux_results',
+                                             internal_filename='flux_results',
                                              fmt='csv',
-                                             file_name=file_name,)
-
+                                             file_name=file_name, )
 
         scan_points = self.plot_data.scan_points
-        all_cols = np.hstack([
+        all_cols = numpy.hstack([
             self._scan_results,
             self.plot_data.total_supply.reshape(scan_points, 1),
             self.plot_data.total_demand.reshape(scan_points, 1)])
@@ -458,20 +459,19 @@ class RateCharData(object):
             print e.strerror
 
     def save_coefficient_results(self,
-                               coefficient,
-                               file_name=None,
-                               separator=',',
-                               folder=None):
+                                 coefficient,
+                                 file_name=None,
+                                 separator=',',
+                                 folder=None):
         assert_message = 'coefficient must be one of "ec", "rc" or "prc"'
 
         assert coefficient in ['rc', 'ec', 'prc'], assert_message
 
         base_name = coefficient + '_results'
         file_name = modeltools.get_file_path(working_dir=self._working_dir,
-                                             internal_filename= base_name,
+                                             internal_filename=base_name,
                                              fmt='csv',
-                                             file_name=file_name,)
-
+                                             file_name=file_name, )
 
         results = getattr(self.plot_data, coefficient + '_data')
         names = getattr(self.plot_data, coefficient + '_names')
@@ -495,22 +495,22 @@ class RateCharData(object):
             folder = self._working_dir
 
         file_name = modeltools.get_file_path(working_dir=folder,
-                                             internal_filename= 'flux_results',
+                                             internal_filename='flux_results',
                                              fmt='csv')
         self.save_flux_results(separator=separator, file_name=file_name)
 
         file_name = modeltools.get_file_path(working_dir=folder,
-                                             internal_filename= 'mca_summary',
+                                             internal_filename='mca_summary',
                                              fmt='csv')
         self.save_summary(separator=separator, file_name=file_name)
         for each in ['ec', 'rc', 'prc']:
             base_name = each + '_results'
             file_name = modeltools.get_file_path(working_dir=folder,
-                                             internal_filename= base_name,
-                                             fmt='csv')
+                                                 internal_filename=base_name,
+                                                 fmt='csv')
             self.save_coefficient_results(coefficient=each,
-                                        separator=separator,
-                                        file_name=file_name)
+                                          separator=separator,
+                                          file_name=file_name)
 
     def _min_max_setup(self):
         # Negative minimum linear values mean nothing
@@ -518,31 +518,32 @@ class RateCharData(object):
         # therefore we want the minimum non-negative/non-zero values.
 
         # lets make sure there are no zeros
-        n_z_f = self.plot_data.flux_data[np.nonzero(self.plot_data.flux_data)]
+        n_z_f = self.plot_data.flux_data[
+            numpy.nonzero(self.plot_data.flux_data)]
         n_z_s = self.plot_data.scan_range[
-            np.nonzero(self.plot_data.scan_range)]
+            numpy.nonzero(self.plot_data.scan_range)]
 
-        totals = np.vstack([self.plot_data.total_demand,
-                            self.plot_data.total_supply])
-        n_z_t = totals[np.nonzero(totals)]
+        totals = numpy.vstack([self.plot_data.total_demand,
+                               self.plot_data.total_supply])
+        n_z_t = totals[numpy.nonzero(totals)]
         # and that the array is not now somehow empty
         # although if this happens-you have bigger problems
         if len(n_z_f) == 0:
-            n_z_f = np.array([0.01, 1])
+            n_z_f = numpy.array([0.01, 1])
         if len(n_z_s) == 0:
-            n_z_s = np.array([0.01, 1])
+            n_z_s = numpy.array([0.01, 1])
 
         # lets also (clumsily) find the non-negative mins and maxes
         # by converting to logspace (to get NaNs) and back
         # and then getting the min/max non-NaN
         # PS flux max is the max of the totals
 
-        with np.errstate(all='ignore'):
+        with numpy.errstate(all='ignore'):
 
-            self.plot_data.flux_max = np.nanmax(10 ** np.log10(n_z_t))
-            self.plot_data.flux_min = np.nanmin(10 ** np.log10(n_z_f))
-            self.plot_data.scan_max = np.nanmax(10 ** np.log10(n_z_s))
-            self.plot_data.scan_min = np.nanmin(10 ** np.log10(n_z_s))
+            self.plot_data.flux_max = numpy.nanmax(10 ** numpy.log10(n_z_t))
+            self.plot_data.flux_min = numpy.nanmin(10 ** numpy.log10(n_z_f))
+            self.plot_data.scan_max = numpy.nanmax(10 ** numpy.log10(n_z_s))
+            self.plot_data.scan_min = numpy.nanmin(10 ** numpy.log10(n_z_s))
 
     def _attach_fluxes_to_self(self):
         for i, each in enumerate(self.plot_data.flux_names):
@@ -571,12 +572,14 @@ class RateCharData(object):
         sup_pos = [self.plot_data.flux_names.index('J_' + flux)
                    for flux in supply_blocks]
 
-        self.plot_data['total_demand'] = np.sum([self.plot_data.flux_data[:, i]
-                                                 for i in dem_pos],
-                                                axis=0)
-        self.plot_data['total_supply'] = np.sum([self.plot_data.flux_data[:, i]
-                                                 for i in sup_pos],
-                                                axis=0)
+        self.plot_data['total_demand'] = numpy.sum(
+            [self.plot_data.flux_data[:, i]
+             for i in dem_pos],
+            axis=0)
+        self.plot_data['total_supply'] = numpy.sum(
+            [self.plot_data.flux_data[:, i]
+             for i in sup_pos],
+            axis=0)
 
     def _make_rc_lines(self):
         names = []
@@ -594,7 +597,7 @@ class RateCharData(object):
             names.append(name)
             resps.append(resp)
 
-        resps = np.hstack(resps)
+        resps = numpy.hstack(resps)
 
         self.plot_data.rc_names = names
         self.plot_data.rc_data = resps
@@ -628,7 +631,7 @@ class RateCharData(object):
                 names.append(name)
                 prcs.append(prc)
 
-        prcs = np.hstack(prcs)
+        prcs = numpy.hstack(prcs)
 
         self.plot_data.prc_names = names
         self.plot_data.prc_data = prcs
@@ -648,7 +651,7 @@ class RateCharData(object):
             names.append(name)
             elasts.append(elast)
 
-        elasts = np.hstack(elasts)
+        elasts = numpy.hstack(elasts)
 
         self.plot_data.ec_names = names
         self.plot_data.ec_data = elasts
@@ -668,21 +671,21 @@ class RateCharData(object):
 
         constant = J_ss / (fix_ss ** slope)
 
-        ydist = np.log10(self.plot_data.flux_max / self.plot_data.flux_min)
-        xdist = np.log10(self.plot_data.scan_max / self.plot_data.scan_min)
-        golden_ratio = (1 + np.sqrt(5)) / 2
+        ydist = numpy.log10(self.plot_data.flux_max / self.plot_data.flux_min)
+        xdist = numpy.log10(self.plot_data.scan_max / self.plot_data.scan_min)
+        golden_ratio = (1 + numpy.sqrt(5)) / 2
         xyscale = xdist / (ydist * golden_ratio * 1.5)
 
-        scale_factor = np.cos(np.arctan(slope * xyscale))
-        distance = np.log10(self._slope_range_factor) * scale_factor
+        scale_factor = numpy.cos(numpy.arctan(slope * xyscale))
+        distance = numpy.log10(self._slope_range_factor) * scale_factor
 
         range_min = fix_ss / (10 ** distance)
         range_max = fix_ss * (10 ** distance)
-        scan_range = np.linspace(range_min, range_max, num=2)
+        scan_range = numpy.linspace(range_min, range_max, num=2)
 
         rate = constant * scan_range ** (slope)
 
-        return np.vstack((scan_range, rate)).transpose()
+        return numpy.vstack((scan_range, rate)).transpose()
 
     @property
     def _color_dict(self):
@@ -693,7 +696,7 @@ class RateCharData(object):
                                  fix_map.isModifierOf()
             num_of_cols = len(relavent_reactions) + 3
             cmap = get_cmap('Set2')(
-                np.linspace(0, 1.0, num_of_cols))[:, :3]
+                numpy.linspace(0, 1.0, num_of_cols))[:, :3]
             color_list = [rgb_to_hsv(*cmap[i, :]) for i in range(num_of_cols)]
 
             relavent_reactions.sort()
@@ -985,12 +988,12 @@ class RateCharData(object):
             col = ec_col_data * cc_col_data
             rc_data.append(col)
 
-        temp = np.vstack(rc_data).transpose()
-        rc_data += [np.sum(temp[:, rc_pos[i]], axis=1) for i in
+        temp = numpy.vstack(rc_data).transpose()
+        rc_data += [numpy.sum(temp[:, rc_pos[i]], axis=1) for i in
                     range(len(rc_names))]
 
         rc_out_arr = [scanner.UserOutputResults[:, 0]] + rc_data
-        rc_out_arr = np.vstack(rc_out_arr).transpose()
+        rc_out_arr = numpy.vstack(rc_out_arr).transpose()
 
         rc_data_obj = Data2D(self.mod,
                              [self.plot_data.fixed] + prc_names + rc_names,
