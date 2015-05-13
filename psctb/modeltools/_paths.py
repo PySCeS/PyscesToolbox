@@ -63,7 +63,7 @@ def next_suffix(directory, base_name, ext=None):
 
 
 def get_file_path(working_dir, internal_filename, fmt, fixed=None,
-                  file_name=None, ):
+                  file_name=None, write_suffix=True ):
     """An heuristic for determining the correct file name.
 
     This function determines the file name according to the information
@@ -102,10 +102,12 @@ def get_file_path(working_dir, internal_filename, fmt, fixed=None,
         if not path.exists(save_path):
             pass
             mkdir(save_path)
-        suffix = str(next_suffix(save_path,
-                                 internal_filename,
-                                 fmt))
-        fname = internal_filename + '_' + suffix + '.' + fmt
+        suffix = ''
+        if write_suffix:
+            suffix = '_' + str(next_suffix(save_path,
+                                     internal_filename,
+                                     fmt))
+        fname = internal_filename +  suffix + '.' + fmt
         file_name = path.join(save_path, fname)
     else:
         if path.splitext(file_name)[1] == '':
