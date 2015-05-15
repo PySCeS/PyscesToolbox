@@ -1,7 +1,8 @@
+import json
 from sympy.matrices import Matrix
-from sympy import fraction
+from sympy import fraction, sympify
 
-from ...modeltools import make_path
+from ...modeltools import make_path, get_file_path
 from ...latextools import LatexExpr
 from .symca_toolbox import SymcaToolBox as SMCAtools
 from ...utils.misc import DotDict
@@ -21,6 +22,7 @@ class Symca(object):
         self.mod.doMca()
 
         self._analysis_method = 'symca'
+        self._internal_filename = 'object_data'
         self._working_dir = make_path(self.mod, self._analysis_method)
         self._ltxe = LatexExpr(mod)
 
@@ -214,30 +216,42 @@ class Symca(object):
         full_path = make_path(self.mod, self._analysis_method, [path])
         return full_path
 
-    def export_latex(self):
-        self._latex_out.make_main()
+    def save(self, file_name=None):
+        file_name = get_file_path(working_dir=self._working_dir,
+                                  internal_filename=self._internal_filename,
+                                  fmt='json',
+                                  file_name=file_name,
+                                  write_suffix=False)
+        assert len(self.CC) > 0, 'Nothing to save, run ``do_symca`` method first'
+        to_save = SMCAtools.build_outer_dict(self)
+        with open(file_name,'w') as f:
+            json.dump(to_save,f)
 
-    def save(self):
-        if not self._object_populated:
-            print 'No data to save, run do_symca first'
-        else:
-            CC = [self.CC[k] for k in set(self.CC.keys()) -
-                  set(['common_denominator'])]
+    def load(self, file_name=None):
+        file_name = get_file_path(working_dir=self._working_dir,
+                                  internal_filename=self._internal_filename,
+                                  fmt='json',
+                                  file_name=file_name,
+                                  write_suffix=False)
+        loaded = None
+        with open(file_name,'r') as f:
+            loaded = json.load(f)
 
-            SMCAtools.save(CC,
-                           self.CC.common_denominator,
-                           path.join(self._working_dir,'save_data.pickle')
-                           )
+        for attr_name, inner_dict in loaded.iteritems():
+            setattr(self,attr_name,DotDict())
+            dot_dict = getattr(self,attr_name)
+            inner_dict = sympify(inner_dict)
+            cc_objects = SMCAtools.spawn_cc_objects(
+                    self.mod,
+                    inner_dict,
+                    self._ltxe
+                )[0]
+            for cc in cc_objects:
+                dot_dict[cc.name] = cc
+            dot_dict._make_repr('"$" + v.latex_name + "$"', 'v.value', formatter_factory())
 
-    def load(self):
-        cc_objects = SMCAtools.load(self.mod,
-                                    path.join(self._working_dir,'save_data.pickle')
-                                    )
 
-        for cc in cc_objects:
-            self.CC[cc.name] = cc
-        #self.CC = cc_objects[1:]
-        self._object_populated = True
+
 
     def do_symca(self, auto_save=False, internal_fixed=False):
 
@@ -275,9 +289,9 @@ class Symca(object):
             self.species_dependent
         )
 
-        full_dic = {common_denom_expr: []}
+        full_dic = {common_denom_expr: {}}
         for i, each in enumerate(cc_sol):
-            full_dic[common_denom_expr].append((cc_names[i], each))
+            full_dic[common_denom_expr][cc_names[i]] =  each
         if internal_fixed:
             simpl_dic = {}
             for i, each in enumerate(cc_sol):
@@ -285,8 +299,8 @@ class Symca(object):
                 expr = SMCAtools.maxima_factor(expr, self.path_to('temp'))
                 num, denom = fraction(expr)
                 if not simpl_dic.has_key(denom):
-                    simpl_dic[denom] = []
-                simpl_dic[denom].append((cc_names[i], num))
+                    simpl_dic[denom] = {}
+                simpl_dic[denom][cc_names[i]] = num
 
         cc_objects = SMCAtools.spawn_cc_objects(
             self.mod,

@@ -1,6 +1,6 @@
 import subprocess
 from os import devnull
-#from os import path
+# from os import path
 #from os import mkdir
 import sys
 #from re import sub
@@ -8,13 +8,16 @@ from sympy import Symbol, sympify, nsimplify, fraction, S
 from sympy.matrices import Matrix, diag, NonSquareMatrixError
 from .ccobjects import CCBase, CCoef
 
-import cPickle as pickle
+
+
+## Everything in this file can be a function rather than a static method
+## better yet, almost everything can be part of symca. Finally everything can
+## be in a single file.
 
 all = ['SymcaToolBox']
 
 
 class SymcaToolBox(object):
-
     """The class with the functions used to populate SymcaData. The project is
     structured in this way to abstract the 'work' needed to build the various
     matrices away from the SymcaData class."""
@@ -32,7 +35,7 @@ class SymcaToolBox(object):
         # swap columns around to same order as kmatrix, store in new matrix
         nmatrix_cols = nmatrix[:, mod.kmatrix_row]
         # swap rows around to same oder as lmatrix, store in a new matrix
-        nmatrix_cols_rows = nmatrix_cols[mod.lmatrix_row,:]
+        nmatrix_cols_rows = nmatrix_cols[mod.lmatrix_row, :]
         # create Sympy symbolic matrix from the numpy ndarray
         nmat = Matrix(nmatrix_cols_rows)
         return nmat
@@ -85,10 +88,10 @@ class SymcaToolBox(object):
         Substitutes equivalent fluxes in the kmatrix (e.i. dependent fluxes
         with independent fluxes or otherwise equal fluxes)
         """
-        new_fluxes = all_fluxes[:,:]
+        new_fluxes = all_fluxes[:, :]
         for row in xrange(kmatrix.rows - 1, -1, -1):
             for row_above in xrange(row - 1, -1, -1):
-                if kmatrix[row,:] == kmatrix[row_above,:]:
+                if kmatrix[row, :] == kmatrix[row_above, :]:
                     new_fluxes[row] = new_fluxes[row_above]
         return new_fluxes
 
@@ -139,7 +142,8 @@ class SymcaToolBox(object):
             for row in range(nmat.rows):
                 current_species = species[row]
                 ec_name = 'ec' + \
-                    str(current_reaction)[2:] + '_' + str(current_species)
+                          str(current_reaction)[2:] + '_' + str(
+                    current_species)
                 cond1 = getattr(mod, ec_name) != 0
 
                 if cond1:
@@ -157,7 +161,7 @@ class SymcaToolBox(object):
         Replaces floats with ints and puts elements with fractions
         on a single demoninator.
         """
-        m = matrix[:,:]
+        m = matrix[:, :]
         for i, e in enumerate(m):
             m[i] = nsimplify(e, rational=True).cancel()
         return m
@@ -179,23 +183,25 @@ class SymcaToolBox(object):
 
         def cofactor_matrix(mat):
             out = Matrix(mat.rows, mat.cols, lambda i, j:
-                         cofactor(mat, i, j))
+            cofactor(mat, i, j))
             return out
 
         def minor_entry(mat, i, j):
             if not 0 <= i < mat.rows or not 0 <= j < mat.cols:
-                raise ValueError("`i` and `j` must satisfy 0 <= i < `mat.rows` " +
-                                 "(%d)" % mat.rows + "and 0 <= j < `mat.cols` (%d)." % mat.cols)
+                raise ValueError(
+                    "`i` and `j` must satisfy 0 <= i < `mat.rows` " +
+                    "(%d)" % mat.rows + "and 0 <= j < `mat.cols` (%d)." % mat.cols)
             return SymcaToolBox.det_bareis(minor_matrix(mat, i, j))
 
         def minor_matrix(mat, i, j):
             if not 0 <= i < mat.rows or not 0 <= j < mat.cols:
-                raise ValueError("`i` and `j` must satisfy 0 <= i < `mat.rows` " +
-                                 "(%d)" % mat.rows + "and 0 <= j < `mat.cols` (%d)." % mat.cols)
+                raise ValueError(
+                    "`i` and `j` must satisfy 0 <= i < `mat.rows` " +
+                    "(%d)" % mat.rows + "and 0 <= j < `mat.cols` (%d)." % mat.cols)
             m = mat.as_mutable()
             m.row_del(i)
             m.col_del(j)
-            return m[:,:]
+            return m[:, :]
 
         def cofactor(mat, i, j):
             if (i + j) % 2 == 0:
@@ -225,7 +231,7 @@ class SymcaToolBox(object):
         if not mat.is_square:
             raise NonSquareMatrixError()
 
-        m, n = mat[:,:], mat.rows
+        m, n = mat[:, :], mat.rows
 
         if n == 1:
             det = m[0, 0]
@@ -286,7 +292,7 @@ class SymcaToolBox(object):
         maxima_in_file = path_to + 'in.txt'
         maxima_out_file = path_to + 'out.txt'
         if expression.is_Matrix:
-            expr_mat = expression[:,:]
+            expr_mat = expression[:, :]
             # print expr_mat
             print 'Simplifying matrix with ' + str(len(expr_mat)) + ' elements'
             for i, e in enumerate(expr_mat):
@@ -330,8 +336,8 @@ class SymcaToolBox(object):
         matrix CC_i_solution
         """
 
-        j_cci_sol = cc_i_num[:num_ind_fluxes,:]
-        s_cci_sol = cc_i_num[num_ind_fluxes:,:]
+        j_cci_sol = cc_i_num[:num_ind_fluxes, :]
+        s_cci_sol = cc_i_num[num_ind_fluxes:, :]
 
         j_ccd_sol = scaledk0 * j_cci_sol
         s_ccd_sol = scaledl0 * s_cci_sol
@@ -415,16 +421,17 @@ class SymcaToolBox(object):
         if num_deps == 0:
             return sympify('1')
         else:
-            dependent_ls = lmatrix[num_inds:,:]
+            dependent_ls = lmatrix[num_inds:, :]
             denom = sympify('1')
             for row in range(dependent_ls.rows):
-                for each in dependent_ls[row,:] * species_independent * -1:
+                for each in dependent_ls[row, :] * species_independent * -1:
                     denom = denom * each.atoms(Symbol).pop()
                 denom = denom * species_dependent[row]
             return denom.nsimplify()
 
     @staticmethod
-    def fix_expressions(cc_num, common_denom_expr, lmatrix, species_independent, species_dependent):
+    def fix_expressions(cc_num, common_denom_expr, lmatrix,
+                        species_independent, species_dependent):
 
         fix_denom = SymcaToolBox.get_fix_denom(
             lmatrix,
@@ -435,7 +442,7 @@ class SymcaToolBox(object):
 
         cd_num, cd_denom = fraction(common_denom_expr)
 
-        new_cc_num = cc_num[:,:]
+        new_cc_num = cc_num[:, :]
         # print type(new_cc_num)
         for i, each in enumerate(new_cc_num):
             new_cc_num[i] = ((each * cd_denom) / fix_denom).expand()
@@ -445,6 +452,7 @@ class SymcaToolBox(object):
     @staticmethod
     def spawn_cc_objects(mod, cc_dic, ltxe):
 
+        #  this should not be the responsibility of this function
         model_block_CCs = []
         for denom, names_nums in cc_dic.iteritems():
             common_denom = CCBase(
@@ -455,12 +463,12 @@ class SymcaToolBox(object):
             )
             cc_object_list = [common_denom]
 
-            for name_num in names_nums:
+            for name, num in names_nums.iteritems():
                 cc_object_list.append(
                     CCoef(
                         mod,
-                        str(name_num[0]),
-                        name_num[1],
+                        str(name),
+                        num,
                         common_denom,
                         ltxe
                     )
@@ -470,37 +478,68 @@ class SymcaToolBox(object):
         return model_block_CCs
 
     @staticmethod
-    def save(cc_list, common_denominator, path_to_pickle):
-        mod = common_denominator.mod
-        common_denominator.mod = ''
-        for cc in cc_list:
-            cc.mod = ''
-            for cp in cc.control_patterns:
-                cp.mod = ''
-
-        cc_list.append(common_denominator)
-        with open(path_to_pickle, 'w') as f:
-            pickle.dump(cc_list, f)
-
-        cc_list.pop()
-        common_denominator.mod = mod
-        for cc in cc_list:
-            cc.mod = mod
-            for cp in cc.control_patterns:
-                cp.mod = mod
+    def build_inner_dict(cc_object):
+        deep_dict = {}
+        for key, value in cc_object.iteritems():
+            if key != 'common_denominator':
+                deepest_dict = {str(key): str(value.numerator)}
+                deep_dict.update(deepest_dict)
+        inner_dict = {str(cc_object.common_denominator.expression): deep_dict}
+        return inner_dict
 
     @staticmethod
-    def load(mod, path_to_pickle):
-        with open(path_to_pickle) as f:
-            cc_list = pickle.load(f)
+    def build_outer_dict(symca_object):
+        containers = {}
+        containers['CC'] = SymcaToolBox.build_inner_dict(
+            getattr(symca_object, 'CC'))
+        counter = 0
+        while True:
+            CC_obj_name = 'CC{0}'.format(counter)
+            try:
+                CC_obj_dict = getattr(symca_object, CC_obj_name)
+            except AttributeError:
+                break
+            containers[CC_obj_name] = SymcaToolBox.build_inner_dict(
+                CC_obj_dict)
+            counter += 1
+        return containers
 
-        common_denominator = cc_list.pop()
 
-        common_denominator.mod = mod
-        for cc in cc_list:
-            cc.mod = mod
-            for cp in cc.control_patterns:
-                cp.mod = mod
 
-        cc_list.insert(0, common_denominator)
-        return cc_list
+
+    # OLD SAVE FUNCTIONS> Not as good as new ones
+    # @staticmethod
+    # def save(cc_list, common_denominator, path_to_pickle):
+    #     mod = common_denominator.mod
+    #     common_denominator.mod = ''
+    #     for cc in cc_list:
+    #         cc.mod = ''
+    #         for cp in cc.control_patterns:
+    #             cp.mod = ''
+    #
+    #     cc_list.append(common_denominator)
+    #     with open(path_to_pickle, 'w') as f:
+    #         pickle.dump(cc_list, f)
+    #
+    #     cc_list.pop()
+    #     common_denominator.mod = mod
+    #     for cc in cc_list:
+    #         cc.mod = mod
+    #         for cp in cc.control_patterns:
+    #             cp.mod = mod
+    #
+    # @staticmethod
+    # def load(mod, path_to_pickle):
+    #     with open(path_to_pickle) as f:
+    #         cc_list = pickle.load(f)
+    #
+    #     common_denominator = cc_list.pop()
+    #
+    #     common_denominator.mod = mod
+    #     for cc in cc_list:
+    #         cc.mod = mod
+    #         for cp in cc.control_patterns:
+    #             cp.mod = mod
+    #
+    #     cc_list.insert(0, common_denominator)
+    #     return cc_list
