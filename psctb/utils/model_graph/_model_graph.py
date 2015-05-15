@@ -40,7 +40,7 @@ class ModelGraph(object):
         self._analysis_method = analysis_method
         self._working_dir = modeltools.make_path(self.mod,
                                                  self._analysis_method)
-        self._layout_working_dir = path.split(self._working_dir)[0]
+
 
         self._default_base_name = 'model_scheme'
         if not base_name:
@@ -54,7 +54,7 @@ class ModelGraph(object):
 
         if not pos_dic:
             try:
-                with open(path.join(self._layout_working_dir,
+                with open(path.join(self._working_dir,
                                     'graph_layout.dict'), 'r') as f:
                     self._pos_dic = json.load(f)
             except:
@@ -77,6 +77,8 @@ class ModelGraph(object):
         for rx in self._model_map.reactions:
             self._pos_dic[rx.name] = ('none', 'none')
 
+
+    # TODO Change d3networkx_psctb so that dumping json and dumping svg work in the same way
     def _pos_change_setup(self):
         def make_pos_dic(nodes_json):
             raw_json = json.loads(nodes_json)
@@ -88,7 +90,7 @@ class ModelGraph(object):
         def save_json(sender):
             pos_dic = make_pos_dic(self._force_directed_graph.gnode_json)
             self._pos_dic = pos_dic
-            with open(path.join(self._layout_working_dir, 'graph_layout.dict'),
+            with open(path.join(self._working_dir, 'graph_layout.dict'),
                       'w') as f:
                 json.dump(pos_dic, f)
 
