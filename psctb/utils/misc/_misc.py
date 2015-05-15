@@ -68,7 +68,7 @@ def is_number(suspected_number):
     try:
         int(suspected_number)
         number = True
-    except ValueError:
+    except Exception:
         pass
     return number
 
