@@ -1,6 +1,7 @@
 from numpy.ma import log10
 import sys
-import os
+from os import path, devnull
+
 from numpy import array, errstate, nanmin, nanmax, nonzero
 from IPython.display import HTML
 
@@ -242,7 +243,7 @@ def silence_print(func):
 
     def wrapper(*args, **kwargs):
         stdout = sys.stdout
-        sys.stdout = open(os.devnull, 'w')
+        sys.stdout = open(devnull, 'w')
         returns = func(*args, **kwargs)
         sys.stdout = stdout
         return returns
@@ -576,3 +577,32 @@ class DotDict(dict):
             return div_string
 
         self._repr_html_ = representation
+
+
+# no use yet for this class but seemed like a nice/quick/simple way to address
+# directory trees with no overlapping subdirectory names.
+# will work for ['/a/b/c/d',/a/b/c/e'] but not for ['/a/b/c/d',/a/b/d']
+class SimpleDirectoryStructure(object):
+    def __init__(self, fpaths=None):
+        self._path_dict = {}
+        if type(fpaths) is list:
+            self.add_paths(fpaths)
+        if type(fpaths) is str:
+            self.add_path(fpaths)
+
+    def add_path(self,fpath):
+        top_path = fpath
+        temp_split = path.split(top_path)
+        self._path_dict[temp_split[1]] = top_path
+        while(temp_split[1] != ''):
+            top_path = temp_split[0]
+            temp_split = path.split(top_path)
+            self._path_dict[temp_split[1]] = top_path
+
+    def add_paths(self,list_of_fpaths):
+        for fpath in list_of_fpaths:
+            self.add_path(fpath)
+
+
+    def __getitem__(self,key):
+        return self._path_dict[key]
