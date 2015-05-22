@@ -1,23 +1,19 @@
 import json
 from os import path
-from time import sleep
 
 from IPython.display import display
 from IPython.html import widgets
 from numpy import floor
 from pysces import ModelMap
 from sympy import Symbol
-
-from ... import modeltools
 from d3networkx_psctb import ForceDirectedGraph
 from d3networkx_psctb import EventfulGraph
 
+from ... import modeltools
+from ..misc import split_coefficient
 
-RGB_RGB_RGB_ = {0: "rgb(94,79,162)", 1: "rgb(50,136,189)",
-                2: "rgb(102,194,165)", 3: "rgb(171,221,164)",
-                4: "rgb(230,245,152)", 5: "rgb(254,224,139)",
-                6: "rgb(253,174,97)", 7: "rgb(244,109,67)",
-                8: "rgb(213,62,79)", 9: "rgb(158,1,66)", 10: "rgb(158,1,66)"}
+
+
 
 __author__ = 'carl'
 
@@ -25,6 +21,39 @@ __all__ = ['ModelGraph']
 
 
 class ModelGraph(object):
+
+
+    SPECIES_NODE = {'fill': "#FF6138",
+                'stroke': "#FF6138",
+                'color': 'black',
+                'shape': 'circle',
+                'dx': 15,
+                'dy': 7,
+                'font_size': 20,
+                'fixed': True,
+                'r': 11,
+                'strokewidth':'1.5px',
+                }
+
+    REACTION_NODE = {'fill': "#00A388",
+                     'stroke': "#00A388",
+                     'color': 'black',
+                     'shape': 'rect',
+                     'dx': 15,
+                     'dy': 7,
+                     'font_size': 20,
+                     'fixed': True,
+                     'r': 8,
+                     'strokewidth':'1.5px',
+                     }
+
+    RGB_RGB_RGB_ = {0: "rgb(94,79,162)", 1: "rgb(50,136,189)",
+                    2: "rgb(102,194,165)", 3: "rgb(171,221,164)",
+                    4: "rgb(230,245,152)", 5: "rgb(254,224,139)",
+                    6: "rgb(253,174,97)", 7: "rgb(244,109,67)",
+                    8: "rgb(213,62,79)", 9: "rgb(158,1,66)", 10: "rgb(158,1,66)"}
+
+
     def __init__(self, mod, pos_dic=None, analysis_method=None,
                  base_name=None):
         super(ModelGraph, self).__init__()
@@ -41,8 +70,10 @@ class ModelGraph(object):
         self._working_dir = modeltools.make_path(self.mod,
                                                  self._analysis_method)
 
-
         self._default_base_name = 'model_scheme'
+        self._pod_dict_dir = modeltools.make_path(self.mod,
+                                                  'modelgraph')
+
         if not base_name:
             base_name = self._default_base_name
         self._base_name = base_name
@@ -54,7 +85,7 @@ class ModelGraph(object):
 
         if not pos_dic:
             try:
-                with open(path.join(self._working_dir,
+                with open(path.join(self._pod_dict_dir,
                                     'graph_layout.dict'), 'r') as f:
                     self._pos_dic = json.load(f)
             except:
@@ -63,10 +94,10 @@ class ModelGraph(object):
             if pos_dic == 'clear':
                 self._clear_pos_dic()
             else:
-                with open(pos_dic,'r') as f:
+                with open(pos_dic, 'r') as f:
                     self._pos_dic = json.load(f)
 
-        self._elas_dic = {}
+        self._ec_dict = {}
         self._pos_change_setup()
         self._save_image_setup()
 
@@ -90,7 +121,7 @@ class ModelGraph(object):
         def save_json(sender):
             pos_dic = make_pos_dic(self._force_directed_graph.gnode_json)
             self._pos_dic = pos_dic
-            with open(path.join(self._working_dir, 'graph_layout.dict'),
+            with open(path.join(self._pod_dict_dir, 'graph_layout.dict'),
                       'w') as f:
                 json.dump(pos_dic, f)
 
@@ -113,18 +144,18 @@ class ModelGraph(object):
             else:
                 x, y = "none", "none"
             self._eventful_graph.add_node(species.name,
-                                          fill="#FF6138",
-                                          stroke="#FF6138",
-                                          color='black',
-                                          shape='circle',
+                                          fill=ModelGraph.SPECIES_NODE['fill'],
+                                          stroke=ModelGraph.SPECIES_NODE['stroke'],
+                                          color=ModelGraph.SPECIES_NODE['color'],
+                                          shape=ModelGraph.SPECIES_NODE['shape'],
                                           label=species.name,
-                                          dx=15,
-                                          dy=7,
-                                          font_size=20,
+                                          dx=ModelGraph.SPECIES_NODE['dx'],
+                                          dy=ModelGraph.SPECIES_NODE['dy'],
+                                          font_size=ModelGraph.SPECIES_NODE['font_size'],
                                           x=x,
                                           y=y,
-                                          fixed=True,
-                                          r=11,
+                                          fixed=ModelGraph.SPECIES_NODE['fixed'],
+                                          r=ModelGraph.SPECIES_NODE['r'],
                                           )
 
     def _make_reaction_nodes(self):
@@ -135,18 +166,18 @@ class ModelGraph(object):
             else:
                 x, y = "none", "none"
             self._eventful_graph.add_node(reaction.name,
-                                          fill="#00A388",
-                                          stroke="#00A388",
-                                          color='black',
-                                          shape='rect',
+                                          fill=ModelGraph.REACTION_NODE['fill'],
+                                          stroke=ModelGraph.REACTION_NODE['stroke'],
+                                          color=ModelGraph.REACTION_NODE['color'],
+                                          shape=ModelGraph.REACTION_NODE['shape'],
                                           label=reaction.name,
-                                          dx=15,
-                                          dy=7,
-                                          font_size=20,
+                                          dx=ModelGraph.REACTION_NODE['dx'],
+                                          dy=ModelGraph.REACTION_NODE['dy'],
+                                          font_size=ModelGraph.REACTION_NODE['font_size'],
                                           x=x,
                                           y=y,
-                                          fixed=True,
-                                          r=8,
+                                          fixed=ModelGraph.REACTION_NODE['fixed'],
+                                          r=ModelGraph.REACTION_NODE['r'],
                                           )
 
     def _make_substrate_links(self):
@@ -161,7 +192,7 @@ class ModelGraph(object):
                                               stroke='black')
                 self._eventful_graph.adj[reaction][species.name][
                     'strokewidth'] = '2px'
-                self._elas_dic[elas] = (reaction, species.name)
+                self._ec_dict[elas] = (reaction, species.name)
                 del self._eventful_graph.adj[species.name][reaction]
 
     def _make_product_links(self):
@@ -178,7 +209,7 @@ class ModelGraph(object):
                 self._eventful_graph.adj[reaction][species.name][
                     'strokewidth'] = '2px'
                 del self._eventful_graph.adj[species.name][reaction]
-                self._elas_dic[elas] = (reaction, species.name)
+                self._ec_dict[elas] = (reaction, species.name)
 
     def _make_modifier_links(self):
         for species in self._model_map.species:
@@ -194,7 +225,7 @@ class ModelGraph(object):
                 self._eventful_graph.adj[species.name][reaction][
                     'strokewidth'] = '2px'
                 del self._eventful_graph.adj[reaction][species.name]
-                self._elas_dic[elas] = (species.name, reaction)
+                self._ec_dict[elas] = (species.name, reaction)
 
     def remove_external_modifier_links(self):
         for species in self._model_map.species:
@@ -212,13 +243,23 @@ class ModelGraph(object):
                                only_overwrite=False):
         if not prop_dic:
             prop_dic = {}
-        s_t = self._elas_dic.get(elas)
+        # TODO this can probably be replaced by misc.ec_dict(self.mod)[elas] or self._ec_dict can be constructed with that function.
+        s_t = self._ec_dict.get(elas)
         if s_t:
             source, target = s_t
             dic_to_change = self._eventful_graph.adj[source][target]
             for k, v in prop_dic.iteritems():
                 if only_overwrite and k in dic_to_change or not only_overwrite:
                     dic_to_change[k] = v
+
+    def reset_node_properties(self):
+        for species in self._model_map.species:
+            self.change_node_properties(species.name, ModelGraph.SPECIES_NODE)
+
+        for reaction in self._model_map.reactions:
+            self.change_node_properties(reaction.name, ModelGraph.REACTION_NODE)
+
+
 
     def change_node_properties(self, node_name, prop_dic=None):
         if not prop_dic:
@@ -308,11 +349,13 @@ class ModelGraph(object):
 
 
     def highlight_cp(self, cp):
-        colors = RGB_RGB_RGB_
+        colors = ModelGraph.RGB_RGB_RGB_
         symbols = cp.numerator.atoms(Symbol)
-        title = widgets.Latex('Control Patterns for $' + cp.parent.latex_name + '$')
+        title = widgets.Latex(
+            'Control Patterns for $' + cp.parent.latex_name + '$')
         CP_repr = widgets.Latex('$~$')
-
+        _, controlled, controller = split_coefficient(cp.parent.name, self.mod)
+        species_names = [species.name for species in self._model_map.species]
 
         cat = floor(cp.percentage / 10)
 
@@ -329,6 +372,10 @@ class ModelGraph(object):
         self._make_modifier_links()
         self._force_directed_graph.show_color_legend = False
         self._force_directed_graph.show_color_legend = True
+        self.reset_node_properties()
+        if controlled in species_names:
+            self.change_node_properties(controlled, {'stroke':'#8B361E', 'strokewidth':'3px'})
+        self.change_node_properties(controller,{'stroke':'#006B58', 'strokewidth':'3px'})
         for sym in symbols:
             self.change_link_properties(str(sym),
                                         {'strokewidth': '20px',
@@ -340,14 +387,18 @@ class ModelGraph(object):
 
 
     def highlight_cc(self, cc):
-        colors = RGB_RGB_RGB_
+
+        colors = ModelGraph.RGB_RGB_RGB_
         title = widgets.Latex('Control Patterns for $' + cc.latex_name + '$')
         CP_repr = widgets.Latex('$~$')
+        _, controlled, controller = split_coefficient(cc.name, self.mod)
+        species_names = [species.name for species in self._model_map.species]
 
         def onclick_maker(cp):
             symbols = cp.numerator.atoms(Symbol)
 
             def click(sender):
+                self.reset_node_properties()
                 self._base_name = cc.name + '_' + cp.name
                 cat = floor(cp.percentage / 10)
                 self._make_product_links()
@@ -355,13 +406,16 @@ class ModelGraph(object):
                 self._make_modifier_links()
                 self._force_directed_graph.show_color_legend = False
                 self._force_directed_graph.show_color_legend = True
+                controlled in species_names
+                if controlled in species_names:
+                    self.change_node_properties(controlled, {'stroke':'#8B361E', 'strokewidth':'3px'})
+                self.change_node_properties(controller,{'stroke':'#006B58', 'strokewidth':'3px'})
                 for sym in symbols:
                     self.change_link_properties(str(sym),
                                                 {'strokewidth': '20px',
                                                  'marker_end': 'arrowheadlarge',
                                                  'stroke': colors[cat]},
                                                 only_overwrite=True)
-
 
                 CP_repr.value = cp._repr_latex_()
 
