@@ -1,9 +1,10 @@
-from numpy.ma import log10
 import sys
 from os import path, devnull
 
+from numpy.ma import log10
 from numpy import array, errstate, nanmin, nanmax, nonzero
 from IPython.display import HTML
+
 
 __all__ = ['cc_list',
            'ec_list',
@@ -17,7 +18,13 @@ __all__ = ['cc_list',
            'html_table',
            'do_safe_state',
            'find_min',
-           'find_max']
+           'find_max',
+           'split_coefficient',
+           'ec_dict',
+           'cc_dict',
+           'rc_dict',
+           'prc_dict']
+
 
 def find_min(array_like):
     no_zeros = array_like[nonzero(array_like)]
@@ -31,6 +38,7 @@ def find_max(array_like):
     with errstate(all='ignore'):
         max = nanmax(10 ** log10(no_zeros))
     return max
+
 
 def do_safe_state(mod, parameter, value, type='ss'):
     setattr(mod, parameter, value)
@@ -46,6 +54,16 @@ def do_safe_state(mod, parameter, value, type='ss'):
         ret = False
     mod.SetLoud()
     return ret
+
+def split_coefficient(coefficient_name, mod):
+    coefficient_2_types = ['cc','ec','rc']
+    coefficient_3_types = ['prc']
+    if coefficient_name[:2] in coefficient_2_types:
+        coefficient_type = coefficient_name[:2]
+    if coefficient_name[:3] in coefficient_3_types:
+        coefficient_type = coefficient_name[:3]
+    members = eval(coefficient_type + '_dict(mod)["' + coefficient_name + '"]')
+    return tuple([coefficient_type] + list(members))
 
 
 def is_number(suspected_number):
@@ -287,6 +305,19 @@ def cc_list(mod):
     return ccs
 
 
+def cc_dict(mod):
+    ccs = {}
+    for base_reaction in mod.reactions:
+        for top_species in mod.species:
+            cc = 'cc%s_%s' % (top_species, base_reaction)
+            ccs[cc] = (top_species, base_reaction)
+        for top_reaction in mod.reactions:
+            cc = 'ccJ%s_%s' % (top_reaction, base_reaction)
+            ccs[cc] = (top_reaction, base_reaction)
+
+    return ccs
+
+
 def ec_list(mod):
     """
     Retuns a list of elasticity coefficients of a model.
@@ -322,6 +353,19 @@ def ec_list(mod):
     return ecs
 
 
+def ec_dict(mod):
+    ecs = {}
+    for top_reaction in mod.reactions:
+        for base_species in mod.species:
+            ec = 'ec%s_%s' % (top_reaction, base_species)
+            ecs[ec] = (top_reaction, base_species)
+        for base_param in mod.parameters:
+            ec = 'ec%s_%s' % (top_reaction, base_param)
+            ecs[ec] = (top_reaction, base_param)
+
+    return ecs
+
+
 def rc_list(mod):
     """
     Retuns a list of response coefficients of a model.
@@ -354,6 +398,19 @@ def rc_list(mod):
             rc = 'rcJ%s_%s' % (top_reaction, base_param)
             rcs.append(rc)
     rcs.sort()
+    return rcs
+
+
+def rc_dict(mod):
+    rcs = {}
+    for base_param in mod.parameters:
+        for top_species in mod.species:
+            rc = 'rc%s_%s' % (top_species, base_param)
+            rcs[rc] = (top_species, base_param)
+        for top_reaction in mod.reactions:
+            rc = 'rcJ%s_%s' % (top_reaction, base_param)
+            rcs[rc] = (top_reaction, base_param)
+
     return rcs
 
 
@@ -393,6 +450,24 @@ def prc_list(mod):
                                         back_reaction)
                 prcs.append(prc)
     prcs.sort()
+    return prcs
+
+
+def prc_dict(mod):
+    prcs = {}
+    for base_param in mod.parameters:
+        for back_reaction in mod.reactions:
+            for top_species in mod.species:
+                prc = 'prc%s_%s_%s' % (top_species, base_param, back_reaction)
+                prcs[prc] = (top_species, base_param, back_reaction)
+            for top_reaction in mod.reactions:
+                prc = 'prcJ%s_%s_%s' % (top_reaction,
+                                        base_param,
+                                        back_reaction)
+                prcs[prc] = (top_reaction,
+                             base_param,
+                             back_reaction)
+
     return prcs
 
 
@@ -590,19 +665,19 @@ class SimpleDirectoryStructure(object):
         if type(fpaths) is str:
             self.add_path(fpaths)
 
-    def add_path(self,fpath):
+    def add_path(self, fpath):
         top_path = fpath
         temp_split = path.split(top_path)
         self._path_dict[temp_split[1]] = top_path
-        while(temp_split[1] != ''):
+        while (temp_split[1] != ''):
             top_path = temp_split[0]
             temp_split = path.split(top_path)
             self._path_dict[temp_split[1]] = top_path
 
-    def add_paths(self,list_of_fpaths):
+    def add_paths(self, list_of_fpaths):
         for fpath in list_of_fpaths:
             self.add_path(fpath)
 
 
-    def __getitem__(self,key):
+    def __getitem__(self, key):
         return self._path_dict[key]
