@@ -227,14 +227,14 @@ class ModelGraph(object):
                 del self._eventful_graph.adj[reaction][species.name]
                 self._ec_dict[elas] = (species.name, reaction)
 
+
     def remove_external_modifier_links(self):
         for species in self._model_map.species:
             for reaction in species.isModifierOf():
                 if species.name in self.mod.parameters:
-                    self._eventful_graph.adj[species.name][reaction][
-                        'strokewidth'] = '0px'
+                    self.change_link_properties('ec%s_%s' % (reaction, species.name), {'strokewidth':'0px'})
 
-    def remove_sinks(self):
+    def remove_dummy_sinks(self):
         for each in ['dummy', 'sink']:
             if each in self._eventful_graph.node:
                 del self._eventful_graph.node[each]
@@ -348,7 +348,7 @@ class ModelGraph(object):
             self.draw_all_links()
 
 
-    def highlight_cp(self, cp):
+    def highlight_cp(self, cp, show_dummy_sinks=False, show_external_modifier_links=False ):
         colors = ModelGraph.RGB_RGB_RGB_
         symbols = cp.numerator.atoms(Symbol)
         title = widgets.Latex(
@@ -384,9 +384,13 @@ class ModelGraph(object):
                                         only_overwrite=True)
 
         self._base_name = cp.parent.name + '_' + cp.name
+        if not show_dummy_sinks:
+            self.remove_dummy_sinks()
+        if not show_external_modifier_links:
+            self.remove_external_modifier_links()
 
 
-    def highlight_cc(self, cc):
+    def highlight_cc(self, cc, show_dummy_sinks=False, show_external_modifier_links=False ):
 
         colors = ModelGraph.RGB_RGB_RGB_
         title = widgets.Latex('Control Patterns for $' + cc.latex_name + '$')
@@ -406,7 +410,7 @@ class ModelGraph(object):
                 self._make_modifier_links()
                 self._force_directed_graph.show_color_legend = False
                 self._force_directed_graph.show_color_legend = True
-                controlled in species_names
+
                 if controlled in species_names:
                     self.change_node_properties(controlled, {'stroke':'#8B361E', 'strokewidth':'3px'})
                 self.change_node_properties(controller,{'stroke':'#006B58', 'strokewidth':'3px'})
@@ -418,6 +422,10 @@ class ModelGraph(object):
                                                 only_overwrite=True)
 
                 CP_repr.value = cp._repr_latex_()
+                if not show_dummy_sinks:
+                    self.remove_dummy_sinks()
+                if not show_external_modifier_links:
+                    self.remove_external_modifier_links()
 
             return click
 
@@ -437,3 +445,7 @@ class ModelGraph(object):
         buttons.children = tuple(button_list)
         self._top_box.children = (titles, buttons)
         self.show(clear_top_box=False)
+        if not show_dummy_sinks:
+            self.remove_dummy_sinks()
+        if not show_external_modifier_links:
+            self.remove_external_modifier_links()

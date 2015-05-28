@@ -318,14 +318,15 @@ class CCoef(CCBase):
             all_same = True
         return all_same
 
-    def highlight_patterns(self,width=None, height=None):
+    def highlight_patterns(self,width=None, height=None, show_dummy_sinks=False, show_external_modifier_links=False):
 
         mg = ModelGraph(mod=self.mod,analysis_method=self._analysis_method)
         if height:
             mg.height = height
         if width:
             mg.width = width
-        mg.highlight_cc(self)
+
+        mg.highlight_cc(self, show_dummy_sinks, show_external_modifier_links)
 
 
 class CPattern(CCBase):
