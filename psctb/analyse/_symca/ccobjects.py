@@ -3,7 +3,7 @@ from numpy import array, float64, nanmin, nanmax
 from ...utils.model_graph import ModelGraph
 from sympy import Symbol
 from pysces import ModelMap
-from numpy import NaN
+from numpy import NaN, abs
 
 from ...utils.misc import silence_print, DotDict, formatter_factory, \
     do_safe_state, find_min, find_max
@@ -146,10 +146,16 @@ class CCoef(CCBase):
         self._latex_expression_full = None
         self._latex_expression = None
         self._latex_name = None
+        self._abs_value = None
 
         self.control_patterns = None
 
         self._set_control_patterns()
+
+    @property
+    def abs_value(self):
+        self._calc_abs_value()
+        return self._abs_value
 
     @property
     def latex_numerator(self):
@@ -267,11 +273,24 @@ class CCoef(CCBase):
         return data
 
 
-    def _recalculate_value(self):
-        """Recalculates the control coefficients and control pattern
-           values. calls _calc_value() for self and each control
-           pattern. Useful for when model parameters change"""
-        self._calc_value()
+    # def _recalculate_value(self):
+    #     """Recalculates the control coefficients and control pattern
+    #        values. calls _calc_value() for self and each control
+    #        pattern. Useful for when model parameters change"""
+    #     self._calc_value()
+
+    def _calc_abs_value(self):
+        """Calculates the numeric value of the control pattern from the
+           values of its control patterns."""
+        keys = self.expression.atoms(Symbol)
+        subsdict = {}
+        for key in keys:
+            str_key = str(key)
+            subsdict[str_key] = getattr(self.mod, str_key)
+        for pattern in self.control_patterns.values():
+            pattern._calc_value(subsdict)
+        self._abs_value = sum(
+            [abs(pattern._value) for pattern in self.control_patterns.values()])
 
     def _calc_value(self):
         """Calculates the numeric value of the control pattern from the
@@ -396,5 +415,5 @@ class CPattern(CCBase):
 
     @property
     def percentage(self):
-        self._percentage = (self.value / self.parent.value) * 100
+        self._percentage = (abs(self.value) / self.parent.abs_value) * 100
         return self._percentage
