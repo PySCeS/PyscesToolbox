@@ -253,82 +253,91 @@ class Symca(object):
 
 
 
-    def do_symca(self, auto_save=False, internal_fixed=False):
+    def do_symca(self, auto_save_load=False, internal_fixed=False):
+        def do_symca_internals(self):
+            CC_i_num, common_denom_expr = SMCAtools.invert(
+                self.ematrix,
+                self.path_to('temp')
+            )
 
-        CC_i_num, common_denom_expr = SMCAtools.invert(
-            self.ematrix,
-            self.path_to('temp')
-        )
+            # logging.info('CC_i_num:')
+            # logging.info(CC_i_num)
+            # logging.info('common_denom_expr:')
+            # logging.info(common_denom_expr)
 
-        # logging.info('CC_i_num:')
-        # logging.info(CC_i_num)
-        # logging.info('common_denom_expr:')
-        # logging.info(common_denom_expr)
+            cc_sol = SMCAtools.solve_dep(
+                CC_i_num,
+                self.scaled_k0,
+                self.scaled_l0,
+                self.num_ind_fluxes,
+                self.path_to('temp')
+            )
 
-        cc_sol = SMCAtools.solve_dep(
-            CC_i_num,
-            self.scaled_k0,
-            self.scaled_l0,
-            self.num_ind_fluxes,
-            self.path_to('temp')
-        )
+            cc_sol, common_denom_expr = SMCAtools.fix_expressions(
+                cc_sol,
+                common_denom_expr,
+                self.lmatrix,
+                self.species_independent,
+                self.species_dependent
+            )
 
-        cc_sol, common_denom_expr = SMCAtools.fix_expressions(
-            cc_sol,
-            common_denom_expr,
-            self.lmatrix,
-            self.species_independent,
-            self.species_dependent
-        )
+            cc_names = SMCAtools.build_cc_matrix(
+                self.fluxes,
+                self.fluxes_independent,
+                self.species_independent,
+                self.fluxes_dependent,
+                self.species_dependent
+            )
 
-        cc_names = SMCAtools.build_cc_matrix(
-            self.fluxes,
-            self.fluxes_independent,
-            self.species_independent,
-            self.fluxes_dependent,
-            self.species_dependent
-        )
-
-        full_dic = {common_denom_expr: {}}
-        for i, each in enumerate(cc_sol):
-            full_dic[common_denom_expr][cc_names[i]] =  each
-        if internal_fixed:
-            simpl_dic = {}
+            full_dic = {common_denom_expr: {}}
             for i, each in enumerate(cc_sol):
-                expr = each / common_denom_expr
-                expr = SMCAtools.maxima_factor(expr, self.path_to('temp'))
-                num, denom = fraction(expr)
-                if not simpl_dic.has_key(denom):
-                    simpl_dic[denom] = {}
-                simpl_dic[denom][cc_names[i]] = num
+                full_dic[common_denom_expr][cc_names[i]] =  each
+            if internal_fixed:
+                simpl_dic = {}
+                for i, each in enumerate(cc_sol):
+                    expr = each / common_denom_expr
+                    expr = SMCAtools.maxima_factor(expr, self.path_to('temp'))
+                    num, denom = fraction(expr)
+                    if not simpl_dic.has_key(denom):
+                        simpl_dic[denom] = {}
+                    simpl_dic[denom][cc_names[i]] = num
 
-        cc_objects = SMCAtools.spawn_cc_objects(
-            self.mod,
-            full_dic,
-            self._ltxe
-        )[0]
+            cc_objects = SMCAtools.spawn_cc_objects(
+                self.mod,
+                full_dic,
+                self._ltxe
+            )[0]
 
-        for cc in cc_objects:
-            self.CC[cc.name] = cc
-        self.CC._make_repr(
-            '"$" + v.latex_name + "$"', 'v.value', formatter_factory())
+            for cc in cc_objects:
+                self.CC[cc.name] = cc
+            self.CC._make_repr(
+                '"$" + v.latex_name + "$"', 'v.value', formatter_factory())
 
-        if internal_fixed:
-            simp_objects_list = SMCAtools.spawn_cc_objects(self.mod,
-                                                           simpl_dic,
-                                                           self._ltxe)
-            cnt = 0
-            for block in simp_objects_list:
-                setattr(self, 'CC' + str(cnt), DotDict())
-                dd = getattr(self, 'CC' + str(cnt))
-                for cc in block:
-                    dd[cc.name] = cc
-                dd._make_repr(
-                    '"$" + v.latex_name + "$"', 'v.value', formatter_factory())
-                cnt += 1
+            if internal_fixed:
+                simp_objects_list = SMCAtools.spawn_cc_objects(self.mod,
+                                                               simpl_dic,
+                                                               self._ltxe)
+                cnt = 0
+                for block in simp_objects_list:
+                    setattr(self, 'CC' + str(cnt), DotDict())
+                    dd = getattr(self, 'CC' + str(cnt))
+                    for cc in block:
+                        dd[cc.name] = cc
+                    dd._make_repr(
+                        '"$" + v.latex_name + "$"', 'v.value', formatter_factory())
+                    cnt += 1
+    
+            self._object_populated = True
+            self.CC_i_num = CC_i_num
 
-        self._object_populated = True
-        self.CC_i_num = CC_i_num
-
-        if auto_save:
+        if auto_save_load:
+            try:
+                self.load()
+            except:
+                do_symca_internals(self)
+                self.save()
+        else:
+            do_symca_internals(self)
             self.save()
+
+
