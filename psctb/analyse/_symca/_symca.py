@@ -326,7 +326,7 @@ class Symca(object):
                     dd._make_repr(
                         '"$" + v.latex_name + "$"', 'v.value', formatter_factory())
                     cnt += 1
-    
+
             self._object_populated = True
             self.CC_i_num = CC_i_num
 
@@ -338,6 +338,5 @@ class Symca(object):
                 self.save()
         else:
             do_symca_internals(self)
-            self.save()
 
 
