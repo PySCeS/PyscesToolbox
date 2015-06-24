@@ -33,9 +33,11 @@ A  Linux system might not be required, but the software has thus far only been t
 
 PyscesToolbox can be installed from github using pip with the following command:
 
-'''
+```
 pip install git+git://github.com/PySCeS/pysces.git
-'''
+```
+
+
 
 
 
