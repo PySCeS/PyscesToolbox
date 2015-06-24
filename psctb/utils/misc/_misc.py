@@ -202,7 +202,7 @@ def html_table(matrix_or_array_like,
 
     See Also
     --------
-    'formatter_factory' : Creates formatter function
+    formatter_factory
 
     """
 

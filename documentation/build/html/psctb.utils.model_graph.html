@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>psctb.utils.model_graph package &mdash; PyscesToolbox 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyscesToolbox 1.0 documentation" href="index.html" />
+    <link rel="up" title="psctb.utils package" href="psctb.utils.html" />
+    <link rel="next" title="psctb.utils.plotting package" href="psctb.utils.plotting.html" />
+    <link rel="prev" title="psctb.utils.misc package" href="psctb.utils.misc.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="psctb.utils.plotting.html" title="psctb.utils.plotting package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="psctb.utils.misc.html" title="psctb.utils.misc package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyscesToolbox 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >psctb</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="psctb.html" >psctb package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="psctb.utils.html" accesskey="U">psctb.utils package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="psctb-utils-model-graph-package">
+<h1>psctb.utils.model_graph package<a class="headerlink" href="#psctb-utils-model-graph-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-psctb.utils.model_graph._model_graph">
+<span id="psctb-utils-model-graph-model-graph-module"></span><h2>psctb.utils.model_graph._model_graph module<a class="headerlink" href="#module-psctb.utils.model_graph._model_graph" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph">
+<em class="property">class </em><code class="descclassname">psctb.utils.model_graph._model_graph.</code><code class="descname">ModelGraph</code><span class="sig-paren">(</span><em>mod</em>, <em>pos_dic=None</em>, <em>analysis_method=None</em>, <em>base_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p class="rubric">Attributes</p>
+<p class="rubric">Methods</p>
+<dl class="attribute">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.REACTION_NODE">
+<code class="descname">REACTION_NODE</code><em class="property"> = {'strokewidth': '1.5px', 'stroke': '#00A388', 'r': 8, 'font_size': 20, 'dx': 15, 'dy': 7, 'color': 'black', 'fixed': True, 'shape': 'rect', 'fill': '#00A388'}</em><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.REACTION_NODE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.RGB_RGB_RGB_">
+<code class="descname">RGB_RGB_RGB_</code><em class="property"> = {0: 'rgb(94,79,162)', 1: 'rgb(50,136,189)', 2: 'rgb(102,194,165)', 3: 'rgb(171,221,164)', 4: 'rgb(230,245,152)', 5: 'rgb(254,224,139)', 6: 'rgb(253,174,97)', 7: 'rgb(244,109,67)', 8: 'rgb(213,62,79)', 9: 'rgb(158,1,66)', 10: 'rgb(158,1,66)'}</em><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.RGB_RGB_RGB_" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.SPECIES_NODE">
+<code class="descname">SPECIES_NODE</code><em class="property"> = {'strokewidth': '1.5px', 'stroke': '#FF6138', 'r': 11, 'font_size': 20, 'dx': 15, 'dy': 7, 'color': 'black', 'fixed': True, 'shape': 'circle', 'fill': '#FF6138'}</em><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.SPECIES_NODE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.change_link_properties">
+<code class="descname">change_link_properties</code><span class="sig-paren">(</span><em>elas</em>, <em>prop_dic=None</em>, <em>only_overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.change_link_properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.change_node_properties">
+<code class="descname">change_node_properties</code><span class="sig-paren">(</span><em>node_name</em>, <em>prop_dic=None</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.change_node_properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.draw_all_links">
+<code class="descname">draw_all_links</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.draw_all_links" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.height">
+<code class="descname">height</code><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.height" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.highlight_cc">
+<code class="descname">highlight_cc</code><span class="sig-paren">(</span><em>cc</em>, <em>show_dummy_sinks=False</em>, <em>show_external_modifier_links=False</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.highlight_cc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.highlight_cp">
+<code class="descname">highlight_cp</code><span class="sig-paren">(</span><em>cp</em>, <em>show_dummy_sinks=False</em>, <em>show_external_modifier_links=False</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.highlight_cp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.nodes_fixed">
+<code class="descname">nodes_fixed</code><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.nodes_fixed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.remove_dummy_sinks">
+<code class="descname">remove_dummy_sinks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.remove_dummy_sinks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.remove_external_modifier_links">
+<code class="descname">remove_external_modifier_links</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.remove_external_modifier_links" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.reset_node_properties">
+<code class="descname">reset_node_properties</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.reset_node_properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>file_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the image.</p>
+<p>Saves the image to either the default working directory or to an a
+specified location.
+Parameters
+&#8212;&#8212;&#8212;-
+file_name : str, Optional (default : None)</p>
+<blockquote>
+<div>An optional path to which the image will be saved.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.show">
+<code class="descname">show</code><span class="sig-paren">(</span><em>no_links=False</em>, <em>clear_top_box=True</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.show" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.straight_links">
+<code class="descname">straight_links</code><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.straight_links" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="psctb.utils.model_graph._model_graph.ModelGraph.width">
+<code class="descname">width</code><a class="headerlink" href="#psctb.utils.model_graph._model_graph.ModelGraph.width" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-psctb.utils.model_graph">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-psctb.utils.model_graph" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">psctb.utils.model_graph package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-psctb.utils.model_graph._model_graph">psctb.utils.model_graph._model_graph module</a></li>
+<li><a class="reference internal" href="#module-psctb.utils.model_graph">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="psctb.utils.misc.html"
+                        title="previous chapter">psctb.utils.misc package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="psctb.utils.plotting.html"
+                        title="next chapter">psctb.utils.plotting package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/psctb.utils.model_graph.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Carl Christensen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.4</a>
+      
+      |
+      <a href="_sources/psctb.utils.model_graph.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -14,7 +14,23 @@ all = ['Symca']
 
 
 class Symca(object):
+    """
+    A class that performs Symbolic Metabolic Control Analysis.
 
+    This class takes pysces model as an input and performs symbolic inversion
+    of the ``E matrix`` using ``Sympy`` by calculating the determinant and
+    adjoint matrices of this ``E matrix``.
+
+    Parameters
+    ----------
+    mod : PysMod
+        The pysces model on which to perform symbolic control analysis.
+    auto_load : boolean
+        If true
+
+    Returns
+    -------
+    """
     def __init__(self, mod, auto_load=False):
         super(Symca, self).__init__()
 
@@ -50,6 +66,7 @@ class Symca(object):
         self._esL = None
         self._ematrix = None
         if auto_load:
+            try
             self.load()
 
     @property
