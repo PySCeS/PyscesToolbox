@@ -355,8 +355,11 @@ class RateCharData(object):
 
     def _make_ec_summary(self):
         ecs = {}
-        for flux in self.plot_data.flux_names:
-            reaction = flux[2:]
+        reagent_of = [each[2:] for each in self.plot_data.flux_names]
+        modifier_of = getattr(
+            self._model_map, self.plot_data.fixed).isModifierOf()
+        all_reactions = reagent_of + modifier_of
+        for reaction in all_reactions:
             name = 'ec%s_%s' % (reaction, self.plot_data.fixed)
             val = getattr(self.mod, name)
             ecs[name] = val

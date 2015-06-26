@@ -8,8 +8,7 @@ PyscesToolbox currently provides tools for:
 - Generalised supply-demand analysis.
 - Symbolic metabolic control analysis and control pattern analysis.
 - Generating model schemas from metabolic models.
-- Distinguishing
- between thermodynamic and kinetic contributions towards reaction rate.
+- Distinguishing between thermodynamic and kinetic contributions towards reaction rate.
 - Interactive plotting
 
 PyscesToolbox was designed to be used within the IPython notebook, but most of the core features should work in a normal Python script.
@@ -21,20 +20,25 @@ This project is a work in progress and most features still require proper docume
 - A Python 2.7 installation
 - The full Scipy stack (see [http://scipy.org/install.html](http://scipy.org/install.html))
 - PySCeS (see [http://pysces.sourceforge.net/download.html](http://pysces.sourceforge.net/download.html) or install using ``pip install pysces``)
-- A Linux system
+- Networkx (see [https://networkx.github.io/](https://networkx.github.io/))
+- Maxima (see [http://maxima.sourceforge.net/download.html](http://maxima.sourceforge.net/download.html))
 
-Notes:
+**Notes:**
 
 Any versions of the scipy stack components released in or after 2014 should work, the only hard requirement is an IPython version in the 3.x.x series as PyscesToolbox relies quite heavily on the features of the IPython notebook and its widget system.
 
-A  Linux system might not be required, but the software has thus far only been tested on Linux (Ubuntu 14.04)
+Maxima is only a requirement for SymCA. Currently this functionality is not supported on Windows, but will be included in the near future.
+
+**For Windows users:**
+
+We recommend the WinPython_2.7 distribution ([http://winpython.sourceforge.net/](http://winpython.sourceforge.net/)). This portable scientific python distribution includes a variety of scientific packages out of the box and significantly streamlines the experience of working with Python on Windows. Other alternatives include Anaconda, Enthought Canopy and Python(x,y).
 
 ##Installation
 
 PyscesToolbox can be installed from github using pip with the following command:
 
 ```
-pip install git+git://github.com/PySCeS/pysces.git
+pip install git+git://github.com/PySCeS/PyscesToolbox.git
 ```
 
 
