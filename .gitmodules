@@ -1,4 +1,0 @@
-[submodule "d3networkx_psctb"]
-	path = d3networkx_psctb
-	url = git@github.com:exe0cdc/ipython-d3networkx.git
-	branch = submodule
