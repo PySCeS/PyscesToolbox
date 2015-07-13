@@ -1,20 +1,20 @@
-from __future__ import print_function
+from setuptools import setup, find_packages
 
-import setuptools
+packages = find_packages()
 
-packages = setuptools.find_packages()
-
-config = {
-    'description': 'A library full of useful functions to use with PySCeS',
-    'author': 'Carl Christensen',
-    'url': 'TBA.',
-    'download_url': 'TBA',
-    'author_email': 'exe0cdc@gmail.com',
-    'version': '0.1',
-    'install_requires': ['sympy', 'numpy', 'pysces',],
-    'packages': packages,
-    'include_package_data': True,
-    'scripts': [],
-    'name': 'PyscesToolbox',
-}
-setuptools.setup(**config)
+setup(
+    name='PyscesToolbox',
+    version='0.8.0',
+    packages=packages,
+    url='https://github.com/PySCeS/PyscesToolbox',
+    license='',
+    author='Carl Christensen',
+    author_email='carldc@sun.ac.za',
+    description='A set of metabolic model analysis tools for PySCeS.',
+    install_requires=['IPython>=3.0.0,<4.0.0',
+                      'numpy',
+                      'sympy',
+                      'pysces',
+                      'matplotlib',
+                      'd3networkx_psctb'],
+)

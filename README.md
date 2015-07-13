@@ -1,7 +1,7 @@
 #PyscesToolbox
 
 
-This is a set of metabolic model analysis tools using PySCeS as a basis.
+This is a set of metabolic model analysis tools for PySCeS.
 
 PyscesToolbox currently provides tools for:
 
@@ -27,19 +27,32 @@ This project is a work in progress and most features still require proper docume
 
 Any versions of the scipy stack components released in or after 2014 should work, the only hard requirement is an IPython version in the 3.x.x series as PyscesToolbox relies quite heavily on the features of the IPython notebook and its widget system.
 
+Required packages should automatically download and install when using the commands specified under **Installation** below.
+
 Maxima is only a requirement for SymCA. Currently this functionality is not supported on Windows, but will be included in the near future.
 
 **For Windows users:**
 
-We recommend the WinPython_2.7 distribution ([http://winpython.sourceforge.net/](http://winpython.sourceforge.net/)). This portable scientific python distribution includes a variety of scientific packages out of the box and significantly streamlines the experience of working with Python on Windows. Other alternatives include Anaconda, Enthought Canopy and Python(x,y).
+We recommend the WinPython_2.7 32bit distribution ([http://winpython.sourceforge.net/](http://winpython.sourceforge.net/)). This portable scientific python distribution includes a variety of scientific packages out of the box and significantly streamlines the experience of working with Python on Windows. Other alternatives include Anaconda, Enthought Canopy and Python(x,y).
 
 ##Installation
 
-PyscesToolbox can be installed from github using pip with the following command:
+PyscesToolbox can be installed from github using pip with the following two commands:
 
+```bash
+pip install git+https://github.com/exe0cdc/ipython-d3networkx.git
+pip install git+https://github.com/PySCeS/PyscesToolbox.git
 ```
-pip install git+git://github.com/PySCeS/PyscesToolbox.git
+
+##Basic usage
+
+To start a PySCeSToolbox session in a IPython notebook start up a notebook (using the ``ipython notebook`` command) and run the following commands:
+
+```python
+import pysces
+import psctb
 ```
+
 
 
 
