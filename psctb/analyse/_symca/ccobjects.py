@@ -1,10 +1,10 @@
 import numpy as np
 from numpy import array, float64, nanmin, nanmax
-from ...utils.model_graph import ModelGraph
 from sympy import Symbol
 from pysces import ModelMap
 from numpy import NaN, abs
 
+from ...utils.model_graph import ModelGraph
 from ...utils.misc import silence_print, DotDict, formatter_factory, \
     do_safe_state, find_min, find_max
 from ...utils.plotting import Data2D

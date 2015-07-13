@@ -1,4 +1,4 @@
-from os import path, mkdir
+from os import path
 from collections import OrderedDict
 
 from IPython.display import display, clear_output

@@ -1,4 +1,5 @@
 import json
+
 from sympy.matrices import Matrix
 from sympy import fraction, sympify
 
@@ -7,7 +8,6 @@ from ...latextools import LatexExpr
 from .symca_toolbox import SymcaToolBox as SMCAtools
 from ...utils.misc import DotDict
 from ...utils.misc import formatter_factory
-from os import path
 
 
 all = ['Symca']

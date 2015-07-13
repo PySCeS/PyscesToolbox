@@ -13,8 +13,6 @@ from ... import modeltools
 from ..misc import split_coefficient
 
 
-
-
 __author__ = 'carl'
 
 __all__ = ['ModelGraph']

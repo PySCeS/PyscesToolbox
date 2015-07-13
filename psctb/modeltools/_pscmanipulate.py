@@ -1,8 +1,11 @@
-from os import path, mkdir
-from pysces import model, model_dir, output_dir
+from os import path
 import cStringIO
 import string
+
+from pysces import model
+
 from ._paths import get_model_name
+
 
 __all__ = ['psc_to_str',
            'mod_to_str',
