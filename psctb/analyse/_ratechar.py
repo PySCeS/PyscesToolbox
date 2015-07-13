@@ -949,12 +949,16 @@ class RateCharData(object):
                                          self.plot_data.fixed,
                                          route_reaction)
 
-                ecs.append(ec)
+                # ecs.append(ec)
+                if ec not in ecs:
+                    ecs.append(ec)
                 ccs.append(cc)
                 prc_names.append(name)
 
+        ec_len = len(ecs)
+
         user_output = [self.plot_data.fixed] + ecs + ccs
-        print user_output
+
 
         scanner = pysces.Scanner(self.mod)
         scanner.quietRun = True
@@ -974,20 +978,31 @@ class RateCharData(object):
                          'xlim': [self.plot_data.scan_min,
                                   self.plot_data.scan_max]}
 
-        cc_ec_data_obj = Data2D(self.mod,
-                                user_output,
-                                scanner.UserOutputResults,
-                                self._ltxe,
-                                self._analysis_method,
-                                ax_properties,
-                                'cc_ec_scan')
+        cc_ec_data_obj = Data2D(mod=self.mod,
+                                column_names=user_output,
+                                data_array=scanner.UserOutputResults,
+                                ltxe=self._ltxe,
+                                analysis_method=self._analysis_method,
+                                ax_properties=ax_properties,
+                                file_name='cc_ec_scan',
+                                num_of_groups=ec_len)
 
         rc_data = []
+
+        all_outs = scanner.UserOutputResults[:, 1:]
+
+        ec_outs = all_outs[:, :ec_len]
+        cc_outs = all_outs[:, ec_len:]
+        ec_positions = range(ec_len) * (len(prc_names)/ec_len)
+
+
         for i, prc_name in enumerate(prc_names):
-            outs = scanner.UserOutputResults[:, 1:]
-            cc_s_pos = len(prc_names)
-            ec_col_data = outs[:, i]
-            cc_col_data = outs[:, i + cc_s_pos]
+
+            ec_col_data = ec_outs[:, ec_positions[i]]
+
+            cc_col_data = cc_outs[:, i]
+            # ec_col_data = outs[:, i]
+            # cc_col_data = outs[:, i + cc_s_pos]
             col = ec_col_data * cc_col_data
             rc_data.append(col)
 
@@ -998,50 +1013,16 @@ class RateCharData(object):
         rc_out_arr = [scanner.UserOutputResults[:, 0]] + rc_data
         rc_out_arr = numpy.vstack(rc_out_arr).transpose()
 
-        rc_data_obj = Data2D(self.mod,
-                             [self.plot_data.fixed] + prc_names + rc_names,
-                             rc_out_arr,
-                             self._ltxe,
-                             self._analysis_method,
-                             ax_properties,
-                             'prc_scan')
+        rc_data_obj = Data2D(mod=self.mod,
+                             column_names = [self.plot_data.fixed] + prc_names + rc_names,
+                             data_array=rc_out_arr,
+                             ltxe=self._ltxe,
+                             analysis_method=self._analysis_method,
+                             ax_properties=ax_properties,
+                             file_name='prc_scan',
+                             num_of_groups=ec_len)
         rc_data_obj._working_dir = path.split(self._working_dir)[0]
         cc_ec_data_obj._working_dir = path.split(self._working_dir)[0]
 
         return rc_data_obj, cc_ec_data_obj
 
-##########################################
-'''
-TODO:
-fix this metadata story
-and create LineData objects
-
-idea:
-
-setup linedata in one function.. setup colormap here as well
-so something like:
-
-cmap =  number of colors corresponding with number of fluxes
-for each line that we should draw
-    if line_type is flux:
-        color = color out of cmap
-    elif ec:
-        darker
-    etc
-
-    line = LineData(bla bla bla)
-    lines.append(line)
-
-
-categories:
-
-Supply demand
-
-Flux, Elasticity coefficients, Partial Response coefficients, Response coefficients
-
-Reaction Name
-
-
-
-
-'''

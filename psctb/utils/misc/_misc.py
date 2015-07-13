@@ -23,7 +23,8 @@ __all__ = ['cc_list',
            'ec_dict',
            'cc_dict',
            'rc_dict',
-           'prc_dict']
+           'prc_dict',
+           'group_sort']
 
 
 def find_min(array_like):
@@ -469,6 +470,24 @@ def prc_dict(mod):
                              back_reaction)
 
     return prcs
+
+
+def group_sort(old_list, num_of_groups):
+    # Normally scan columns are sorted in a way that they are sorted together
+    # in the order they were scanned. This function sorts the lines so that
+    # each item in each group is equally spaced away from each other so that
+    # they can be assigned colors (using matplotlib's colormap functionality)
+    # that differ from each other. This is better than sorting lines before
+    # sending the data tp data2d because otherwise button grouping will also be
+    # affected by this sorting scheme.
+    group_size = len(old_list)/num_of_groups
+    first_group = range(0,len(old_list),num_of_groups)
+    groups = first_group
+    for i in xrange(1,group_size-1):
+        groups = groups + [j+i for j in first_group]
+    new_list = [old_list[pos] for pos in groups]
+
+    return new_list
 
 
 class PseudoDotDict:

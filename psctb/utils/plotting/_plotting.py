@@ -190,7 +190,8 @@ class Data2D(object):
                  ax_properties=None,
                  file_name=None,
                  additional_cat_classes=None,
-                 additional_cats=None):
+                 additional_cats=None,
+                 num_of_groups=None):
         self.plot_data = DotDict()
         self.plot_data['scan_in'] = column_names[0]
         self.plot_data['scan_out'] = column_names[1:]
@@ -313,6 +314,8 @@ class Data2D(object):
         self._setup_categories()
         self._setup_lines()
         self._category_classes.update(self._scan_types)
+        if num_of_groups:
+            self._lines = group_sort(self._lines, num_of_groups)
 
     def _setup_categories(self):
         """
@@ -874,6 +877,7 @@ class ScanFig(object):
                 head = widgets.Latex(value=k)
                 display(head)
                 display(v)
+                v._css = [(None,'flex-wrap','wrap'),]
                 # v.remove_class('vbox')
                 # v.add_class('hbox')
                 # v.set_css({'flex-wrap': 'wrap'})
@@ -891,7 +895,7 @@ class ScanFig(object):
                 display(v)
                 # v.remove_class('vbox')
                 # v.add_class('hbox')
-                # v.set_css({'flex-wrap': 'wrap'})
+                v._css = [(None,'flex-wrap','wrap'),]
         display(widgets.Latex(value='$~$'))
         display(self._save_button)
         # self._save_button.remove_class('vbox')
