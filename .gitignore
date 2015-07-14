@@ -6,3 +6,4 @@
 *.egg-info
 del_junk.sh
 .idea
+*.old
