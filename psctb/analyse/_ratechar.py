@@ -917,7 +917,7 @@ class RateCharData(object):
 
         return scan_fig
 
-    @silence_print
+    #@silence_print
     def plot_decompose(self):
         ecs = []
         ccs = []
@@ -985,7 +985,8 @@ class RateCharData(object):
                                 analysis_method=self._analysis_method,
                                 ax_properties=ax_properties,
                                 file_name='cc_ec_scan',
-                                num_of_groups=ec_len)
+                                num_of_groups=ec_len,
+                                working_dir=path.split(self._working_dir)[0])
 
         rc_data = []
 
@@ -1012,7 +1013,6 @@ class RateCharData(object):
 
         rc_out_arr = [scanner.UserOutputResults[:, 0]] + rc_data
         rc_out_arr = numpy.vstack(rc_out_arr).transpose()
-
         rc_data_obj = Data2D(mod=self.mod,
                              column_names = [self.plot_data.fixed] + prc_names + rc_names,
                              data_array=rc_out_arr,
@@ -1020,9 +1020,10 @@ class RateCharData(object):
                              analysis_method=self._analysis_method,
                              ax_properties=ax_properties,
                              file_name='prc_scan',
-                             num_of_groups=ec_len)
-        rc_data_obj._working_dir = path.split(self._working_dir)[0]
-        cc_ec_data_obj._working_dir = path.split(self._working_dir)[0]
+                             num_of_groups=ec_len,
+                             working_dir=path.split(self._working_dir)[0])
+        #rc_data_obj._working_dir = path.split(self._working_dir)[0]
+        #cc_ec_data_obj._working_dir = path.split(self._working_dir)[0]
 
         return rc_data_obj, cc_ec_data_obj
 

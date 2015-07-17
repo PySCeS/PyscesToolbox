@@ -191,7 +191,8 @@ class Data2D(object):
                  file_name=None,
                  additional_cat_classes=None,
                  additional_cats=None,
-                 num_of_groups=None):
+                 num_of_groups=None,
+                 working_dir=None):
         self.plot_data = DotDict()
         self.plot_data['scan_in'] = column_names[0]
         self.plot_data['scan_out'] = column_names[1:]
@@ -218,9 +219,8 @@ class Data2D(object):
         self._mod.doMcaRC()
 
         if not analysis_method:
-            self._analysis_method = 'parameter_scan'
-        else:
-            self._analysis_method = analysis_method
+            analysis_method = 'parameter_scan'
+        self._analysis_method = analysis_method
 
         self._fname_specified = False
 
@@ -230,12 +230,12 @@ class Data2D(object):
             self._fname = file_name
             self._fname_specified = True
 
-        self._working_dir = modeltools.make_path(self._mod,
-                                                 self._analysis_method)
-        if not ax_properties:
-            self._ax_properties_ = None
-        else:
-            self._ax_properties_ = ax_properties
+        if not working_dir:
+            self._working_dir = modeltools.make_path(mod=self._mod,
+                                                     analysis_method=self._analysis_method)
+        self._working_dir = working_dir
+
+        self._ax_properties_ = ax_properties
 
         # So in order for ScanFig to have all those nice buttons that are
         # organised so well we need to set it up beforehand. Basically
