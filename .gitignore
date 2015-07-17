@@ -4,6 +4,6 @@
 /dist
 /build
 *.egg-info
-del_junk.sh
+reinstall.sh
 .idea
 *.old
