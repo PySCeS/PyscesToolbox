@@ -425,8 +425,37 @@ class SymcaToolBox(object):
             denom = sympify('1')
             for row in range(dependent_ls.rows):
                 for each in dependent_ls[row, :] * species_independent * -1:
-                    denom = denom * each.atoms(Symbol).pop()
+                    symbol_atoms = each.atoms(Symbol)
+                    for symbol_atom in symbol_atoms:
+                        if symbol_atom not in denom:
+                            denom = denom * symbol_atom
+                    #denom = denom * each.atoms(Symbol).pop()
                 denom = denom * species_dependent[row]
+            return denom.nsimplify()
+
+    def get_fix_denom_jannie(lmatrix, species_independent, species_dependent):
+        num_inds = len(species_independent)
+        num_deps = len(species_dependent)
+        if num_deps == 0:
+            return sympify('1')
+        else:
+            dependent_ls = lmatrix[num_inds:, :]
+            denom = sympify('1')
+            for row in range(dependent_ls.rows):
+                den_new = sympify('1')
+                for each in dependent_ls[row, :] * species_independent * -1:
+                    symbol_atoms = each.atoms(Symbol)
+                    for symbol_atom in symbol_atoms:
+                        if den_new == 1:
+                            den_new = den_new * symbol_atom
+                        else:
+                            den_new = den_new + symbol_atom
+                    #denom = denom * each.atoms(Symbol).pop()
+                if den_new == 1:
+                    den_new = den_new * species_dependent[row]
+                else:
+                    den_new = den_new + species_dependent[row]
+                denom = denom * den_new
             return denom.nsimplify()
 
     @staticmethod
