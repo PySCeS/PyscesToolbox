@@ -520,12 +520,12 @@ class ScanFig(object):
 
         # figure setup
         plt.ioff()
-        self.fig = plt.figure(figsize=(10, 5.72))
+        self.mpl_figure = plt.figure(figsize=(10, 5.72))
         if fig_properties:
-            self.fig.set(**fig_properties)
+            self.mpl_figure.set(**fig_properties)
 
         # axis setup
-        self.mpl_axes = self.fig.add_subplot(111)
+        self.mpl_axes = self.mpl_figure.add_subplot(111)
         if ax_properties:
             self.mpl_axes.set(**ax_properties)
 
@@ -597,9 +597,9 @@ class ScanFig(object):
         if rcParams['backend'] == \
                 'module://IPython.kernel.zmq.pylab.backend_inline':
             clear_output(wait=True)
-            display(self.fig)
+            display(self.mpl_figure)
         else:
-            self.fig.show()
+            self.mpl_figure.show()
 
     def save(self, file_name=None, dpi=None, fmt=None):
         """
@@ -618,7 +618,7 @@ class ScanFig(object):
                                              file_name = file_name)
         fmt = modeltools.get_fmt(file_name)
 
-        self.fig.savefig(file_name,
+        self.mpl_figure.savefig(file_name,
                          format=fmt,
                          dpi=dpi,
                          bbox_extra_artists=(self.mpl_axes.get_legend(),),
