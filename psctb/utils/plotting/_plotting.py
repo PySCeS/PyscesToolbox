@@ -810,6 +810,10 @@ class ScanFig(object):
         return self._categories_
 
     @property
+    def category_names(self):
+        return self._categories.keys()
+
+    @property
     def categories_status(self):
         if not self._categories_status:
             cat_stat_dict = {}
