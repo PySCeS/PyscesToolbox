@@ -511,7 +511,7 @@ class ScanFig(object):
 
         rcParams.update({'font.size': 16})
 
-        self._categories = None
+        self._categories_ = None
         self._categories_status = None
         self._lines_ = None
         self._widgets_ = None
@@ -537,9 +537,9 @@ class ScanFig(object):
         self.mpl_axes.set_color_cycle(cmap)
 
         if category_classes:
-            self.category_classes = category_classes
+            self._category_classes = category_classes
         else:
-            self.category_classes = {'': [k for k in self.categories]}
+            self._category_classes = {'': [k for k in self._categories]}
 
         if base_name:
             self._base_name = base_name
@@ -630,7 +630,7 @@ class ScanFig(object):
     def _widgets(self):
         if not self._widgets_:
             widget_classes = OrderedDict()
-            for k in self.category_classes.iterkeys():
+            for k in self._category_classes.iterkeys():
                 widget_classes[k] = widgets.HBox()
 
             def oc(cat):
@@ -640,13 +640,13 @@ class ScanFig(object):
 
                 return on_change
 
-            for each in self.categories:
+            for each in self._categories:
                 w = widgets.ToggleButton()
                 w.description = each
                 w.value = self.categories_status[each]
                 on_change = oc(each)
                 w.on_trait_change(on_change, 'value')
-                for k, v in self.category_classes.iteritems():
+                for k, v in self._category_classes.iteritems():
                     if each in v:
                         widget_classes[k].children += (w),
 
@@ -788,8 +788,8 @@ class ScanFig(object):
         return self._figure_widgets_
 
     @property
-    def categories(self):
-        if not self._categories:
+    def _categories(self):
+        if not self._categories_:
             main_cats = []
             cats = []
             for each in self._raw_line_data:
@@ -806,14 +806,14 @@ class ScanFig(object):
                 for cat in each.categories:
                     cat_dict[cat].append(line)
 
-            self._categories = cat_dict
-        return self._categories
+            self._categories_ = cat_dict
+        return self._categories_
 
     @property
     def categories_status(self):
         if not self._categories_status:
             cat_stat_dict = {}
-            for each in self.categories:
+            for each in self._categories:
                 cat_stat_dict[each] = False
 
             self._categories_status = cat_stat_dict
@@ -854,12 +854,12 @@ class ScanFig(object):
         # get the visibility status of the category eg. True/False
         self.categories_status[cat] = value
         # get all the other categories
-        other_cats = self.categories.keys()
+        other_cats = self._categories.keys()
         other_cats.pop(other_cats.index(cat))
         # self.categories is a dict with categories as keys
         # and list of lines that fall within a category
         # as a value. So for each line that falls in a cat
-        for line in self.categories[cat]:
+        for line in self._categories[cat]:
             # The visibility for a line has not changed at the start of
             # the loop
             in_other_cats = False
@@ -867,7 +867,7 @@ class ScanFig(object):
             other_cat_stats = []
 
             for each in other_cats:
-                if line in self.categories[each]:
+                if line in self._categories[each]:
                     other_cat_stats.append(self.categories_status[each])
                     in_other_cats = True
             # If a line is never in any other categories
