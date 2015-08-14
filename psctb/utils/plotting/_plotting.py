@@ -513,7 +513,7 @@ class ScanFig(object):
 
         self._categories = None
         self._categories_status = None
-        self._lines = None
+        self._lines_ = None
         self._widgets_ = None
         self._figure_widgets_ = None
         self._raw_line_data = line_data_list
@@ -553,7 +553,7 @@ class ScanFig(object):
 
         self._save_counter = 0
 
-        self.lines
+        self._lines
         if rcParams['backend'] == \
                 'module://IPython.kernel.zmq.pylab.backend_inline':
             plt.close()
@@ -800,7 +800,7 @@ class ScanFig(object):
                 cat_dict[each] = []
 
             for each in self._raw_line_data:
-                line = self.lines[each.name]
+                line = self._lines[each.name]
                 for cat in each.categories:
                     cat_dict[cat].append(line)
 
@@ -818,8 +818,8 @@ class ScanFig(object):
         return self._categories_status
 
     @property
-    def lines(self):
-        if not self._lines:
+    def _lines(self):
+        if not self._lines_:
             lines = {}
             for i, each in enumerate(self._raw_line_data):
                 line, = self.mpl_axes.plot(each.x, each.y)
@@ -835,11 +835,11 @@ class ScanFig(object):
                 line.set_visible(False)
 
                 lines[each.name] = line
-            self._lines = lines
-        return self._lines
+            self._lines_ = lines
+        return self._lines_
 
     def toggle_line(self, name, value):
-        self.lines[name].set_visible(value)
+        self._lines[name].set_visible(value)
 
     def toggle_category(self, cat, value):
         # get the visibility status of the category eg. True/False
