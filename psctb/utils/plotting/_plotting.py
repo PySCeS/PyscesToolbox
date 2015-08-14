@@ -554,10 +554,12 @@ class ScanFig(object):
         self._save_counter = 0
 
         self._lines
+
         if rcParams['backend'] == \
                 'module://IPython.kernel.zmq.pylab.backend_inline':
             plt.close()
         self._save_button_ = None
+
 
     @property
     def _save_button(self):
@@ -837,6 +839,13 @@ class ScanFig(object):
                 lines[each.name] = line
             self._lines_ = lines
         return self._lines_
+
+    @property
+    def line_names(self):
+        lines = self._lines.keys()
+        lines.sort()
+        return lines
+
 
     def toggle_line(self, name, value):
         self._lines[name].set_visible(value)
