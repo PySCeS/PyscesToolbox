@@ -896,6 +896,9 @@ class ScanFig(object):
                 # v.set_css({'flex-wrap': 'wrap'})
         display(widgets.Latex(value='$~$'))
         display(self._save_button)
+        for boxes in self._widgets.itervalues():
+            for button in boxes.children:
+                button.value = self.categories_status[button.description]
         # self._save_button.remove_class('vbox')
         # self._save_button.add_class('hbox')
 
