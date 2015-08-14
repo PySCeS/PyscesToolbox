@@ -913,7 +913,7 @@ class RateCharData(object):
         scan_fig.toggle_category('Supply', True)
         scan_fig.toggle_category('Demand', True)
         scan_fig.toggle_category('Fluxes', True)
-        scan_fig.ax.axvline(self.plot_data.fixed_ss, ls=':', color='gray')
+        scan_fig.mpl_axes.axvline(self.plot_data.fixed_ss, ls=':', color='gray')
 
         return scan_fig
 

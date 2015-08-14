@@ -525,16 +525,16 @@ class ScanFig(object):
             self.fig.set(**fig_properties)
 
         # axis setup
-        self.ax = self.fig.add_subplot(111)
+        self.mpl_axes = self.fig.add_subplot(111)
         if ax_properties:
-            self.ax.set(**ax_properties)
+            self.mpl_axes.set(**ax_properties)
 
         # colourmap_setup
         # at the moment this is very basic and could be expanded
         # it would be useful to set it up based on category somehow
         cmap = plt.get_cmap('Set1')(
             linspace(0, 1.0, len(line_data_list)))
-        self.ax.set_color_cycle(cmap)
+        self.mpl_axes.set_color_cycle(cmap)
 
         if category_classes:
             self.category_classes = category_classes
@@ -588,7 +588,7 @@ class ScanFig(object):
         """
 
         _add_legend_viewlim(
-            self.ax,
+            self.mpl_axes,
             bbox_to_anchor=(0, -0.17),
             ncol=3,
             loc=2,
@@ -621,7 +621,7 @@ class ScanFig(object):
         self.fig.savefig(file_name,
                          format=fmt,
                          dpi=dpi,
-                         bbox_extra_artists=(self.ax.get_legend(),),
+                         bbox_extra_artists=(self.mpl_axes.get_legend(),),
                          bbox_inches='tight')
 
     @property
@@ -731,20 +731,20 @@ class ScanFig(object):
         if not self._figure_widgets_:
             min_x = widgets.FloatText()
             max_x = widgets.FloatText()
-            min_x.value, max_x.value = self.ax.get_xlim()
+            min_x.value, max_x.value = self.mpl_axes.get_xlim()
             min_x.description = 'min'
             max_x.description = 'max'
 
             min_y = widgets.FloatText()
             max_y = widgets.FloatText()
-            min_y.value, max_y.value = self.ax.get_ylim()
+            min_y.value, max_y.value = self.mpl_axes.get_ylim()
             min_y.description = 'min'
             max_y.description = 'max'
 
             log_x = widgets.Checkbox()
             log_y = widgets.Checkbox()
-            log_x.value = convert_scale(self.ax.get_xscale())
-            log_y.value = convert_scale(self.ax.get_yscale())
+            log_x.value = convert_scale(self.mpl_axes.get_xscale())
+            log_y.value = convert_scale(self.mpl_axes.get_yscale())
             log_x.description = 'x_log'
             log_y.description = 'y_log'
 
@@ -756,16 +756,16 @@ class ScanFig(object):
                     min_x.value = c_v(min_x.value)
                     max_x.value = c_v(max_x.value)
 
-                self.ax.set_xlim([min_x.value, max_x.value])
+                self.mpl_axes.set_xlim([min_x.value, max_x.value])
 
                 if log_y.value is True:
                     min_y.value = c_v(min_y.value)
                     max_y.value = c_v(max_y.value)
 
-                self.ax.set_ylim([min_y.value, max_y.value])
+                self.mpl_axes.set_ylim([min_y.value, max_y.value])
 
-                self.ax.set_xscale(convert_scale(log_x.value))
-                self.ax.set_yscale(convert_scale(log_y.value))
+                self.mpl_axes.set_xscale(convert_scale(log_x.value))
+                self.mpl_axes.set_yscale(convert_scale(log_y.value))
 
                 self.show()
 
@@ -822,7 +822,7 @@ class ScanFig(object):
         if not self._lines:
             lines = {}
             for i, each in enumerate(self._raw_line_data):
-                line, = self.ax.plot(each.x, each.y)
+                line, = self.mpl_axes.plot(each.x, each.y)
 
                 # set width to a default width of 2
                 # bc the default value of one is too low
