@@ -280,10 +280,12 @@ class CCoef(CCBase):
     #     self._calc_value()
 
     def _calc_abs_value(self):
-        """Calculates the numeric value of the control pattern from the
+        """Calculates the absolute numeric value of the control coefficient from the
            values of its control patterns."""
         keys = self.expression.atoms(Symbol)
         subsdict = {}
+        if len(keys) == 0:
+            subsdict = None
         for key in keys:
             str_key = str(key)
             subsdict[str_key] = getattr(self.mod, str_key)
@@ -293,10 +295,12 @@ class CCoef(CCBase):
             [abs(pattern._value) for pattern in self.control_patterns.values()])
 
     def _calc_value(self):
-        """Calculates the numeric value of the control pattern from the
+        """Calculates the numeric value of the control coefficient from the
            values of its control patterns."""
         keys = self.expression.atoms(Symbol)
         subsdict = {}
+        if len(keys) == 0:
+            subsdict = None
         for key in keys:
             str_key = str(key)
             subsdict[str_key] = getattr(self.mod, str_key)
