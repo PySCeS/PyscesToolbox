@@ -260,11 +260,6 @@ class Symca(object):
                 self.path_to('temp')
             )
 
-            # logging.info('CC_i_num:')
-            # logging.info(CC_i_num)
-            # logging.info('common_denom_expr:')
-            # logging.info(common_denom_expr)
-
             cc_sol = SMCAtools.solve_dep(
                 CC_i_num,
                 self.scaled_k0,
