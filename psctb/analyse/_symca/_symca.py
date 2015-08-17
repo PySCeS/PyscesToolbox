@@ -11,7 +11,7 @@ all = ['Symca']
 
 
 class Symca(object):
-    def __init__(self, mod, auto_load=False):
+    def __init__(self, mod, auto_load=False, internal_fixed = False):
         super(Symca, self).__init__()
 
         self.mod = mod
@@ -44,6 +44,8 @@ class Symca(object):
         self._es_matrix = None
         self._esL = None
         self._ematrix = None
+
+        self.internal_fixed = internal_fixed
         if auto_load:
             try:
                 self.load()
@@ -264,6 +266,9 @@ class Symca(object):
 
 
     def do_symca(self, internal_fixed=False, auto_save_load = True):
+        if not internal_fixed:
+            internal_fixed = self.internal_fixed
+
         def do_symca_internals(self):
             CC_i_num, common_denom_expr = SMCAtools.invert(
                 self.ematrix,
