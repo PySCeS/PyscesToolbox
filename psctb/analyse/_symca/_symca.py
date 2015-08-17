@@ -260,7 +260,7 @@ class Symca(object):
 
 
 
-    def do_symca(self, auto_save_load=False, internal_fixed=False):
+    def do_symca(self, internal_fixed=False, auto_save_load = True):
         def do_symca_internals(self):
             CC_i_num, common_denom_expr = SMCAtools.invert(
                 self.ematrix,
