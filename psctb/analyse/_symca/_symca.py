@@ -28,7 +28,7 @@ class Symca(object):
 
 
         self._object_populated = False
-        self.CC = DotDict()
+        self.CC = None
 
         self._nmatrix = None
         self._species = None
@@ -222,7 +222,7 @@ class Symca(object):
                                   fmt='json',
                                   file_name=file_name,
                                   write_suffix=False)
-        assert len(self.CC) > 0, 'Nothing to save, run ``do_symca`` method first'
+        assert self.CC, 'Nothing to save, run ``do_symca`` method first'
         to_save = SMCAtools.build_outer_dict(self)
         with open(file_name,'w') as f:
             json.dump(to_save,f)
@@ -284,43 +284,34 @@ class Symca(object):
                 self.species_dependent
             )
 
-            full_dic = {common_denom_expr: {}}
-            for i, each in enumerate(cc_sol):
-                full_dic[common_denom_expr][cc_names[i]] =  each
-            if internal_fixed:
-                simpl_dic = {}
-                for i, each in enumerate(cc_sol):
-                    expr = each / common_denom_expr
-                    expr = SMCAtools.maxima_factor(expr, self.path_to('temp'))
-                    num, denom = fraction(expr)
-                    if not simpl_dic.has_key(denom):
-                        simpl_dic[denom] = {}
-                    simpl_dic[denom][cc_names[i]] = num
+            cc_objects = SMCAtools.spawn_cc_objects(self.mod,
+                                                    cc_names,
+                                                    cc_sol,
+                                                    common_denom_expr,
+                                                    self._ltxe)
 
-            cc_objects = SMCAtools.spawn_cc_objects(
-                self.mod,
-                full_dic,
-                self._ltxe
-            )[0]
+            self.CC = SMCAtools.make_CC_dot_dict(cc_objects)
 
-            for cc in cc_objects:
-                self.CC[cc.name] = cc
-            self.CC._make_repr(
-                '"$" + v.latex_name + "$"', 'v.value', formatter_factory())
 
             if internal_fixed:
-                simp_objects_list = SMCAtools.spawn_cc_objects(self.mod,
-                                                               simpl_dic,
-                                                               self._ltxe)
-                cnt = 0
-                for block in simp_objects_list:
-                    setattr(self, 'CC' + str(cnt), DotDict())
-                    dd = getattr(self, 'CC' + str(cnt))
-                    for cc in block:
-                        dd[cc.name] = cc
-                    dd._make_repr(
-                        '"$" + v.latex_name + "$"', 'v.value', formatter_factory())
-                    cnt += 1
+                simpl_dic = SMCAtools.make_internals_dict(cc_sol,
+                                                          cc_names,
+                                                          common_denom_expr,
+                                                          self.path_to('temp'))
+
+
+                CC_block_counter = 0
+                for each_common_denom_expr, name_num in simpl_dic.iteritems():
+
+                    simpl_cc_objects = SMCAtools.spawn_cc_objects(self.mod,
+                                                                  name_num[0],
+                                                                  name_num[1],
+                                                                  each_common_denom_expr,
+                                                                  self._ltxe,)
+
+                    CC_dot_dict = SMCAtools.make_CC_dot_dict(simpl_cc_objects)
+                    setattr(self, 'CC%s' % CC_block_counter, CC_dot_dict)
+                    CC_block_counter += 1
 
             self._object_populated = True
             self.CC_i_num = CC_i_num

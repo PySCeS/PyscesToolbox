@@ -7,6 +7,8 @@ import sys
 from sympy import Symbol, sympify, nsimplify, fraction, S
 from sympy.matrices import Matrix, diag, NonSquareMatrixError
 from .ccobjects import CCBase, CCoef
+from ...utils.misc import DotDict
+from ...utils.misc import formatter_factory
 
 
 
@@ -479,32 +481,47 @@ class SymcaToolBox(object):
         return new_cc_num, (cd_num / fix_denom).expand()
 
     @staticmethod
-    def spawn_cc_objects(mod, cc_dic, ltxe):
+    def spawn_cc_objects(mod, cc_names, cc_sol, common_denom_exp, ltxe):
 
-        #  this should not be the responsibility of this function
-        model_block_CCs = []
-        for denom, names_nums in cc_dic.iteritems():
-            common_denom = CCBase(
-                mod,
-                'common_denominator',
-                denom,
-                ltxe
-            )
-            cc_object_list = [common_denom]
 
-            for name, num in names_nums.iteritems():
-                cc_object_list.append(
-                    CCoef(
-                        mod,
-                        str(name),
-                        num,
-                        common_denom,
-                        ltxe
-                    )
-                )
-            model_block_CCs.append(cc_object_list)
+        common_denom_object = CCBase(mod,
+                                     'common_denominator',
+                                     common_denom_exp,
+                                     ltxe)
+        cc_object_list = [common_denom_object]
 
-        return model_block_CCs
+        for name, num in zip(cc_names,cc_sol):
+            ccoef_object = CCoef(mod,
+                                 str(name),
+                                 num,
+                                 common_denom_object,
+                                 ltxe)
+
+            cc_object_list.append(ccoef_object)
+        return cc_object_list
+
+    @staticmethod
+    def make_internals_dict(cc_sol,cc_names, common_denom_expr, path_to):
+        simpl_dic = {}
+        for i, each in enumerate(cc_sol):
+            expr = each / common_denom_expr
+            expr = SymcaToolBox.maxima_factor(expr, path_to)
+            num, denom = fraction(expr)
+            if not simpl_dic.has_key(denom):
+                simpl_dic[denom] = [[],[]]
+            simpl_dic[denom][0].append(cc_names[i])
+            simpl_dic[denom][1].append(num)
+
+        return simpl_dic
+
+    @staticmethod
+    def make_CC_dot_dict(cc_objects):
+        CC = DotDict()
+        for cc in cc_objects:
+            CC[cc.name] = cc
+        CC._make_repr('"$" + v.latex_name + "$"', 'v.value', formatter_factory())
+        return CC
+
 
     @staticmethod
     def build_inner_dict(cc_object):
