@@ -45,7 +45,10 @@ class Symca(object):
         self._esL = None
         self._ematrix = None
         if auto_load:
-            self.load()
+            try:
+                self.load()
+            except:
+                print 'Nothing to load: Run `do_symca` first'
 
     @property
     def nmatrix(self):
