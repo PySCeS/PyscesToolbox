@@ -1,7 +1,7 @@
 import subprocess
 from os import devnull
 # from os import path
-#from os import mkdir
+# from os import mkdir
 import sys
 #from re import sub
 from sympy import Symbol, sympify, nsimplify, fraction, S
@@ -431,7 +431,7 @@ class SymcaToolBox(object):
                     for symbol_atom in symbol_atoms:
                         if symbol_atom not in denom:
                             denom = denom * symbol_atom
-                    #denom = denom * each.atoms(Symbol).pop()
+                            #denom = denom * each.atoms(Symbol).pop()
                 denom = denom * species_dependent[row]
             return denom.nsimplify()
 
@@ -452,7 +452,7 @@ class SymcaToolBox(object):
                             den_new = den_new * symbol_atom
                         else:
                             den_new = den_new + symbol_atom
-                    #denom = denom * each.atoms(Symbol).pop()
+                            #denom = denom * each.atoms(Symbol).pop()
                 if den_new == 1:
                     den_new = den_new * species_dependent[row]
                 else:
@@ -490,7 +490,7 @@ class SymcaToolBox(object):
                                      ltxe)
         cc_object_list = [common_denom_object]
 
-        for name, num in zip(cc_names,cc_sol):
+        for name, num in zip(cc_names, cc_sol):
             ccoef_object = CCoef(mod,
                                  str(name),
                                  num,
@@ -501,14 +501,14 @@ class SymcaToolBox(object):
         return cc_object_list
 
     @staticmethod
-    def make_internals_dict(cc_sol,cc_names, common_denom_expr, path_to):
+    def make_internals_dict(cc_sol, cc_names, common_denom_expr, path_to):
         simpl_dic = {}
         for i, each in enumerate(cc_sol):
             expr = each / common_denom_expr
             expr = SymcaToolBox.maxima_factor(expr, path_to)
             num, denom = fraction(expr)
             if not simpl_dic.has_key(denom):
-                simpl_dic[denom] = [[],[]]
+                simpl_dic[denom] = [[], []]
             simpl_dic[denom][0].append(cc_names[i])
             simpl_dic[denom][1].append(num)
 
@@ -519,7 +519,8 @@ class SymcaToolBox(object):
         CC = DotDict()
         for cc in cc_objects:
             CC[cc.name] = cc
-        CC._make_repr('"$" + v.latex_name + "$"', 'v.value', formatter_factory())
+        CC._make_repr('"$" + v.latex_name + "$"', 'v.value',
+                      formatter_factory())
         return CC
 
 
@@ -550,42 +551,54 @@ class SymcaToolBox(object):
             counter += 1
         return containers
 
+    @staticmethod
+    def make_inner_dict(cc_container, cc_container_name):
+        CC_dict = {}
+        CC_dict[cc_container_name] = dict(zip(
+            [cc.name for cc in cc_container.values() if
+             cc.name is not 'common_denominator'],
+            [str(cc.numerator) for cc in cc_container.values() if
+             cc.name is not 'common_denominator']))
+        CC_dict[cc_container_name]['common_denominator'] = str(
+            cc_container.common_denominator.expression)
+        return CC_dict
 
 
 
-    # OLD SAVE FUNCTIONS> Not as good as new ones
-    # @staticmethod
-    # def save(cc_list, common_denominator, path_to_pickle):
-    #     mod = common_denominator.mod
-    #     common_denominator.mod = ''
-    #     for cc in cc_list:
-    #         cc.mod = ''
-    #         for cp in cc.control_patterns:
-    #             cp.mod = ''
-    #
-    #     cc_list.append(common_denominator)
-    #     with open(path_to_pickle, 'w') as f:
-    #         pickle.dump(cc_list, f)
-    #
-    #     cc_list.pop()
-    #     common_denominator.mod = mod
-    #     for cc in cc_list:
-    #         cc.mod = mod
-    #         for cp in cc.control_patterns:
-    #             cp.mod = mod
-    #
-    # @staticmethod
-    # def load(mod, path_to_pickle):
-    #     with open(path_to_pickle) as f:
-    #         cc_list = pickle.load(f)
-    #
-    #     common_denominator = cc_list.pop()
-    #
-    #     common_denominator.mod = mod
-    #     for cc in cc_list:
-    #         cc.mod = mod
-    #         for cp in cc.control_patterns:
-    #             cp.mod = mod
-    #
-    #     cc_list.insert(0, common_denominator)
-    #     return cc_list
+
+        # OLD SAVE FUNCTIONS> Not as good as new ones
+        # @staticmethod
+        # def save(cc_list, common_denominator, path_to_pickle):
+        #     mod = common_denominator.mod
+        #     common_denominator.mod = ''
+        #     for cc in cc_list:
+        #         cc.mod = ''
+        #         for cp in cc.control_patterns:
+        #             cp.mod = ''
+        #
+        #     cc_list.append(common_denominator)
+        #     with open(path_to_pickle, 'w') as f:
+        #         pickle.dump(cc_list, f)
+        #
+        #     cc_list.pop()
+        #     common_denominator.mod = mod
+        #     for cc in cc_list:
+        #         cc.mod = mod
+        #         for cp in cc.control_patterns:
+        #             cp.mod = mod
+        #
+        # @staticmethod
+        # def load(mod, path_to_pickle):
+        #     with open(path_to_pickle) as f:
+        #         cc_list = pickle.load(f)
+        #
+        #     common_denominator = cc_list.pop()
+        #
+        #     common_denominator.mod = mod
+        #     for cc in cc_list:
+        #         cc.mod = mod
+        #         for cp in cc.control_patterns:
+        #             cp.mod = mod
+        #
+        #     cc_list.insert(0, common_denominator)
+        #     return cc_list

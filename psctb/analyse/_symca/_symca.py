@@ -1,20 +1,16 @@
 import json
-
 from sympy.matrices import Matrix
-from sympy import fraction, sympify
+from sympy import sympify
 
 from ...modeltools import make_path, get_file_path
 from ...latextools import LatexExpr
 from .symca_toolbox import SymcaToolBox as SMCAtools
-from ...utils.misc import DotDict
-from ...utils.misc import formatter_factory
 
 
 all = ['Symca']
 
 
 class Symca(object):
-
     def __init__(self, mod, auto_load=False):
         super(Symca, self).__init__()
 
@@ -25,7 +21,6 @@ class Symca(object):
         self._internal_filename = 'object_data'
         self._working_dir = make_path(self.mod, self._analysis_method)
         self._ltxe = LatexExpr(mod)
-
 
         self._object_populated = False
         self.CC = None
@@ -222,10 +217,23 @@ class Symca(object):
                                   fmt='json',
                                   file_name=file_name,
                                   write_suffix=False)
+
         assert self.CC, 'Nothing to save, run ``do_symca`` method first'
-        to_save = SMCAtools.build_outer_dict(self)
-        with open(file_name,'w') as f:
-            json.dump(to_save,f)
+        main_cc_dict = SMCAtools.make_inner_dict(self.CC, 'CC')
+        counter = 0
+        while True:
+            cc_container_name = 'CC{0}'.format(counter)
+            try:
+                cc_container = getattr(self, cc_container_name)
+                main_cc_dict.update(
+                    SMCAtools.make_inner_dict(cc_container, cc_container_name))
+                counter += 1
+            except:
+                break
+
+        to_save = main_cc_dict
+        with open(file_name, 'w') as f:
+            json.dump(to_save, f)
 
     def load(self, file_name=None):
         file_name = get_file_path(working_dir=self._working_dir,
@@ -233,23 +241,22 @@ class Symca(object):
                                   fmt='json',
                                   file_name=file_name,
                                   write_suffix=False)
-        loaded = None
-        with open(file_name,'r') as f:
-            loaded = json.load(f)
 
-        for attr_name, inner_dict in loaded.iteritems():
-            setattr(self,attr_name,DotDict())
-            dot_dict = getattr(self,attr_name)
-            inner_dict = sympify(inner_dict)
-            cc_objects = SMCAtools.spawn_cc_objects(
-                    self.mod,
-                    inner_dict,
-                    self._ltxe
-                )[0]
-            for cc in cc_objects:
-                dot_dict[cc.name] = cc
-            dot_dict._make_repr('"$" + v.latex_name + "$"', 'v.value', formatter_factory())
+        with open(file_name, 'r') as f:
+                main_cc_dict = json.load(f)
 
+        cc_containers = {}
+        for key, value in main_cc_dict.iteritems():
+            common_denom_exp = sympify(value.pop('common_denominator'))
+            cc_container = SMCAtools.spawn_cc_objects(self.mod,
+                                                      value.keys(),
+                                                      [sympify(exp) for exp in
+                                                       value.values()],
+                                                      common_denom_exp,
+                                                      self._ltxe)
+            cc_containers[key] = SMCAtools.make_CC_dot_dict(cc_container)
+        for key, value in cc_containers.iteritems():
+            setattr(self,key,value)
 
 
 
@@ -292,22 +299,19 @@ class Symca(object):
 
             self.CC = SMCAtools.make_CC_dot_dict(cc_objects)
 
-
             if internal_fixed:
                 simpl_dic = SMCAtools.make_internals_dict(cc_sol,
                                                           cc_names,
                                                           common_denom_expr,
                                                           self.path_to('temp'))
 
-
                 CC_block_counter = 0
                 for each_common_denom_expr, name_num in simpl_dic.iteritems():
-
                     simpl_cc_objects = SMCAtools.spawn_cc_objects(self.mod,
                                                                   name_num[0],
                                                                   name_num[1],
                                                                   each_common_denom_expr,
-                                                                  self._ltxe,)
+                                                                  self._ltxe, )
 
                     CC_dot_dict = SMCAtools.make_CC_dot_dict(simpl_cc_objects)
                     setattr(self, 'CC%s' % CC_block_counter, CC_dot_dict)
