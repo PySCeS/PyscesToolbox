@@ -2,6 +2,7 @@ import json
 from sympy.matrices import Matrix
 from sympy import sympify
 
+from ...utils.misc import extract_model
 from ...modeltools import make_path, get_file_path
 from ...latextools import LatexExpr
 from .symca_toolbox import SymcaToolBox as SMCAtools
@@ -14,13 +15,13 @@ class Symca(object):
     def __init__(self, mod, auto_load=False, internal_fixed = False):
         super(Symca, self).__init__()
 
-        self.mod = mod
+        self.mod, obj_type = extract_model(mod)
         self.mod.doMca()
 
         self._analysis_method = 'symca'
         self._internal_filename = 'object_data'
         self._working_dir = make_path(self.mod, self._analysis_method)
-        self._ltxe = LatexExpr(mod)
+        self._ltxe = LatexExpr(self.mod)
 
         self._object_populated = False
         self.CC = None
@@ -46,6 +47,8 @@ class Symca(object):
         self._ematrix = None
 
         self.internal_fixed = internal_fixed
+        if obj_type == 'RateCharData':
+            self.internal_fixed = True
         if auto_load:
             try:
                 self.load()
