@@ -3,7 +3,7 @@ from os import path, devnull
 
 from numpy.ma import log10
 from numpy import array, errstate, nanmin, nanmax, nonzero
-from IPython.display import HTML
+from pysces.PyscesModel import PysMod
 
 
 __all__ = ['cc_list',
@@ -24,8 +24,24 @@ __all__ = ['cc_list',
            'cc_dict',
            'rc_dict',
            'prc_dict',
-           'group_sort']
+           'group_sort',
+           'extract_model']
 
+def extract_model(obj):
+    mod = obj
+    try:
+        mod = obj.mod
+    except:
+        pass
+
+    assert isinstance(mod,PysMod), "The object provided does not contain a " \
+                                   "valid Pysces model. Reinstantiate with a" \
+                                   " valid model."
+
+    the_type = str(type(obj))[:-2]
+    the_type = the_type[the_type.rindex('.')+1:]
+
+    return mod, the_type
 
 def find_min(array_like):
     no_zeros = array_like[nonzero(array_like)]
