@@ -317,6 +317,16 @@ class Symca(object):
 
                 CC_block_counter = 0
                 for each_common_denom_expr, name_num in simpl_dic.iteritems():
+                    name_num[1], \
+                    each_common_denom_expr = SMCAtools.fix_expressions(
+                        name_num[1],
+                        each_common_denom_expr,
+                        self.lmatrix,
+                        self.species_independent,
+                        self.species_dependent
+                    )
+
+
                     simpl_cc_objects = SMCAtools.spawn_cc_objects(self.mod,
                                                                   name_num[0],
                                                                   name_num[1],

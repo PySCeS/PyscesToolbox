@@ -470,15 +470,29 @@ class SymcaToolBox(object):
             species_dependent
         )
         # print fix_denom
-
+        fix = False
+        ret2 = common_denom_expr
         cd_num, cd_denom = fraction(common_denom_expr)
 
-        new_cc_num = cc_num[:, :]
-        # print type(new_cc_num)
-        for i, each in enumerate(new_cc_num):
-            new_cc_num[i] = ((each * cd_denom) / fix_denom).expand()
 
-        return new_cc_num, (cd_num / fix_denom).expand()
+        if type(cc_num) is list:
+            new_cc_num = cc_num[:]
+        else:
+            new_cc_num = cc_num[:, :]
+
+        for each in new_cc_num:
+            each_test = (each*cd_denom).expand()
+            for symb in fix_denom.atoms(Symbol):
+                if symb in each_test:
+                    fix = True
+                    break
+        if fix:
+            for i, each in enumerate(new_cc_num):
+                new_cc_num[i] = ((each * cd_denom) / fix_denom).expand()
+
+            ret2 = (cd_num / fix_denom).expand()
+
+        return new_cc_num, ret2
 
     @staticmethod
     def spawn_cc_objects(mod, cc_names, cc_sol, common_denom_exp, ltxe):

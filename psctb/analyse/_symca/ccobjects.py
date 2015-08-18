@@ -315,6 +315,9 @@ class CCoef(CCBase):
            control pattern as it appears in in control coefficient
            expression"""
         patterns = self.numerator.as_coeff_add()[1]
+        if len(patterns) == 0:
+            patterns = [self.numerator.as_coeff_add()[0]]
+
         cps = DotDict()
         cps._make_repr('v.name', 'v.value', formatter_factory())
         for i, pattern in enumerate(patterns):
