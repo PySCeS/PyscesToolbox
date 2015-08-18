@@ -12,7 +12,7 @@ all = ['Symca']
 
 
 class Symca(object):
-    def __init__(self, mod, auto_load=False, internal_fixed = False):
+    def __init__(self, mod, auto_load=False, internal_fixed=False):
         super(Symca, self).__init__()
 
         self.mod, obj_type = extract_model(mod)
@@ -250,7 +250,7 @@ class Symca(object):
                                   write_suffix=False)
 
         with open(file_name, 'r') as f:
-                main_cc_dict = json.load(f)
+            main_cc_dict = json.load(f)
 
         cc_containers = {}
         for key, value in main_cc_dict.iteritems():
@@ -263,11 +263,10 @@ class Symca(object):
                                                       self._ltxe)
             cc_containers[key] = SMCAtools.make_CC_dot_dict(cc_container)
         for key, value in cc_containers.iteritems():
-            setattr(self,key,value)
+            setattr(self, key, value)
 
 
-
-    def do_symca(self, internal_fixed=False, auto_save_load = True):
+    def do_symca(self, internal_fixed=False, auto_save_load=True):
         if not internal_fixed:
             internal_fixed = self.internal_fixed
 
@@ -310,6 +309,8 @@ class Symca(object):
             self.CC = SMCAtools.make_CC_dot_dict(cc_objects)
 
             if internal_fixed:
+                print "There is an internal fixed metabolite: performing " \
+                      "additional simplification"
                 simpl_dic = SMCAtools.make_internals_dict(cc_sol,
                                                           cc_names,
                                                           common_denom_expr,
@@ -325,7 +326,6 @@ class Symca(object):
                         self.species_independent,
                         self.species_dependent
                     )
-
 
                     simpl_cc_objects = SMCAtools.spawn_cc_objects(self.mod,
                                                                   name_num[0],
