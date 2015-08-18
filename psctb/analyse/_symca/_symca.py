@@ -23,7 +23,6 @@ class Symca(object):
         self._working_dir = make_path(self.mod, self._analysis_method)
         self._ltxe = LatexExpr(self.mod)
 
-        self._object_populated = False
         self.CC = None
 
         self._nmatrix = None
@@ -328,7 +327,6 @@ class Symca(object):
                     setattr(self, 'CC%s' % CC_block_counter, CC_dot_dict)
                     CC_block_counter += 1
 
-            self._object_populated = True
             self.CC_i_num = CC_i_num
 
         if auto_save_load:
