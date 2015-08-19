@@ -1,6 +1,7 @@
 import json
 from sympy.matrices import Matrix
 from sympy import sympify
+import sys
 
 from ...utils.misc import extract_model
 from ...modeltools import make_path, get_file_path
@@ -309,8 +310,6 @@ class Symca(object):
             self.CC = SMCAtools.make_CC_dot_dict(cc_objects)
 
             if internal_fixed:
-                print "There is an internal fixed metabolite: performing " \
-                      "additional simplification"
                 simpl_dic = SMCAtools.make_internals_dict(cc_sol,
                                                           cc_names,
                                                           common_denom_expr,
