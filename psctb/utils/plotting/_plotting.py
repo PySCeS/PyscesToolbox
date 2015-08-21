@@ -211,12 +211,12 @@ class Data2D(object):
         #self.data_in = data_array[:, 0]
         #self.data_out = data_array[:, 1:]
 
-        self._mod = mod
+        self.mod = mod
         if not ltxe:
             ltxe = LatexExpr(mod)
         self._ltxe = ltxe
 
-        self._mod.doMcaRC()
+        self.mod.doMcaRC()
 
         if not analysis_method:
             analysis_method = 'parameter_scan'
@@ -231,7 +231,7 @@ class Data2D(object):
             self._fname_specified = True
 
         if not working_dir:
-            self._working_dir = modeltools.make_path(mod=self._mod,
+            working_dir = modeltools.make_path(mod=self.mod,
                                                      analysis_method=self._analysis_method)
         self._working_dir = working_dir
 
@@ -380,14 +380,14 @@ class Data2D(object):
 
     @property
     def _x_name(self):
-        mm = ModelMap(self._mod)
+        mm = ModelMap(self.mod)
         species = mm.hasSpecies()
         x_name = ''
         if self.plot_data.scan_in == 'Time':
             x_name = 'Time (s)'
         elif self.plot_data.scan_in in species:
             x_name = '[%s]' % self.plot_data.scan_in
-        elif self.plot_data.scan_in in self._mod.parameters:
+        elif self.plot_data.scan_in in self.mod.parameters:
             x_name = self.plot_data.scan_in
         return x_name
 
@@ -520,21 +520,21 @@ class ScanFig(object):
 
         # figure setup
         plt.ioff()
-        self.mpl_figure = plt.figure(figsize=(10, 5.72))
+        self.fig = plt.figure(figsize=(10, 5.72))
         if fig_properties:
-            self.mpl_figure.set(**fig_properties)
+            self.fig.set(**fig_properties)
 
         # axis setup
-        self.mpl_axes = self.mpl_figure.add_subplot(111)
+        self.ax = self.fig.add_subplot(111)
         if ax_properties:
-            self.mpl_axes.set(**ax_properties)
+            self.ax.set(**ax_properties)
 
         # colourmap_setup
         # at the moment this is very basic and could be expanded
         # it would be useful to set it up based on category somehow
         cmap = plt.get_cmap('Set1')(
             linspace(0, 1.0, len(line_data_list)))
-        self.mpl_axes.set_color_cycle(cmap)
+        self.ax.set_color_cycle(cmap)
 
         if category_classes:
             self._category_classes = category_classes
@@ -590,7 +590,7 @@ class ScanFig(object):
         """
 
         _add_legend_viewlim(
-            self.mpl_axes,
+            self.ax,
             bbox_to_anchor=(0, -0.17),
             ncol=3,
             loc=2,
@@ -599,9 +599,9 @@ class ScanFig(object):
         if rcParams['backend'] == \
                 'module://IPython.kernel.zmq.pylab.backend_inline':
             clear_output(wait=True)
-            display(self.mpl_figure)
+            display(self.fig)
         else:
-            self.mpl_figure.show()
+            self.fig.show()
 
     def save(self, file_name=None, dpi=None, fmt=None):
         """
@@ -620,10 +620,10 @@ class ScanFig(object):
                                              file_name = file_name)
         fmt = modeltools.get_fmt(file_name)
 
-        self.mpl_figure.savefig(file_name,
+        self.fig.savefig(file_name,
                          format=fmt,
                          dpi=dpi,
-                         bbox_extra_artists=(self.mpl_axes.get_legend(),),
+                         bbox_extra_artists=(self.ax.get_legend(),),
                          bbox_inches='tight')
 
     @property
@@ -733,20 +733,20 @@ class ScanFig(object):
         if not self._figure_widgets_:
             min_x = widgets.FloatText()
             max_x = widgets.FloatText()
-            min_x.value, max_x.value = self.mpl_axes.get_xlim()
+            min_x.value, max_x.value = self.ax.get_xlim()
             min_x.description = 'min'
             max_x.description = 'max'
 
             min_y = widgets.FloatText()
             max_y = widgets.FloatText()
-            min_y.value, max_y.value = self.mpl_axes.get_ylim()
+            min_y.value, max_y.value = self.ax.get_ylim()
             min_y.description = 'min'
             max_y.description = 'max'
 
             log_x = widgets.Checkbox()
             log_y = widgets.Checkbox()
-            log_x.value = convert_scale(self.mpl_axes.get_xscale())
-            log_y.value = convert_scale(self.mpl_axes.get_yscale())
+            log_x.value = convert_scale(self.ax.get_xscale())
+            log_y.value = convert_scale(self.ax.get_yscale())
             log_x.description = 'x_log'
             log_y.description = 'y_log'
 
@@ -758,16 +758,16 @@ class ScanFig(object):
                     min_x.value = c_v(min_x.value)
                     max_x.value = c_v(max_x.value)
 
-                self.mpl_axes.set_xlim([min_x.value, max_x.value])
+                self.ax.set_xlim([min_x.value, max_x.value])
 
                 if log_y.value is True:
                     min_y.value = c_v(min_y.value)
                     max_y.value = c_v(max_y.value)
 
-                self.mpl_axes.set_ylim([min_y.value, max_y.value])
+                self.ax.set_ylim([min_y.value, max_y.value])
 
-                self.mpl_axes.set_xscale(convert_scale(log_x.value))
-                self.mpl_axes.set_yscale(convert_scale(log_y.value))
+                self.ax.set_xscale(convert_scale(log_x.value))
+                self.ax.set_yscale(convert_scale(log_y.value))
 
                 self.show()
 
@@ -828,7 +828,7 @@ class ScanFig(object):
         if not self._lines_:
             lines = {}
             for i, each in enumerate(self._raw_line_data):
-                line, = self.mpl_axes.plot(each.x, each.y)
+                line, = self.ax.plot(each.x, each.y)
 
                 # set width to a default width of 2
                 # bc the default value of one is too low
