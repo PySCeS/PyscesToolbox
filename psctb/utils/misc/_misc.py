@@ -1,10 +1,11 @@
 import sys
 from os import path, devnull
 
+
 from numpy.ma import log10
 from numpy import array, errstate, nanmin, nanmax, nonzero
 from pysces.PyscesModel import PysMod
-
+from IPython.display import HTML
 
 __all__ = ['cc_list',
            'ec_list',
