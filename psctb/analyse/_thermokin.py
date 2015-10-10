@@ -73,6 +73,25 @@ def get_subs_dict(expression, mod):
 
 
 def get_reqn_path(mod):
+    """Gets the default path and filename of`.reqn` files belonging to a model
+    
+    The `.reqn` files which contain rate equations spilt into different
+    (arbitrary) components should be saved in the same directory as the model
+    file itself by default. It should have the same filename (sans extension) 
+    as the model file.
+    
+    Parameters
+    ----------
+    mod : PysMod
+        A pysces model which has corresponding `.reqn` file saved in the same
+        directory with the same file name as the model file.
+    
+    Returns
+    -------
+    str
+        A sting with the path and filename of the `.reqn` file.
+    """
+
     fname = mod.ModelFile
     dot_loc = fname.find('.')
     fname_min_ext = fname[:dot_loc]
@@ -81,6 +100,18 @@ def get_reqn_path(mod):
 
 
 def get_term_dict_from_path(path_to_read):
+    """Produces and returns a dictionary of filesnames from 
+    
+    
+    
+    Parameters
+    ----------
+    
+    
+    Returns
+    -------
+    """
+    
     raw_lines = read_files(path_to_read)
     clean_lines = strip_other(raw_lines)
     if correct_fmt(clean_lines):
