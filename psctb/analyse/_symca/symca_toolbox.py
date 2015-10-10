@@ -469,10 +469,9 @@ class SymcaToolBox(object):
             species_independent,
             species_dependent
         )
-        # print fix_denom
         fix = False
-        ret2 = common_denom_expr
         cd_num, cd_denom = fraction(common_denom_expr)
+        ret2 = cd_num
 
 
         if type(cc_num) is list:
@@ -480,15 +479,19 @@ class SymcaToolBox(object):
         else:
             new_cc_num = cc_num[:, :]
 
+        for i, each in enumerate(new_cc_num):
+             new_cc_num[i] = ((each * cd_denom)).expand()
+
         for each in new_cc_num:
-            each_test = (each*cd_denom).expand()
             for symb in fix_denom.atoms(Symbol):
-                if symb in each_test:
+                if symb in each:
                     fix = True
                     break
+            if fix: break
+
         if fix:
             for i, each in enumerate(new_cc_num):
-                new_cc_num[i] = ((each * cd_denom) / fix_denom).expand()
+                new_cc_num[i] = (each / fix_denom).expand()
 
             ret2 = (cd_num / fix_denom).expand()
 
