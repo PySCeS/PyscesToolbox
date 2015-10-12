@@ -429,7 +429,7 @@ class SymcaToolBox(object):
                 for each in dependent_ls[row, :] * species_independent * -1:
                     symbol_atoms = each.atoms(Symbol)
                     for symbol_atom in symbol_atoms:
-                        if symbol_atom not in denom:
+                        if symbol_atom not in denom.atoms(Symbol):
                             denom = denom * symbol_atom
                             #denom = denom * each.atoms(Symbol).pop()
                 denom = denom * species_dependent[row]
@@ -484,7 +484,7 @@ class SymcaToolBox(object):
 
         for each in new_cc_num:
             for symb in fix_denom.atoms(Symbol):
-                if symb in each:
+                if symb in each.atoms(Symbol):
                     fix = True
                     break
             if fix: break
