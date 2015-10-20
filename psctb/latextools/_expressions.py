@@ -49,9 +49,9 @@ class LatexExpr(object):
                                                                      min_(reaction))
             for top_reaction in mod.reactions:
                 for var_par in mod.species + mod.parameters:
-                    o_ec = 'pec%s_%s_%s' % (min_(top_reaction),
-                                            min_(var_par),
-                                            min_(term))
+                    o_ec = 'pec%s_%s_%s' % (top_reaction,
+                                            var_par,
+                                            term)
                     n_ec = 'varepsilon__%s_%s__%s' % (min_(top_reaction),
                                                       min_(var_par),
                                                       min_(term))
