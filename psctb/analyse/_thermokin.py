@@ -169,6 +169,7 @@ class ThermoKin(object):
         self._ltxe.add_term_types(get_term_types_from_raw_data(self._raw_data))
 
         self._populate_object()
+        self._populate_mca_data()
 
     def _verify_results(self):
         print '%s\t\t%s\t\t%s' % ('Name', 'Tk val', 'Mod val')
@@ -199,6 +200,14 @@ class ThermoKin(object):
                                self._ltxe)
             setattr(self, reaction, reqn_obj)
             self.reactions[reaction] = reqn_obj
+
+    def _populate_mca_data(self):
+        self.mca_data = DotDict()
+        self.mca_data._make_repr('"$" + v.latex_name + "$"', 'v.value',
+                                 formatter_factory())
+
+        for rate_eqn in self.reactions.itervalues():
+            self.mca_data.update(rate_eqn.mca_data)
 
 
 class RateEqn(object):
