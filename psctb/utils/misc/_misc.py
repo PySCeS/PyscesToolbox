@@ -101,9 +101,13 @@ def is_number(suspected_number):
     """
 
     # We make the assumption that most numbers can be converted to ints.
+    # - 21/10/2015 False assumption - strings representing that look like ints
+    # can be converted to ints
+    # new assumtion - only numbers can add another number
     number = False
     try:
-        int(suspected_number)
+        #int(suspected_number)
+        suspected_number + 1
         number = True
     except Exception:
         pass
