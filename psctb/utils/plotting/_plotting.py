@@ -57,13 +57,15 @@ def _add_legend_viewlim(ax, **kwargs):
 
 class LineData(object):
     """
-    An object that contains data that can be used to draw a matplotlib line.
+    An object that contains data and metadata used by ``ScanFig`` to draw a
+    ``matplotlib`` line with interactivity.
 
     This object is used to initialise a ``ScanFig`` object together with a
     ``Data2D`` object. Once a ``ScanFig`` instance is initialised, the
     ``LineData`` objects are saved in a list ``_raw_line_data``. Changing
     any values there will have no effect on the output of the ``ScanFig``
-    instance.
+    instance. Actual x,y data, ``matplotlib`` line metadata, and ``ScanFig``
+    category metadata is stored.
 
     Parameters
     ----------
@@ -110,6 +112,7 @@ class LineData(object):
         Attaches all properties in ``self.properties`` to the ``self``
         namespace.
         """
+        # TODO Figure out why the properties are (or need to be) attached in this way. It seems unnecessary
         for k, v in self.properties.iteritems():
             setattr(self, k, v)
 
@@ -139,8 +142,13 @@ class Data2D(object):
     """
     An object that wraps results from a PySCeS parameter scan.
 
-    Results from a parameter scan used to initialise this object which in turn
-    is used to create a ``ScanFig`` object.
+    Results from parameter scan of timecourse are used to initialise this
+    object which in turn is used to create a ``ScanFig`` object. Here results
+    can easily be accessed and saved to disk.
+
+    The ``Data2D`` is also responsible for setting up a ``ScanFig`` object from
+    analysis results and therefore contains optional parameters for setting
+    up this object.
 
     Parameters
     ----------
@@ -148,17 +156,15 @@ class Data2D(object):
         The model for which the parameter scan was performed.
     column_names : list of str
         The names of each column in the data_array. Columns should be arranged
-        with the input values (scan_in) in the first column and the output
-        values (scan_out) in the columns that follow.
+        with the input values (scan_in, time) in the first column and the
+        output values (scan_out) in the columns that follow.
     data_array : ndarray
-        An array containing results from a parameter scan. Arranged as
-        described above.
+        An array containing results from a parameter scan or tome simulation.
+        Arranged as described above.
     ltxe : LatexExpr, optional (Default : None)
         A LatexExpr object that is used to convert PySCeS compatible
         expressions to LaTeX math. If None is supplied a new LatexExpr object
-        will be instantiated, but when working with multiple objects that make
-        use of the LatexExpr class, it saves memory to share a single
-        instance between them.
+        will be instantiated. Sharing a single instance saves memory.
     analysis_method : str, Optional (Default : None)
         A string that indicates the name of the analysis method used to
         generate the results that populate ``Data2D``. This will determine
@@ -173,6 +179,24 @@ class Data2D(object):
     file_name : str, Optional (Default : None)
         The name that should be prepended to files produced any ``ScanFig``
         objects produced by ``Data2D``. If None, defaults to 'scan_fig'.
+    additional_cat_classes : dict, Optional (Default : None)
+        A dictionary containing additional line class categories for
+        ``ScanFig`` construction. Each ``data_array`` column contains results
+        representing a specific category of result (elasticity, flux,
+        concentration) which in turn fall into a larger class of data types
+        (All Coefficients). This dictionary defines which line classes fall
+        into which class category. (k = category class; v = line categories)
+    additional_cats : dict, Optional (Default : None)
+        A dictionary that defines additional result categories as well as the
+        lines that fall into these categories. (k = line category, v =
+        lines in category).
+    num_of_groups : int, Optional (Default : None)
+        A number that defines the number of groups of lines. Used to ensure
+        that the lines that are closely related (e.g. elasticities for one
+        reaction) have colors assigned to them that are easily differentiable.
+    working_dir : str, Optional (Default : None)
+        This string sets the working directory directly and if provided
+        supersedes ``analysis_method``.
 
     See Also
     --------
@@ -203,13 +227,7 @@ class Data2D(object):
         self._column_names = column_names
         self._scan_results = data_array
 
-        # self.column_names = column_names
-        #self.column_names_in = column_names[0]
-        #.column_names_out = column_names[1:]
 
-        #self.data = data_array
-        #self.data_in = data_array[:, 0]
-        #self.data_out = data_array[:, 1:]
 
         self.mod = mod
         if not ltxe:
@@ -230,9 +248,11 @@ class Data2D(object):
             self._fname = file_name
             self._fname_specified = True
 
+
+        #This is here specifically for the plot_decompose method of pysces. If
         if not working_dir:
             working_dir = modeltools.make_path(mod=self.mod,
-                                                     analysis_method=self._analysis_method)
+                                               analysis_method=self._analysis_method)
         self._working_dir = working_dir
 
         self._ax_properties_ = ax_properties
@@ -251,7 +271,7 @@ class Data2D(object):
         #
         # Buttons will be arranged so that a category class is a label under
         # which all the buttons that toggle a certain category is arranged
-        # under. For instance under the lable 'All Coefficients' will be the
+        # under. For instance under the label'All Coefficients' will be the
         # buttons 'Elasticity Coefficients', 'Control Coefficients',
         # 'Response Coefficients etc.
         #
@@ -277,7 +297,7 @@ class Data2D(object):
                            'Steady-State Species Concentrations'])])
 
         if additional_cat_classes:
-            for k,v in additional_cat_classes.iteritems():
+            for k, v in additional_cat_classes.iteritems():
                 if k in self._category_classes:
                     lst = self._category_classes[k]
                     new_lst = list(set(lst + v))
@@ -303,7 +323,7 @@ class Data2D(object):
             ])
 
         if additional_cats:
-            for k,v in additional_cats.iteritems():
+            for k, v in additional_cats.iteritems():
                 if k in self._scan_types:
                     lst = self._scan_types[k]
                     new_lst = list(set(lst + v))
@@ -383,6 +403,7 @@ class Data2D(object):
         mm = ModelMap(self.mod)
         species = mm.hasSpecies()
         x_name = ''
+        # TODO Enable lower case "time" as well as well as making generic for minutes/hours
         if self.plot_data.scan_in == 'Time':
             x_name = 'Time (s)'
         elif self.plot_data.scan_in in species:
@@ -409,8 +430,8 @@ class Data2D(object):
                            category_classes=self._category_classes,
                            ax_properties=self._ax_properties,
                            working_dir=path.join(self._working_dir,
-                                           self.plot_data.scan_in,),
-                           base_name=base_name,)
+                                                 self.plot_data.scan_in, ),
+                           base_name=base_name, )
         return scan_fig
 
     def save_data(self, file_name=None, separator=','):
@@ -435,11 +456,11 @@ class Data2D(object):
             which itself is determined by the ``analysis_method`` parameter of
             __init__.
         """
-        file_name = modeltools.get_file_path(working_dir = self._working_dir,
-                                             internal_filename = self._fname,
-                                             fmt = 'csv',
-                                             fixed = self.plot_data.scan_in,
-                                             file_name = file_name)
+        file_name = modeltools.get_file_path(working_dir=self._working_dir,
+                                             internal_filename=self._fname,
+                                             fmt='csv',
+                                             fixed=self.plot_data.scan_in,
+                                             file_name=file_name)
 
         scan_results = self._scan_results
         column_names = self._column_names
@@ -491,15 +512,20 @@ class ScanFig(object):
         ``matplotlib.axes.AxesSubplot'' object in a way that its ``set``
         method can be used to change its properties. If None default matplotlib
         axes properties will be used.
-    fname : str, Optional (Default : None)
-        The file name under which figures should be saved. If None, the name
-        "ScanFig" will be used when save is used with default parameters.
+    base_name : str, Optional (Default : None)
+        Base name that will be used when an image is saved by ``ScanFig``. If
+        None, then ``scan_fig`` will be used.
+    working_dir : str, Optional (Default : None)
+        The directory in which files figures will be saved. If None, then it
+        will default to the directory specified in ``pysces.output_dir``.
+
 
     See Also
     --------
     LineData
     Data2D
     """
+
     def __init__(self, line_data_list,
                  category_classes=None,
                  fig_properties=None,
@@ -544,7 +570,7 @@ class ScanFig(object):
         if base_name:
             self._base_name = base_name
         else:
-            self._base_name =  'scan_fig'
+            self._base_name = 'scan_fig'
 
         if working_dir:
             self._working_dir = working_dir
@@ -605,7 +631,18 @@ class ScanFig(object):
 
     def save(self, file_name=None, dpi=None, fmt=None):
         """
+        Saves the figure in it's current configuration.
 
+        Parameters
+        ----------
+        file_name : str, Optional (Default : None)
+            The file name to be used. If None is provided the file will be saved
+            to ``working_dir/base_name.fmt``
+        dpi : int, Optional (Default : None)
+            The dpi to use. Defaults to 180.
+        fmt : str, Optional (Default : None)
+            The image format to use. Defaults to ``svg``. If ``file_name``
+            contains a valid extension it will supersede ``fmt``.
 
         """
         if not fmt:
@@ -614,10 +651,10 @@ class ScanFig(object):
         if not dpi:
             dpi = 180
 
-        file_name = modeltools.get_file_path(working_dir = self._working_dir,
-                                             internal_filename= self._base_name,
-                                             fmt = fmt,
-                                             file_name = file_name)
+        file_name = modeltools.get_file_path(working_dir=self._working_dir,
+                                             internal_filename=self._base_name,
+                                             fmt=fmt,
+                                             file_name=file_name)
         fmt = modeltools.get_fmt(file_name)
 
         self.fig.savefig(file_name,
@@ -852,9 +889,49 @@ class ScanFig(object):
 
 
     def toggle_line(self, name, value):
+        """
+        Changes the visibility of a certain line.
+
+        When used a specific line's visibility is changed according to the
+        ``value`` provided.
+
+        Parameters
+        ----------
+        name: str
+            The name of the line to change.
+        value: bool
+            The visibility status to change the line to (True for visible,
+            False for invisible).
+
+        See Also
+        --------
+        toggle_category
+
+
+        """
         self._lines[name].set_visible(value)
 
     def toggle_category(self, cat, value):
+        """
+        Changes the visibility of all the lines in a certain line category.
+
+        When used all lines in the provided category's  visibility is changed
+        according to the ``value`` provided.
+
+        Parameters
+        ----------
+        cat: str
+            The name of the category to change.
+        value: bool
+            The visibility status to change the lines to (True for visible,
+            False for invisible).
+
+        See Also
+        --------
+        toggle_line
+
+        """
+
         # get the visibility status of the category eg. True/False
         self.categories_status[cat] = value
         # get all the other categories
@@ -884,13 +961,22 @@ class ScanFig(object):
                 line.set_visible(value)
 
     def interact(self):
+        """
+        Displays the figure in a IPython/Jupyter notebook together with buttons
+        to toggle the visibility of certain lines.
+
+        See Also
+        --------
+        show
+        adjust_figure
+        """
         self.show()
         for k, v in self._widgets.iteritems():
             if len(v.children) > 0:
                 head = widgets.Latex(value=k)
                 display(head)
                 display(v)
-                v._css = [(None,'flex-wrap','wrap'),]
+                v._css = [(None, 'flex-wrap', 'wrap'), ]
                 # v.remove_class('vbox')
                 # v.add_class('hbox')
                 # v.set_css({'flex-wrap': 'wrap'})
@@ -899,10 +985,24 @@ class ScanFig(object):
         for boxes in self._widgets.itervalues():
             for button in boxes.children:
                 button.value = self.categories_status[button.description]
-        # self._save_button.remove_class('vbox')
-        # self._save_button.add_class('hbox')
+                # self._save_button.remove_class('vbox')
+                # self._save_button.add_class('hbox')
 
     def adjust_figure(self):
+        """
+        Provides widgets to set the limits and scale (log/linear) of the figure.
+
+        As with ``interact``, the plot is displayed in the notebook. Here
+        no widgets are provided the change the visibility of the data
+        displayed on the plot, rather controls to set the limits and scale are
+        provided.
+
+        See Also
+        --------
+        show
+        interact
+
+        """
         self.show()
         for k, v in self._figure_widgets.iteritems():
             if len(v.children) > 0:
@@ -911,7 +1011,7 @@ class ScanFig(object):
                 display(v)
                 # v.remove_class('vbox')
                 # v.add_class('hbox')
-                v._css = [(None,'flex-wrap','wrap'),]
+                v._css = [(None, 'flex-wrap', 'wrap'), ]
         display(widgets.Latex(value='$~$'))
         display(self._save_button)
         # self._save_button.remove_class('vbox')
