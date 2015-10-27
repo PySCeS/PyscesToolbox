@@ -267,7 +267,7 @@ class Symca(object):
             setattr(self, key, value)
 
 
-    def do_symca(self, internal_fixed=False, auto_save_load=True):
+    def do_symca(self, internal_fixed=False, auto_save_load=False):
         if not internal_fixed:
             internal_fixed = self.internal_fixed
 
