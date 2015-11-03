@@ -16,6 +16,20 @@ from ...latextools import LatexExpr
 from ... import modeltools
 
 
+
+#matplotlib 1.5 breaks set_color_cycle functionality
+#now we need cycler
+from matplotlib import __version__ as mpl_version
+
+use_cycler = False
+
+from distutils.version import StrictVersion
+if StrictVersion(mpl_version) >= StrictVersion('1.5.0'):
+    from cycler import cycler
+    use_cycler = True
+
+
+
 exportLAWH = silence_print(pysces.write.exportLabelledArrayWithHeader)
 
 """
@@ -560,7 +574,11 @@ class ScanFig(object):
         # it would be useful to set it up based on category somehow
         cmap = plt.get_cmap('Set1')(
             linspace(0, 1.0, len(line_data_list)))
-        self.ax.set_color_cycle(cmap)
+        if use_cycler:
+            col_cycler = cycler('color',cmap)
+            self.ax.set_prop_cycle(col_cycler)
+        else:
+            self.ax.set_color_cycle(cmap)
 
         if category_classes:
             self._category_classes = category_classes
