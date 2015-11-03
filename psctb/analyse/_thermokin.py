@@ -10,7 +10,7 @@ from ..utils.misc import DotDict, formatter_factory, find_min, find_max
 from ..latextools import LatexExpr
 from ..modeltools import make_path
 from ..utils.plotting import Data2D
-from ..utils.misc import do_safe_state
+from ..utils.misc import do_safe_state, get_value
 
 
 class FormatException(Exception):
@@ -53,14 +53,6 @@ def construct_dict(lines):
         else:
             outer_dict[r_name] = inner_dict
     return outer_dict
-
-
-def get_value_eval(expression, subs_dict):
-    for k, v in subs_dict.iteritems():
-        subs_dict[k] = float64(v)
-    # print expression
-    ans = eval(expression, {}, subs_dict)
-    return ans
 
 
 def get_subs_dict(expression, mod):
@@ -451,7 +443,7 @@ class Term(object):
     def _calc_value(self, subs_dict=None):
         if not subs_dict:
             subs_dict = get_subs_dict(self.expression, self.mod)
-        self._value = get_value_eval(self._str_expression, subs_dict)
+        self._value = get_value(self._str_expression, subs_dict)
 
 
 class RateTerm(Term):

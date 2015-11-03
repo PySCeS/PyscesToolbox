@@ -1,12 +1,12 @@
 import numpy as np
-from numpy import array, float64, nanmin, nanmax
+from numpy import array, nanmin, nanmax
 from sympy import Symbol
 from pysces import ModelMap
 from numpy import NaN, abs
 
 from ...utils.model_graph import ModelGraph
 from ...utils.misc import silence_print, DotDict, formatter_factory, \
-    do_safe_state, find_min, find_max
+    do_safe_state, find_min, find_max, get_value
 from ...utils.plotting import Data2D
 
 
@@ -22,28 +22,6 @@ def get_state(mod, do_state=False):
         [getattr(mod, s + '_ss') for s in mod.species]
     return ss
 
-#
-# @silence_print
-# def silent_mca(mod):
-#     mod.doMca()
-
-
-def get_value_eval(expression, subs_dict):
-    for k, v in subs_dict.iteritems():
-        subs_dict[k] = float64(v)
-    ans = eval(expression, {}, subs_dict)
-    return ans
-
-#
-# class StateKeeper:
-#
-#     def __init__(self, state):
-#         self._last_state_for_mca = state
-#
-#     def do_mca_state(self, mod, state):
-#         if state != self._last_state_for_mca:
-#             silent_mca(mod)
-#             self._last_state_for_mca = state
 
 
 class CCBase(object):
@@ -101,7 +79,7 @@ class CCBase(object):
         for key in keys:
             str_key = str(key)
             subsdict[str_key] = getattr(self.mod, str_key)
-        self._value = get_value_eval(self._str_expression, subsdict)
+        self._value = get_value(self._str_expression, subsdict)
 
     def __repr__(self):
         return self.expression.__repr__()
@@ -390,7 +368,7 @@ class CPattern(CCBase):
             for key in keys:
                 str_key = str(key)
                 subsdict[str_key] = getattr(self.mod, str_key)
-        self._value = get_value_eval(self._str_expression, subsdict)
+        self._value = get_value(self._str_expression, subsdict)
 
     @property
     def latex_numerator(self):

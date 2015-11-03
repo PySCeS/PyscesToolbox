@@ -3,9 +3,10 @@ from os import path, devnull
 
 
 from numpy.ma import log10
-from numpy import array, errstate, nanmin, nanmax, nonzero
+from numpy import array, errstate, nanmin, nanmax, nonzero, float64
 from pysces.PyscesModel import PysMod
 from IPython.display import HTML
+from sympy import sympify
 
 __all__ = ['cc_list',
            'ec_list',
@@ -26,7 +27,10 @@ __all__ = ['cc_list',
            'rc_dict',
            'prc_dict',
            'group_sort',
-           'extract_model']
+           'extract_model',
+           'get_value',
+           'get_value_eval',
+           'get_value_sympy',]
 
 def extract_model(obj):
     mod = obj
@@ -72,6 +76,25 @@ def do_safe_state(mod, parameter, value, type='ss'):
         ret = False
     mod.SetLoud()
     return ret
+
+def get_value_eval(expression, subs_dict):
+    for k, v in subs_dict.iteritems():
+        subs_dict[k] = float64(v)
+    ans = eval(expression, {}, subs_dict)
+    return ans
+
+def get_value_sympy(expression, subs_dict):
+    expression = sympify(expression) # this is quite inefficient - but probably worth it
+    for k, v in subs_dict.iteritems():
+        subs_dict[k] = float64(v)
+    ans = expression.subs(subs_dict)
+    return ans
+
+def get_value(expression, subs_dict):
+    try:
+        return get_value_eval(expression, subs_dict)
+    except:
+        return get_value_sympy(expression, subs_dict)
 
 def split_coefficient(coefficient_name, mod):
     coefficient_2_types = ['cc','ec','rc']
