@@ -10,7 +10,7 @@ from ..utils.misc import DotDict, formatter_factory, find_min, find_max
 from ..latextools import LatexExpr
 from ..modeltools import make_path
 from ..utils.plotting import Data2D
-from ..utils.misc import do_safe_state, get_value
+from ..utils.misc import do_safe_state, get_value, silence_print
 
 
 class FormatException(Exception):
@@ -137,12 +137,18 @@ def get_repr_latex(obj):
                   obj.latex_expression,
                   obj.value)
 
+@silence_print
+def silent_state(mod):
+    mod.doMca()
+    mod.doState()
+
 
 class ThermoKin(object):
     def __init__(self, mod, path_to_reqn_file=None, ltxe=None):
         super(ThermoKin, self).__init__()
         self.mod = mod
-        self.mod.doMca()
+
+        silent_state(mod)
 
         self._analysis_method = 'thermokin'
         self._working_dir = make_path(self.mod, self._analysis_method)
