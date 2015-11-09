@@ -3,7 +3,7 @@ from os import path, devnull
 
 
 from numpy.ma import log10
-from numpy import array, errstate, nanmin, nanmax, nonzero, float64
+from numpy import array, errstate, nanmin, nanmax, nonzero, float64, bool_
 from pysces.PyscesModel import PysMod
 from IPython.display import HTML
 from sympy import sympify
@@ -127,13 +127,16 @@ def is_number(suspected_number):
     # - 21/10/2015 False assumption - strings representing that look like ints
     # can be converted to ints
     # new assumtion - only numbers can add another number
+    # previous assumption is false - booleans are treated as numbers
     number = False
-    try:
-        #int(suspected_number)
-        suspected_number + 1
-        number = True
-    except Exception:
-        pass
+    the_type = type(suspected_number)
+    if the_type is not bool and the_type is not bool_:
+        try:
+            #int(suspected_number)
+            suspected_number + 1
+            number = True
+        except Exception:
+            pass
     return number
 
 
