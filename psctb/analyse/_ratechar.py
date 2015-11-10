@@ -56,7 +56,7 @@ class RateChar(object):
         for species in self.mod.species:
             setattr(self, species, None)
         if auto_load:
-            self.load()
+            self.load_session()
 
     def do_ratechar(self, fixed='all',
                     scan_min=None,
@@ -113,7 +113,7 @@ class RateChar(object):
                                self._ltxe)
             setattr(self, each, rcd)
         if auto_save:
-            self.save()
+            self.save_session()
 
     def _min_max_chooser(self, ss, point, concrange, min_max):
         # chooses a minimum or maximum point based
@@ -185,7 +185,7 @@ class RateChar(object):
         fixed_mod.doState()
         return fixed_mod, fixed_ss
 
-    def save(self, file_name=None):
+    def save_session(self, file_name=None):
         file_name = modeltools.get_file_path(working_dir=self._working_dir,
                                              internal_filename='save_data',
                                              fmt='npz',
@@ -212,7 +212,7 @@ class RateChar(object):
             getattr(self, species).save_all_results(folder=folder,
                                                     separator=separator)
 
-    def load(self, file_name=None):
+    def load_session(self, file_name=None):
         file_name = modeltools.get_file_path(working_dir=self._working_dir,
                                              internal_filename='save_data',
                                              fmt='npz',
@@ -254,28 +254,28 @@ class RateCharData(object):
         super(RateCharData, self).__init__()
         self.mod = fixed_mod
 
-        self.plot_data = DotDict()
-        self.mca_data = DotDict()
+        self.scan_results = DotDict()
+        self.mca_results = DotDict()
 
         self._slope_range_factor = 3.0
 
-        self.plot_data['fixed'] = column_names[0]
-        self.plot_data['fixed_ss'] = fixed_ss
+        self.scan_results['fixed'] = column_names[0]
+        self.scan_results['fixed_ss'] = fixed_ss
 
-        self.plot_data['scan_range'] = scan_results[:, 0]
-        self.plot_data['flux_names'] = column_names[1:]
-        self.plot_data['flux_data'] = scan_results[:, 1:]
-        self.plot_data['scan_points'] = len(self.plot_data.scan_range)
-        self.plot_data['flux_max'] = None
-        self.plot_data['flux_min'] = None
-        self.plot_data['scan_max'] = None
-        self.plot_data['scan_min'] = None
-        self.plot_data['ec_names'] = None
-        self.plot_data['ec_data'] = None
-        self.plot_data['rc_names'] = None
-        self.plot_data['rc_data'] = None
-        self.plot_data['prc_names'] = None
-        self.plot_data['prc_data'] = None
+        self.scan_results['scan_range'] = scan_results[:, 0]
+        self.scan_results['flux_names'] = column_names[1:]
+        self.scan_results['flux_data'] = scan_results[:, 1:]
+        self.scan_results['scan_points'] = len(self.scan_results.scan_range)
+        self.scan_results['flux_max'] = None
+        self.scan_results['flux_min'] = None
+        self.scan_results['scan_max'] = None
+        self.scan_results['scan_min'] = None
+        self.scan_results['ec_names'] = None
+        self.scan_results['ec_data'] = None
+        self.scan_results['rc_names'] = None
+        self.scan_results['rc_data'] = None
+        self.scan_results['prc_names'] = None
+        self.scan_results['prc_data'] = None
 
         self._column_names = column_names
         self._scan_results = scan_results
@@ -285,21 +285,21 @@ class RateCharData(object):
         self._basemod = basemod
         self._working_dir = modeltools.make_path(self._basemod,
                                                  self._analysis_method,
-                                                 [self.plot_data.fixed])
+                                                 [self.scan_results.fixed])
         self._ltxe = ltxe
 
         self._color_dict_ = None
         self._data_setup()
-        self.mca_data._ltxe = ltxe
-        self.mca_data._make_repr(
+        self.mca_results._ltxe = ltxe
+        self.mca_results._make_repr(
             '"$" + self._ltxe.expression_to_latex(k) + "$"', 'v',
             formatter_factory())
-        # del self.plot_data
-        # del self.mca_data
+        # del self.scan_results
+        # del self.mca_results
 
     def _data_setup(self):
         # reset value to do mcarc
-        setattr(self.mod, self.plot_data.fixed, self.plot_data.fixed_ss)
+        setattr(self.mod, self.scan_results.fixed, self.scan_results.fixed_ss)
         self.mod.doMcaRC()
         self._make_attach_total_fluxes()
         self._min_max_setup()
@@ -343,10 +343,10 @@ class RateCharData(object):
         self._make_rc_summary()
         self._make_prc_summary()
 
-        self.mca_data.update(self._ec_summary)
-        self.mca_data.update(self._cc_summary)
-        self.mca_data.update(self._rc_summary)
-        self.mca_data.update(self._prc_summary)
+        self.mca_results.update(self._ec_summary)
+        self.mca_results.update(self._cc_summary)
+        self.mca_results.update(self._rc_summary)
+        self.mca_results.update(self._prc_summary)
 
         del self._ec_summary
         del self._cc_summary
@@ -355,12 +355,12 @@ class RateCharData(object):
 
     def _make_ec_summary(self):
         ecs = {}
-        reagent_of = [each[2:] for each in self.plot_data.flux_names]
+        reagent_of = [each[2:] for each in self.scan_results.flux_names]
         modifier_of = getattr(
-            self._model_map, self.plot_data.fixed).isModifierOf()
+            self._model_map, self.scan_results.fixed).isModifierOf()
         all_reactions = reagent_of + modifier_of
         for reaction in all_reactions:
-            name = 'ec%s_%s' % (reaction, self.plot_data.fixed)
+            name = 'ec%s_%s' % (reaction, self.scan_results.fixed)
             val = getattr(self.mod, name)
             ecs[name] = val
 
@@ -368,9 +368,9 @@ class RateCharData(object):
 
     def _make_rc_summary(self):
         rcs = {}
-        for flux in self.plot_data.flux_names:
+        for flux in self.scan_results.flux_names:
             reaction = flux[2:]
-            name = '%s_%s' % (reaction, self.plot_data.fixed)
+            name = '%s_%s' % (reaction, self.scan_results.fixed)
             val = getattr(self.mod.rc, name)
             name = 'rcJ' + name
             rcs[name] = val
@@ -380,9 +380,9 @@ class RateCharData(object):
     def _make_cc_summary(self):
 
         ccs = {}
-        reagent_of = [each[2:] for each in self.plot_data.flux_names]
+        reagent_of = [each[2:] for each in self.scan_results.flux_names]
         modifier_of = getattr(
-            self._model_map, self.plot_data.fixed).isModifierOf()
+            self._model_map, self.scan_results.fixed).isModifierOf()
         all_reactions = reagent_of + modifier_of
 
         for flux_reaction in reagent_of:
@@ -397,22 +397,22 @@ class RateCharData(object):
 
         prcs = {}
 
-        reagent_of = [each[2:] for each in self.plot_data.flux_names]
+        reagent_of = [each[2:] for each in self.scan_results.flux_names]
         modifier_of = getattr(
-            self._model_map, self.plot_data.fixed).isModifierOf()
+            self._model_map, self.scan_results.fixed).isModifierOf()
         all_reactions = reagent_of + modifier_of
 
         for flux_reaction in reagent_of:
             for route_reaction in all_reactions:
                 ec = getattr(self.mod,
                              'ec%s_%s' % (
-                                 route_reaction, self.plot_data.fixed))
+                                 route_reaction, self.scan_results.fixed))
 
                 cc = getattr(self.mod,
                              'ccJ%s_%s' % (flux_reaction, route_reaction))
                 val = ec * cc
                 name = 'prcJ%s_%s_%s' % (flux_reaction,
-                                         self.plot_data.fixed,
+                                         self.scan_results.fixed,
                                          route_reaction)
 
                 prcs[name] = val
@@ -425,9 +425,9 @@ class RateCharData(object):
                                              fmt='csv',
                                              file_name=file_name, )
 
-        keys = self.mca_data.keys()
+        keys = self.mca_results.keys()
         keys.sort()
-        values = numpy.array([self.mca_data[k]
+        values = numpy.array([self.mca_results[k]
                               for k in keys]).reshape(len(keys), 1)
 
         try:
@@ -445,11 +445,11 @@ class RateCharData(object):
                                              fmt='csv',
                                              file_name=file_name, )
 
-        scan_points = self.plot_data.scan_points
+        scan_points = self.scan_results.scan_points
         all_cols = numpy.hstack([
             self._scan_results,
-            self.plot_data.total_supply.reshape(scan_points, 1),
-            self.plot_data.total_demand.reshape(scan_points, 1)])
+            self.scan_results.total_supply.reshape(scan_points, 1),
+            self.scan_results.total_demand.reshape(scan_points, 1)])
         column_names = self._column_names + ['Total Supply', 'Total Demand']
 
         try:
@@ -476,8 +476,8 @@ class RateCharData(object):
                                              fmt='csv',
                                              file_name=file_name, )
 
-        results = getattr(self.plot_data, coefficient + '_data')
-        names = getattr(self.plot_data, coefficient + '_names')
+        results = getattr(self.scan_results, coefficient + '_data')
+        names = getattr(self.scan_results, coefficient + '_names')
         new_names = []
         for each in names:
             new_names.append('x_vals')
@@ -521,13 +521,13 @@ class RateCharData(object):
         # therefore we want the minimum non-negative/non-zero values.
 
         # lets make sure there are no zeros
-        n_z_f = self.plot_data.flux_data[
-            numpy.nonzero(self.plot_data.flux_data)]
-        n_z_s = self.plot_data.scan_range[
-            numpy.nonzero(self.plot_data.scan_range)]
+        n_z_f = self.scan_results.flux_data[
+            numpy.nonzero(self.scan_results.flux_data)]
+        n_z_s = self.scan_results.scan_range[
+            numpy.nonzero(self.scan_results.scan_range)]
 
-        totals = numpy.vstack([self.plot_data.total_demand,
-                               self.plot_data.total_supply])
+        totals = numpy.vstack([self.scan_results.total_demand,
+                               self.scan_results.total_supply])
         n_z_t = totals[numpy.nonzero(totals)]
         # and that the array is not now somehow empty
         # although if this happens-you have bigger problems
@@ -543,21 +543,21 @@ class RateCharData(object):
 
         with numpy.errstate(all='ignore'):
 
-            self.plot_data.flux_max = numpy.nanmax(10 ** numpy.log10(n_z_t))
-            self.plot_data.flux_min = numpy.nanmin(10 ** numpy.log10(n_z_f))
-            self.plot_data.scan_max = numpy.nanmax(10 ** numpy.log10(n_z_s))
-            self.plot_data.scan_min = numpy.nanmin(10 ** numpy.log10(n_z_s))
+            self.scan_results.flux_max = numpy.nanmax(10 ** numpy.log10(n_z_t))
+            self.scan_results.flux_min = numpy.nanmin(10 ** numpy.log10(n_z_f))
+            self.scan_results.scan_max = numpy.nanmax(10 ** numpy.log10(n_z_s))
+            self.scan_results.scan_min = numpy.nanmin(10 ** numpy.log10(n_z_s))
 
     def _attach_fluxes_to_self(self):
-        for i, each in enumerate(self.plot_data.flux_names):
-            # setattr(self, each, self.plot_data.flux_data[:, i])
-            self.plot_data[each] = self.plot_data.flux_data[:, i]
+        for i, each in enumerate(self.scan_results.flux_names):
+            # setattr(self, each, self.scan_results.flux_data[:, i])
+            self.scan_results[each] = self.scan_results.flux_data[:, i]
 
     def _attach_all_coefficients_to_self(self):
         setup_for = ['ec', 'rc', 'prc']
         for each in setup_for:
-            eval('self._attach_coefficients_to_self(self.plot_data.' + each + '_names,\
-                                                self.plot_data.' + each + '_data)')
+            eval('self._attach_coefficients_to_self(self.scan_results.' + each + '_names,\
+                                                self.scan_results.' + each + '_data)')
 
     def _make_all_coefficient_lines(self):
         setup_for = ['ec', 'rc', 'prc']
@@ -566,21 +566,21 @@ class RateCharData(object):
 
     def _make_attach_total_fluxes(self):
         demand_blocks = getattr(
-            self._model_map, self.plot_data.fixed).isSubstrateOf()
+            self._model_map, self.scan_results.fixed).isSubstrateOf()
         supply_blocks = getattr(
-            self._model_map, self.plot_data.fixed).isProductOf()
+            self._model_map, self.scan_results.fixed).isProductOf()
 
-        dem_pos = [self.plot_data.flux_names.index('J_' + flux)
+        dem_pos = [self.scan_results.flux_names.index('J_' + flux)
                    for flux in demand_blocks]
-        sup_pos = [self.plot_data.flux_names.index('J_' + flux)
+        sup_pos = [self.scan_results.flux_names.index('J_' + flux)
                    for flux in supply_blocks]
 
-        self.plot_data['total_demand'] = numpy.sum(
-            [self.plot_data.flux_data[:, i]
+        self.scan_results['total_demand'] = numpy.sum(
+            [self.scan_results.flux_data[:, i]
              for i in dem_pos],
             axis=0)
-        self.plot_data['total_supply'] = numpy.sum(
-            [self.plot_data.flux_data[:, i]
+        self.scan_results['total_supply'] = numpy.sum(
+            [self.scan_results.flux_data[:, i]
              for i in sup_pos],
             axis=0)
 
@@ -588,9 +588,9 @@ class RateCharData(object):
         names = []
         resps = []
 
-        for each in self.plot_data.flux_names:
+        for each in self.scan_results.flux_names:
             reaction = each[2:]
-            name = reaction + '_' + self.plot_data.fixed
+            name = reaction + '_' + self.scan_results.fixed
 
             J_ss = getattr(self.mod, each)
             slope = getattr(self.mod.rc, name)
@@ -602,19 +602,19 @@ class RateCharData(object):
 
         resps = numpy.hstack(resps)
 
-        self.plot_data.rc_names = names
-        self.plot_data.rc_data = resps
+        self.scan_results.rc_names = names
+        self.scan_results.rc_data = resps
 
     def _make_prc_lines(self):
         names = []
         prcs = []
 
-        reagent_of = [each[2:] for each in self.plot_data.flux_names]
+        reagent_of = [each[2:] for each in self.scan_results.flux_names]
         all_reactions = reagent_of + \
                         getattr(self._model_map,
-                                self.plot_data.fixed).isModifierOf()
+                                self.scan_results.fixed).isModifierOf()
 
-        for flux_reaction in self.plot_data.flux_names:
+        for flux_reaction in self.scan_results.flux_names:
 
             J_ss = getattr(self.mod, flux_reaction)
             reaction = flux_reaction[2:]
@@ -622,13 +622,13 @@ class RateCharData(object):
             for route_reaction in all_reactions:
                 ec = getattr(
                     self.mod,
-                    'ec' + route_reaction + '_' + self.plot_data.fixed)
+                    'ec' + route_reaction + '_' + self.scan_results.fixed)
                 cc = getattr(self.mod, 'ccJ' + reaction + '_' + route_reaction)
                 slope = ec * cc
 
                 prc = self._tangent_line(J_ss, slope)
                 name = 'prcJ%s_%s_%s' % (reaction,
-                                         self.plot_data.fixed,
+                                         self.scan_results.fixed,
                                          route_reaction)
 
                 names.append(name)
@@ -636,16 +636,16 @@ class RateCharData(object):
 
         prcs = numpy.hstack(prcs)
 
-        self.plot_data.prc_names = names
-        self.plot_data.prc_data = prcs
+        self.scan_results.prc_names = names
+        self.scan_results.prc_data = prcs
 
     def _make_ec_lines(self):
         names = []
         elasts = []
 
-        for each in self.plot_data.flux_names:
+        for each in self.scan_results.flux_names:
             reaction = each[2:]
-            name = 'ec' + reaction + '_' + self.plot_data.fixed
+            name = 'ec' + reaction + '_' + self.scan_results.fixed
 
             J_ss = getattr(self.mod, each)
             slope = getattr(self.mod, name)
@@ -656,26 +656,26 @@ class RateCharData(object):
 
         elasts = numpy.hstack(elasts)
 
-        self.plot_data.ec_names = names
-        self.plot_data.ec_data = elasts
+        self.scan_results.ec_names = names
+        self.scan_results.ec_data = elasts
 
     def _attach_coefficients_to_self(self, names, tangent_lines):
         sp = 0
         ep = 2
         for name in names:
             # setattr(self, name, tangent_lines[:, sp:ep])
-            self.plot_data[name] = tangent_lines[:, sp:ep]
+            self.scan_results[name] = tangent_lines[:, sp:ep]
             sp = ep
             ep += 2
 
     def _tangent_line(self, J_ss, slope):
 
-        fix_ss = self.plot_data.fixed_ss
+        fix_ss = self.scan_results.fixed_ss
 
         constant = J_ss / (fix_ss ** slope)
 
-        ydist = numpy.log10(self.plot_data.flux_max / self.plot_data.flux_min)
-        xdist = numpy.log10(self.plot_data.scan_max / self.plot_data.scan_min)
+        ydist = numpy.log10(self.scan_results.flux_max / self.scan_results.flux_min)
+        xdist = numpy.log10(self.scan_results.scan_max / self.scan_results.scan_min)
         golden_ratio = (1 + numpy.sqrt(5)) / 2
         xyscale = xdist / (ydist * golden_ratio * 1.5)
 
@@ -693,7 +693,7 @@ class RateCharData(object):
     @property
     def _color_dict(self):
         if not self._color_dict_:
-            fix_map = getattr(self._model_map, self.plot_data.fixed)
+            fix_map = getattr(self._model_map, self.scan_results.fixed)
             relavent_reactions = fix_map.isProductOf() + \
                                  fix_map.isSubstrateOf() + \
                                  fix_map.isModifierOf()
@@ -722,14 +722,14 @@ class RateCharData(object):
         flux_ld_dict = {}
 
         demand_blocks = ['J_' + dem_reac for dem_reac in getattr(
-            self._model_map, self.plot_data.fixed).isSubstrateOf()]
+            self._model_map, self.scan_results.fixed).isSubstrateOf()]
         supply_blocks = ['J_' + sup_reac for sup_reac in getattr(
-            self._model_map, self.plot_data.fixed).isProductOf()]
+            self._model_map, self.scan_results.fixed).isProductOf()]
 
-        for flux in self.plot_data.flux_names:
-            flux_col = self.plot_data.flux_names.index(flux)
-            x_data = self.plot_data.scan_range
-            y_data = self.plot_data.flux_data[:, flux_col]
+        for flux in self.scan_results.flux_names:
+            flux_col = self.scan_results.flux_names.index(flux)
+            x_data = self.scan_results.scan_range
+            y_data = self.scan_results.flux_data[:, flux_col]
             latex_expr = self._ltxe.expression_to_latex(flux)
             flux_color = self._color_dict[flux]
             color = hsv_to_rgb(flux_color[0],
@@ -764,15 +764,15 @@ class RateCharData(object):
     def _make_ec_ld(self):
         ec_ld_dict = {}
 
-        for ec_name in self.plot_data.ec_names:
+        for ec_name in self.scan_results.ec_names:
             for flux, flux_ld in self._flux_ld_dict.iteritems():
                 ec_reaction = flux[2:]
-                if 'ec' + ec_reaction + '_' + self.plot_data.fixed in ec_name:
+                if 'ec' + ec_reaction + '_' + self.scan_results.fixed in ec_name:
                     flux_color = self._color_dict[flux]
                     color = hsv_to_rgb(flux_color[0],
                                        flux_color[1] * 0.5,
                                        flux_color[2])
-                    ec_data = self.plot_data[ec_name]
+                    ec_data = self.scan_results[ec_name]
                     categories = ['Elasticity Coefficients'] + \
                                  flux_ld.categories[1:]
                     latex_expr = self._ltxe.expression_to_latex(ec_name)
@@ -789,7 +789,7 @@ class RateCharData(object):
     def _make_rc_ld(self):
         rc_ld_dict = {}
 
-        for rc_name in self.plot_data.rc_names:
+        for rc_name in self.scan_results.rc_names:
             for flux, flux_ld in self._flux_ld_dict.iteritems():
                 rc_flux = 'J' + flux[2:]
                 if 'rc' + rc_flux + '_' in rc_name:
@@ -797,7 +797,7 @@ class RateCharData(object):
                     color = hsv_to_rgb(flux_color[0],
                                        flux_color[1],
                                        flux_color[2] * 0.7)
-                    rc_data = self.plot_data[rc_name]
+                    rc_data = self.scan_results[rc_name]
                     categories = ['Response Coefficients'] + \
                                  flux_ld.categories[1:]
                     latex_expr = self._ltxe.expression_to_latex(rc_name)
@@ -822,18 +822,18 @@ class RateCharData(object):
 
         prc_ld_dict = {}
 
-        for prc_name in self.plot_data.prc_names:
+        for prc_name in self.scan_results.prc_names:
             for flux, flux_ld in self._flux_ld_dict.iteritems():
                 prc_flux = 'J' + flux[2:]
-                if 'prc' + prc_flux + '_' + self.plot_data.fixed in prc_name:
+                if 'prc' + prc_flux + '_' + self.scan_results.fixed in prc_name:
                     route_reaction = get_prc_route(prc_name,
                                                    prc_flux,
-                                                   self.plot_data.fixed)
+                                                   self.scan_results.fixed)
                     flux_color = self._color_dict['J_' + route_reaction]
                     color = hsv_to_rgb(flux_color[0],
                                        flux_color[1] * 0.5,
                                        flux_color[2])
-                    prc_data = self.plot_data[prc_name]
+                    prc_data = self.scan_results[prc_name]
                     categories = ['Partial Response Coefficients'] + \
                                  flux_ld.categories[1:]
                     latex_expr = self._ltxe.expression_to_latex(prc_name)
@@ -852,8 +852,8 @@ class RateCharData(object):
         col = self._color_dict['Total Supply']
         total_flux_ld_dict['Total Supply'] = \
             LineData(name='Total Supply',
-                     x_data=self.plot_data.scan_range,
-                     y_data=self.plot_data.total_supply,
+                     x_data=self.scan_results.scan_range,
+                     y_data=self.scan_results.total_supply,
                      categories=['Fluxes',
                                  'Supply',
                                  'Total Supply'],
@@ -865,8 +865,8 @@ class RateCharData(object):
         col = self._color_dict['Total Demand']
         total_flux_ld_dict['Total Demand'] = \
             LineData(name='Total Demand',
-                     x_data=self.plot_data.scan_range,
-                     y_data=self.plot_data.total_demand,
+                     x_data=self.scan_results.scan_range,
+                     y_data=self.scan_results.total_demand,
                      categories=['Fluxes',
                                  'Demand',
                                  'Total Demand'],
@@ -884,7 +884,7 @@ class RateCharData(object):
                 'Supply',
                 'Demand']),
             ('Reaction Blocks',
-             self.plot_data.flux_names +
+             self.scan_results.flux_names +
              ['Total Supply', 'Total Demand']),
             ('Lines', [
                 'Fluxes',
@@ -896,15 +896,15 @@ class RateCharData(object):
 
         scan_fig = ScanFig(line_data_list,
                            ax_properties={'xlabel': '[%s]' %
-                                                    self.plot_data.fixed.replace(
+                                                    self.scan_results.fixed.replace(
                                                         '_', ' '),
                                           'ylabel': 'Rate',
                                           'xscale': 'log',
                                           'yscale': 'log',
-                                          'xlim': [self.plot_data.scan_min,
-                                                   self.plot_data.scan_max],
-                                          'ylim': [self.plot_data.flux_min,
-                                                   self.plot_data.flux_max * 2
+                                          'xlim': [self.scan_results.scan_min,
+                                                   self.scan_results.scan_max],
+                                          'ylim': [self.scan_results.flux_min,
+                                                   self.scan_results.flux_max * 2
                                                    ]},
                            category_classes=category_classes,
                            base_name=self._analysis_method,
@@ -913,40 +913,49 @@ class RateCharData(object):
         scan_fig.toggle_category('Supply', True)
         scan_fig.toggle_category('Demand', True)
         scan_fig.toggle_category('Fluxes', True)
-        scan_fig.ax.axvline(self.plot_data.fixed_ss, ls=':', color='gray')
+        scan_fig.ax.axvline(self.scan_results.fixed_ss, ls=':', color='gray')
 
         return scan_fig
 
-    #@silence_print
     def plot_decompose(self):
+        from warnings import warn, simplefilter
+        simplefilter('always', DeprecationWarning)
+        warn('plot_decompose has been renamed to `do_mca_scan, use that '
+             'method in the future`', DeprecationWarning, stacklevel=1)
+        simplefilter('default', DeprecationWarning)
+        return self.do_mca_scan()
+
+
+    @silence_print
+    def do_mca_scan(self):
         ecs = []
         ccs = []
         prc_names = []
         rc_names = []
         rc_pos = []
 
-        reagent_of = [each[2:] for each in self.plot_data.flux_names]
+        reagent_of = [each[2:] for each in self.scan_results.flux_names]
         all_reactions = reagent_of + \
                         getattr(self._model_map,
-                                self.plot_data.fixed).isModifierOf()
+                                self.scan_results.fixed).isModifierOf()
 
         arl = len(all_reactions)
         strt = 0
         stp = arl
-        for flux_reaction in self.plot_data.flux_names:
+        for flux_reaction in self.scan_results.flux_names:
             reaction = flux_reaction[2:]
-            rc_names.append('rcJ%s_%s' % (reaction, self.plot_data.fixed))
+            rc_names.append('rcJ%s_%s' % (reaction, self.scan_results.fixed))
 
             rc_pos.append(range(strt, stp))
             strt += arl
             stp += arl
 
             for route_reaction in all_reactions:
-                ec = 'ec' + route_reaction + '_' + self.plot_data.fixed
+                ec = 'ec' + route_reaction + '_' + self.scan_results.fixed
                 cc = 'ccJ' + reaction + '_' + route_reaction
 
                 name = 'prcJ%s_%s_%s' % (reaction,
-                                         self.plot_data.fixed,
+                                         self.scan_results.fixed,
                                          route_reaction)
 
                 # ecs.append(ec)
@@ -957,26 +966,26 @@ class RateCharData(object):
 
         ec_len = len(ecs)
 
-        user_output = [self.plot_data.fixed] + ecs + ccs
+        user_output = [self.scan_results.fixed] + ecs + ccs
 
 
         scanner = pysces.Scanner(self.mod)
         scanner.quietRun = True
-        scanner.addScanParameter(self.plot_data.fixed,
-                                 self.plot_data.scan_min,
-                                 self.plot_data.scan_max,
-                                 self.plot_data.scan_points,
+        scanner.addScanParameter(self.scan_results.fixed,
+                                 self.scan_results.scan_min,
+                                 self.scan_results.scan_max,
+                                 self.scan_results.scan_points,
                                  log=True)
         scanner.addUserOutput(*user_output)
         scanner.Run()
 
         ax_properties = {'ylabel': 'Coefficient Value',
                          'xlabel': '[%s]' %
-                                   self.plot_data.fixed.replace('_', ' '),
+                                   self.scan_results.fixed.replace('_', ' '),
                          'xscale': 'log',
                          'yscale': 'linear',
-                         'xlim': [self.plot_data.scan_min,
-                                  self.plot_data.scan_max]}
+                         'xlim': [self.scan_results.scan_min,
+                                  self.scan_results.scan_max]}
 
         cc_ec_data_obj = Data2D(mod=self.mod,
                                 column_names=user_output,
@@ -1014,7 +1023,7 @@ class RateCharData(object):
         rc_out_arr = [scanner.UserOutputResults[:, 0]] + rc_data
         rc_out_arr = numpy.vstack(rc_out_arr).transpose()
         rc_data_obj = Data2D(mod=self.mod,
-                             column_names = [self.plot_data.fixed] + prc_names + rc_names,
+                             column_names = [self.scan_results.fixed] + prc_names + rc_names,
                              data_array=rc_out_arr,
                              ltxe=self._ltxe,
                              analysis_method=self._analysis_method,
