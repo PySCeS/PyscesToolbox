@@ -231,12 +231,12 @@ class Data2D(object):
                  additional_cats=None,
                  num_of_groups=None,
                  working_dir=None):
-        self.plot_data = DotDict()
-        self.plot_data['scan_in'] = column_names[0]
-        self.plot_data['scan_out'] = column_names[1:]
-        self.plot_data['scan_range'] = data_array[:, 0]
-        self.plot_data['scan_results'] = data_array[:, 1:]
-        self.plot_data['scan_points'] = len(self.plot_data.scan_range)
+        self.scan_results = DotDict()
+        self.scan_results['scan_in'] = column_names[0]
+        self.scan_results['scan_out'] = column_names[1:]
+        self.scan_results['scan_range'] = data_array[:, 0]
+        self.scan_results['scan_results'] = data_array[:, 1:]
+        self.scan_results['scan_points'] = len(self.scan_results.scan_range)
 
         self._column_names = column_names
         self._scan_results = data_array
@@ -263,7 +263,7 @@ class Data2D(object):
             self._fname_specified = True
 
 
-        #This is here specifically for the plot_decompose method of pysces. If
+        #This is here specifically for the do_mca_scan method of pysces. If
         if not working_dir:
             working_dir = modeltools.make_path(mod=self.mod,
                                                analysis_method=self._analysis_method)
@@ -367,7 +367,7 @@ class Data2D(object):
         """
         scan_types = self._scan_types
         column_categories = {}
-        for column in self.plot_data.scan_out:
+        for column in self.scan_results.scan_out:
             column_categories[column] = [column]
             for k, v in scan_types.iteritems():
                 if column in v:
@@ -387,10 +387,10 @@ class Data2D(object):
         dictionary is used here.
         """
         lines = []
-        for i, each in enumerate(self.plot_data.scan_out):
+        for i, each in enumerate(self.scan_results.scan_out):
             line = LineData(name=each,
-                            x_data=self.plot_data.scan_range,
-                            y_data=self.plot_data.scan_results[:, i],
+                            x_data=self.scan_results.scan_range,
+                            y_data=self.scan_results.scan_results[:, i],
                             categories=self._column_categories[each],
                             properties={'label':
                                             '$%s$' %
@@ -418,12 +418,12 @@ class Data2D(object):
         species = mm.hasSpecies()
         x_name = ''
         # TODO Enable lower case "time" as well as well as making generic for minutes/hours
-        if self.plot_data.scan_in == 'Time':
+        if self.scan_results.scan_in == 'Time':
             x_name = 'Time (s)'
-        elif self.plot_data.scan_in in species:
-            x_name = '[%s]' % self.plot_data.scan_in
-        elif self.plot_data.scan_in in self.mod.parameters:
-            x_name = self.plot_data.scan_in
+        elif self.scan_results.scan_in in species:
+            x_name = '[%s]' % self.scan_results.scan_in
+        elif self.scan_results.scan_in in self.mod.parameters:
+            x_name = self.scan_results.scan_in
         return x_name
 
     def plot(self):
@@ -444,11 +444,11 @@ class Data2D(object):
                            category_classes=self._category_classes,
                            ax_properties=self._ax_properties,
                            working_dir=path.join(self._working_dir,
-                                                 self.plot_data.scan_in, ),
+                                                 self.scan_results.scan_in, ),
                            base_name=base_name, )
         return scan_fig
 
-    def save_data(self, file_name=None, separator=','):
+    def save_results(self, file_name=None, separator=','):
         """
         Saves data stores in current instance of ``Data2D`` as a comma
         separated file.
@@ -473,7 +473,7 @@ class Data2D(object):
         file_name = modeltools.get_file_path(working_dir=self._working_dir,
                                              internal_filename=self._fname,
                                              fmt='csv',
-                                             fixed=self.plot_data.scan_in,
+                                             fixed=self.scan_results.scan_in,
                                              file_name=file_name)
 
         scan_results = self._scan_results
