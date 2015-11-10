@@ -24,7 +24,7 @@ class Symca(object):
         self._working_dir = make_path(self.mod, self._analysis_method)
         self._ltxe = LatexExpr(self.mod)
 
-        self.CC = None
+        self.cc_results = None
 
         self._nmatrix = None
         self._species = None
@@ -51,9 +51,9 @@ class Symca(object):
             self.internal_fixed = True
         if auto_load:
             try:
-                self.load()
+                self.load_session()
             except:
-                print 'Nothing to load: Run `do_symca` first'
+                print 'Nothing to load_session: Run `do_symca` first'
 
     @property
     def nmatrix(self):
@@ -219,18 +219,18 @@ class Symca(object):
         full_path = make_path(self.mod, self._analysis_method, [path])
         return full_path
 
-    def save(self, file_name=None):
+    def save_session(self, file_name=None):
         file_name = get_file_path(working_dir=self._working_dir,
                                   internal_filename=self._internal_filename,
                                   fmt='json',
                                   file_name=file_name,
                                   write_suffix=False)
 
-        assert self.CC, 'Nothing to save, run ``do_symca`` method first'
-        main_cc_dict = SMCAtools.make_inner_dict(self.CC, 'CC')
+        assert self.cc_results, 'Nothing to save_session, run ``do_symca`` method first'
+        main_cc_dict = SMCAtools.make_inner_dict(self.cc_results, 'cc_results')
         counter = 0
         while True:
-            cc_container_name = 'CC{0}'.format(counter)
+            cc_container_name = 'cc_results_{0}'.format(counter)
             try:
                 cc_container = getattr(self, cc_container_name)
                 main_cc_dict.update(
@@ -243,7 +243,7 @@ class Symca(object):
         with open(file_name, 'w') as f:
             json.dump(to_save, f)
 
-    def load(self, file_name=None):
+    def load_session(self, file_name=None):
         file_name = get_file_path(working_dir=self._working_dir,
                                   internal_filename=self._internal_filename,
                                   fmt='json',
@@ -307,7 +307,7 @@ class Symca(object):
                                                     common_denom_expr,
                                                     self._ltxe)
 
-            self.CC = SMCAtools.make_CC_dot_dict(cc_objects)
+            self.cc_results = SMCAtools.make_CC_dot_dict(cc_objects)
 
             if internal_fixed:
                 simpl_dic = SMCAtools.make_internals_dict(cc_sol,
@@ -333,17 +333,17 @@ class Symca(object):
                                                                   self._ltxe, )
 
                     CC_dot_dict = SMCAtools.make_CC_dot_dict(simpl_cc_objects)
-                    setattr(self, 'CC%s' % CC_block_counter, CC_dot_dict)
+                    setattr(self, 'cc_results_%s' % CC_block_counter, CC_dot_dict)
                     CC_block_counter += 1
 
             self.CC_i_num = CC_i_num
 
         if auto_save_load:
             try:
-                self.load()
+                self.load_session()
             except:
                 do_symca_internals(self)
-                self.save()
+                self.save_session()
         else:
             do_symca_internals(self)
 

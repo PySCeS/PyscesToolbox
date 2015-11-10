@@ -201,7 +201,7 @@ class CCoef(CCBase):
 
         return scan_res
 
-    def par_scan(self, parameter, scan_range, scan_type='percentage', init_return=True):
+    def do_par_scan(self, parameter, scan_range, scan_type='percentage', init_return=True):
 
         assert scan_type in ['percentage', 'value']
         init = getattr(self.mod, parameter)

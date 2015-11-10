@@ -554,11 +554,11 @@ class SymcaToolBox(object):
     @staticmethod
     def build_outer_dict(symca_object):
         containers = {}
-        containers['CC'] = SymcaToolBox.build_inner_dict(
-            getattr(symca_object, 'CC'))
+        containers['cc_results'] = SymcaToolBox.build_inner_dict(
+            getattr(symca_object, 'cc_results'))
         counter = 0
         while True:
-            CC_obj_name = 'CC{0}'.format(counter)
+            CC_obj_name = 'cc_results_{0}'.format(counter)
             try:
                 CC_obj_dict = getattr(symca_object, CC_obj_name)
             except AttributeError:
@@ -585,7 +585,7 @@ class SymcaToolBox(object):
 
         # OLD SAVE FUNCTIONS> Not as good as new ones
         # @staticmethod
-        # def save(cc_list, common_denominator, path_to_pickle):
+        # def save_session(cc_list, common_denominator, path_to_pickle):
         #     mod = common_denominator.mod
         #     common_denominator.mod = ''
         #     for cc in cc_list:
@@ -605,9 +605,9 @@ class SymcaToolBox(object):
         #             cp.mod = mod
         #
         # @staticmethod
-        # def load(mod, path_to_pickle):
+        # def load_session(mod, path_to_pickle):
         #     with open(path_to_pickle) as f:
-        #         cc_list = pickle.load(f)
+        #         cc_list = pickle.load_session(f)
         #
         #     common_denominator = cc_list.pop()
         #
