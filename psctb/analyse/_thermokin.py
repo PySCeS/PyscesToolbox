@@ -167,29 +167,29 @@ class ThermoKin(object):
         self._ltxe.add_term_types(get_term_types_from_raw_data(self._raw_data))
 
         self._populate_object()
-        self._populate_mca_data()
+        self._populate_mca_results()
 
-    def _verify_results(self):
-        print '%s\t\t%s\t\t%s' % ('Name', 'Tk val', 'Mod val')
-        for reaction in self.reactions:
-            mod_val = getattr(self.mod, reaction.name)
-            own_val = reaction.value
-            is_eq = round(mod_val, 10) == round(own_val, 10)
-            print '%s\t\t%.10f\t%.10f\t%s' % (
-                reaction.name, own_val, mod_val, is_eq)
-        for reaction in self.reactions:
-            for var_par in self.mod.parameters + self.mod.species:
-                ec_name = 'ec%s_%s' % (reaction.rname, var_par)
-                mod_val = getattr(self.mod, ec_name)
-                own_val = reaction.mca_data[ec_name].value
-                is_eq = round(mod_val, 10) == round(own_val, 10)
-                print '%s\t\t%.10f\t%.10f\t%s' % (
-                    ec_name, own_val, mod_val, is_eq)
+    # def _verify_results(self):
+    #     print '%s\t\t%s\t\t%s' % ('Name', 'Tk val', 'Mod val')
+    #     for reaction in self.reaction_results:
+    #         mod_val = getattr(self.mod, reaction.name)
+    #         own_val = reaction.value
+    #         is_eq = round(mod_val, 10) == round(own_val, 10)
+    #         print '%s\t\t%.10f\t%.10f\t%s' % (
+    #             reaction.name, own_val, mod_val, is_eq)
+    #     for reaction in self.reaction_results:
+    #         for var_par in self.mod.parameters + self.mod.species:
+    #             ec_name = 'ec%s_%s' % (reaction.rname, var_par)
+    #             mod_val = getattr(self.mod, ec_name)
+    #             own_val = reaction.mca_results[ec_name].value
+    #             is_eq = round(mod_val, 10) == round(own_val, 10)
+    #             print '%s\t\t%.10f\t%.10f\t%s' % (
+    #                 ec_name, own_val, mod_val, is_eq)
 
     def _populate_object(self):
         reacts = []
-        self.reactions = DotDict()
-        self.reactions._make_repr('"$" + v.latex_name + "$"', 'v.value',
+        self.reaction_results = DotDict()
+        self.reaction_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                   formatter_factory())
         for reaction, terms_dict in self._raw_data.iteritems():
             reqn_obj = RateEqn(self.mod,
@@ -197,15 +197,15 @@ class ThermoKin(object):
                                terms_dict,
                                self._ltxe)
             setattr(self, reaction, reqn_obj)
-            self.reactions[reaction] = reqn_obj
+            self.reaction_results[reaction] = reqn_obj
 
-    def _populate_mca_data(self):
-        self.mca_data = DotDict()
-        self.mca_data._make_repr('"$" + v.latex_name + "$"', 'v.value',
+    def _populate_mca_results(self):
+        self.mca_results = DotDict()
+        self.mca_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                  formatter_factory())
 
-        for rate_eqn in self.reactions.itervalues():
-            self.mca_data.update(rate_eqn.mca_data)
+        for rate_eqn in self.reaction_results.itervalues():
+            self.mca_results.update(rate_eqn.mca_results)
 
 
 class RateEqn(object):
@@ -237,22 +237,22 @@ class RateEqn(object):
         self._latex_expression = None
         self._latex_name = None
 
-        self.mca_data = DotDict()
-        self.mca_data._make_repr('"$" + v.latex_name + "$"', 'v.value',
+        self.mca_results = DotDict()
+        self.mca_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                  formatter_factory())
 
-        self._populate_mca_data()
+        self._populate_mca_results()
 
-    def _populate_mca_data(self):
+    def _populate_mca_results(self):
         var_pars = self.mod.parameters + self.mod.species
         for each in var_pars:
             each = sympify(each)
             ec = diff(self.expression, each) * (each / self.expression)
             ec_name = 'ec%s_%s' % (self._rname, each)
-            self.mca_data[ec_name] = Term(self, self.mod, ec_name, ec,
+            self.mca_results[ec_name] = Term(self, self.mod, ec_name, ec,
                                           self._ltxe)
         for each in self.terms.itervalues():
-            self.mca_data.update(each.mca_data)
+            self.mca_results.update(each.mca_results)
 
     def _repr_latex_(self):
         return get_repr_latex(self)
@@ -328,7 +328,7 @@ class RateEqn(object):
                     scan_res[i + 1].append(NaN)
         return scan_res
 
-    def par_scan(self, parameter, scan_range, scan_type='value',
+    def do_par_scan(self, parameter, scan_range, scan_type='value',
                  init_return=True):
 
         assert scan_type in ['percentage', 'value', 'elasticity']
@@ -405,10 +405,10 @@ class RateEqn(object):
         reaction_name = self._rname
         mca_objects = []
         for term in terms:
-            mca_objects.append(self.mca_data[
+            mca_objects.append(self.mca_results[
                 'pec%s_%s_%s' % (reaction_name, parameter, term)])
         mca_objects.append(
-            self.mca_data['ec%s_%s' % (reaction_name, parameter)])
+            self.mca_results['ec%s_%s' % (reaction_name, parameter)])
         return mca_objects
 
 
@@ -457,10 +457,10 @@ class RateTerm(Term):
         super(RateTerm, self).__init__(parent, mod, name, expression, ltxe)
         self.expression = sympify(expression)
         self._rname = rname
-        self.mca_data = DotDict()
-        self.mca_data._make_repr('"$" + v.latex_name + "$"', 'v.value',
+        self.mca_results = DotDict()
+        self.mca_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                  formatter_factory())
-        self._populate_mca_data()
+        self._populate_mca_results()
         self._percentage = None
 
     @property
@@ -468,13 +468,13 @@ class RateTerm(Term):
         per = (log(self.value) / log(self._parent.value)) * 100
         return per
 
-    def _populate_mca_data(self):
+    def _populate_mca_results(self):
         var_pars = self.mod.species + self.mod.parameters
         for each in var_pars:
             each = sympify(each)
             ec_name = 'pec%s_%s_%s' % (self._parent._rname, each, self._rname)
             ec = diff(self.expression, each) * (each / self.expression)
-            self.mca_data[ec_name] = Term(self._parent, self.mod, ec_name, ec,
+            self.mca_results[ec_name] = Term(self._parent, self.mod, ec_name, ec,
                                           self._ltxe)
 
 
