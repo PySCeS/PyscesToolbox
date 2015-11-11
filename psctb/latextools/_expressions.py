@@ -238,7 +238,7 @@ class LatexExpr(object):
             self._tk_subs = tk_subs
         return self._tk_subs
 
-    def expression_to_latex(self, expression):
+    def expression_to_latex(self, expression,mul_symbol=None):
         if type(expression) == str:
             expression = sympify(expression)
 
@@ -263,7 +263,8 @@ class LatexExpr(object):
 
         # using smaller_dict here instead of self.subs_dict
         latex_expr = latex(expression.subs(smaller_dict),
-                           long_frac_ratio=10)
+                           long_frac_ratio=10,
+                           mul_symbol=mul_symbol)
 
         for k, v in self.prc_subs.iteritems():
             latex_expr = latex_expr.replace(k, v)

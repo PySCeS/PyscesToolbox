@@ -213,6 +213,56 @@ class ThermoKin(object):
             self.mca_results.update(rate_eqn.mca_results)
 
 
+    def save_results(self, file_name=None, separator=','):
+        file_name = get_file_path(working_dir=self._working_dir,
+                                             internal_filename='tk_summary',
+                                             fmt='csv',
+                                             file_name=file_name, )
+
+        values = []
+        max_len = 0
+        for reaction_name in sorted(self.reaction_results.keys()):
+            cols = (reaction_name,
+                    self.reaction_results[reaction_name].value,
+                    self.reaction_results[reaction_name].latex_name,
+                    self.reaction_results[reaction_name].latex_expression)
+            values.append(cols)
+            if len(cols[3]) > max_len:
+                max_len = len(cols[3])
+
+
+        for elasticity_name in sorted([ec for ec in self.mca_results.keys() if ec.startswith('ec')]):
+            if self.mca_results[elasticity_name].expression != 0:
+                related_ecs = sorted([ec for ec in self.mca_results.keys() if elasticity_name in ec])
+                for related_ec_name in related_ecs:
+                    cols = (related_ec_name,
+                            self.mca_results[related_ec_name].value,
+                            self.mca_results[related_ec_name].latex_name,
+                            self.mca_results[related_ec_name].latex_expression)
+                    values.append(cols)
+                    if len(cols[3]) > max_len:
+                        max_len = len(cols[3])
+
+        str_fmt = 'S%s' % max_len
+        head = ['name','value','latex_name','latex_expression']
+        X = array(values,
+                  dtype=[(head[0],str_fmt),
+                         (head[1],'float'),
+                         (head[2],str_fmt),
+                         (head[3],str_fmt)])
+
+
+        try:
+            savetxt(fname=file_name,
+                    X=X,
+                    header=','.join(head),
+                    delimiter=separator,
+                    fmt=['%s','%.9f','%s','%s'],)
+
+        except IOError as e:
+            print e.strerror
+
+
 class RateEqn(object):
     def __init__(self, mod, name, term_dict, ltxe):
         super(RateEqn, self).__init__()
@@ -277,7 +327,8 @@ class RateEqn(object):
     def latex_expression(self):
         if not self._latex_expression:
             self._latex_expression = self._ltxe.expression_to_latex(
-                self.expression)
+                self.expression,
+                mul_symbol='dot')
         return self._latex_expression
 
     def _calc_value(self):
@@ -448,7 +499,8 @@ class Term(object):
     def latex_expression(self):
         if not self._latex_expression:
             self._latex_expression = self._ltxe.expression_to_latex(
-                self.expression)
+                self.expression,
+                mul_symbol='dot')
         return self._latex_expression
 
     def _calc_value(self, subs_dict=None):
