@@ -1,6 +1,6 @@
 import subprocess
 from os import devnull
-# from os import path
+from os.path import join
 # from os import mkdir
 import sys
 #from re import sub
@@ -291,8 +291,8 @@ class SymcaToolBox(object):
         function but uses maxima instead
         """
 
-        maxima_in_file = path_to + 'in.txt'
-        maxima_out_file = path_to + 'out.txt'
+        maxima_in_file = join(path_to,'in.txt')
+        maxima_out_file = join(path_to,'out.txt')
         if expression.is_Matrix:
             expr_mat = expression[:, :]
             # print expr_mat
