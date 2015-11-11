@@ -16,7 +16,7 @@ This project is a work in progress and most features still require proper docume
 
 ##IMPORTANT NOTICE 
 
-Because this project is still near its infancy, future changes might break older scripts. These types of changes will be kept to a minimum and will be documented here.
+Because this project is still in its infancy, future changes might break older scripts. These types of changes will be kept to a minimum and will be documented here.
 
 Major changes were made on 11/11/2015 that might break scripts coded before this date. These changes are related to the naming of methods and fields. For scripts older than 11/11/2015 we recommend using an older version of PySCeSToolbox (noted under **Installation**). Manual porting of scripts is also possible with details of necessary changes outlined under **Porting scripts to latest version**. 
 
