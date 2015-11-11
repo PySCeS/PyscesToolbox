@@ -3,14 +3,17 @@ from re import match, findall
 from os import path
 
 from sympy import Symbol, sympify, diff
-from numpy import float64, log, array, float, NaN, nanmin, nanmax
+from numpy import float64, log, array, float, NaN, nanmin, nanmax, savetxt
 from pysces import ModelMap
+
 
 from ..utils.misc import DotDict, formatter_factory, find_min, find_max
 from ..latextools import LatexExpr
-from ..modeltools import make_path
+from ..modeltools import make_path, get_file_path
 from ..utils.plotting import Data2D
 from ..utils.misc import do_safe_state, get_value, silence_print
+
+
 
 
 class FormatException(Exception):
@@ -196,8 +199,10 @@ class ThermoKin(object):
                                reaction,
                                terms_dict,
                                self._ltxe)
-            setattr(self, reaction, reqn_obj)
-            self.reaction_results[reaction] = reqn_obj
+            setattr(self, 'J_' + reaction, reqn_obj)
+            self.reaction_results['J_' + reaction] = reqn_obj
+            for term in reqn_obj.terms.itervalues():
+                self.reaction_results[term.name] = term
 
     def _populate_mca_results(self):
         self.mca_results = DotDict()
