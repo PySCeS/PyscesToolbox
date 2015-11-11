@@ -155,7 +155,7 @@ class CCoef(CCBase):
     def latex_expression(self):
         if not self._latex_expression:
             self._latex_expression = '(' + \
-                self.latex_numerator + ')' + '/ \\,\\Sigma'
+                self.latex_numerator + ')' + '/~\\Sigma'
         return self._latex_expression
 
     @property
@@ -389,7 +389,7 @@ class CPattern(CCBase):
     @property
     def latex_expression(self):
         if not self._latex_expression:
-            self._latex_expression = self.latex_numerator + '/ \\,\\Sigma'
+            self._latex_expression = self.latex_numerator + '/~\\Sigma'
         return self._latex_expression
 
     @property

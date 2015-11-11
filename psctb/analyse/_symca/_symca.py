@@ -7,6 +7,7 @@ from ...utils.misc import extract_model
 from ...modeltools import make_path, get_file_path
 from ...latextools import LatexExpr
 from .symca_toolbox import SymcaToolBox as SMCAtools
+from numpy import savetxt, array
 
 
 all = ['Symca']
@@ -265,6 +266,74 @@ class Symca(object):
             cc_containers[key] = SMCAtools.make_CC_dot_dict(cc_container)
         for key, value in cc_containers.iteritems():
             setattr(self, key, value)
+
+    def save_results(self, file_name=None, separator=','):
+        file_name = get_file_path(working_dir=self._working_dir,
+                                             internal_filename='cc_summary',
+                                             fmt='csv',
+                                             file_name=file_name, )
+
+        rows = []
+        cc_counter = 0
+        cc_dicts = [self.cc_results]
+        max_len = 0
+
+        while True:
+            try:
+                next_dict = getattr(self,'cc_results_%s' % cc_counter)
+                cc_dicts.append(next_dict)
+                cc_counter += 1
+            except:
+                break
+
+        sep = ('######################',0,'','')
+        cc_counter = -1
+        for cc_dict in cc_dicts:
+            result_name = '# results from cc_results'
+            if cc_counter >= 0:
+                result_name += '_%s' % cc_counter
+            head = (result_name,0,'','')
+            rows.append(head)
+            for cc_name in sorted(cc_dict.keys()):
+                cc_obj = cc_dict[cc_name]
+
+                row_1 = (cc_obj.name,
+                         cc_obj.value,
+                         cc_obj.latex_name,
+                         cc_obj.latex_expression)
+
+                expr_len = len(cc_obj.latex_expression)
+                if expr_len > max_len:
+                    max_len = expr_len
+                rows.append(row_1)
+                if not cc_obj.name == 'common_denominator':
+                    for cp in cc_obj.control_patterns.itervalues():
+                        cols = (cp.name,
+                                cp.value,
+                                cp.latex_name,
+                                cp.latex_expression)
+                        rows.append(cols)
+            rows.append(sep)
+            cc_counter += 1
+
+        str_fmt = 'S%s' % max_len
+        head = ['name','value','latex_name','latex_expression']
+        X = array(rows,
+                     dtype=[(head[0],str_fmt),
+                            (head[1],'float'),
+                            (head[2],str_fmt),
+                            (head[3],str_fmt)])
+
+
+        try:
+            savetxt(fname=file_name,
+                    X=X,
+                    header=','.join(head),
+                    delimiter=separator,
+                    fmt=['%s','%.9f','%s','%s'],)
+
+        except IOError as e:
+            print e.strerror
 
 
     def do_symca(self, internal_fixed=False, auto_save_load=False):
