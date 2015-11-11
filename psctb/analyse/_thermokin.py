@@ -170,7 +170,7 @@ class ThermoKin(object):
         self._ltxe.add_term_types(get_term_types_from_raw_data(self._raw_data))
 
         self._populate_object()
-        self._populate_mca_results()
+        self._populate_ec_results()
 
     # def _verify_results(self):
     #     print '%s\t\t%s\t\t%s' % ('Name', 'Tk val', 'Mod val')
@@ -184,7 +184,7 @@ class ThermoKin(object):
     #         for var_par in self.mod.parameters + self.mod.species:
     #             ec_name = 'ec%s_%s' % (reaction.rname, var_par)
     #             mod_val = getattr(self.mod, ec_name)
-    #             own_val = reaction.mca_results[ec_name].value
+    #             own_val = reaction.ec_results[ec_name].value
     #             is_eq = round(mod_val, 10) == round(own_val, 10)
     #             print '%s\t\t%.10f\t%.10f\t%s' % (
     #                 ec_name, own_val, mod_val, is_eq)
@@ -204,13 +204,13 @@ class ThermoKin(object):
             for term in reqn_obj.terms.itervalues():
                 self.reaction_results[term.name] = term
 
-    def _populate_mca_results(self):
-        self.mca_results = DotDict()
-        self.mca_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
+    def _populate_ec_results(self):
+        self.ec_results = DotDict()
+        self.ec_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                  formatter_factory())
 
         for rate_eqn in self.reaction_results.itervalues():
-            self.mca_results.update(rate_eqn.mca_results)
+            self.ec_results.update(rate_eqn.ec_results)
 
 
     def save_results(self, file_name=None, separator=','):
@@ -231,14 +231,14 @@ class ThermoKin(object):
                 max_len = len(cols[3])
 
 
-        for elasticity_name in sorted([ec for ec in self.mca_results.keys() if ec.startswith('ec')]):
-            if self.mca_results[elasticity_name].expression != 0:
-                related_ecs = sorted([ec for ec in self.mca_results.keys() if elasticity_name in ec])
+        for elasticity_name in sorted([ec for ec in self.ec_results.keys() if ec.startswith('ec')]):
+            if self.ec_results[elasticity_name].expression != 0:
+                related_ecs = sorted([ec for ec in self.ec_results.keys() if elasticity_name in ec])
                 for related_ec_name in related_ecs:
                     cols = (related_ec_name,
-                            self.mca_results[related_ec_name].value,
-                            self.mca_results[related_ec_name].latex_name,
-                            self.mca_results[related_ec_name].latex_expression)
+                            self.ec_results[related_ec_name].value,
+                            self.ec_results[related_ec_name].latex_name,
+                            self.ec_results[related_ec_name].latex_expression)
                     values.append(cols)
                     if len(cols[3]) > max_len:
                         max_len = len(cols[3])
@@ -292,22 +292,22 @@ class RateEqn(object):
         self._latex_expression = None
         self._latex_name = None
 
-        self.mca_results = DotDict()
-        self.mca_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
+        self.ec_results = DotDict()
+        self.ec_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                  formatter_factory())
 
-        self._populate_mca_results()
+        self._populate_ec_results()
 
-    def _populate_mca_results(self):
+    def _populate_ec_results(self):
         var_pars = self.mod.parameters + self.mod.species
         for each in var_pars:
             each = sympify(each)
             ec = diff(self.expression, each) * (each / self.expression)
             ec_name = 'ec%s_%s' % (self._rname, each)
-            self.mca_results[ec_name] = Term(self, self.mod, ec_name, ec,
+            self.ec_results[ec_name] = Term(self, self.mod, ec_name, ec,
                                           self._ltxe)
         for each in self.terms.itervalues():
-            self.mca_results.update(each.mca_results)
+            self.ec_results.update(each.ec_results)
 
     def _repr_latex_(self):
         return get_repr_latex(self)
@@ -461,10 +461,10 @@ class RateEqn(object):
         reaction_name = self._rname
         mca_objects = []
         for term in terms:
-            mca_objects.append(self.mca_results[
+            mca_objects.append(self.ec_results[
                 'pec%s_%s_%s' % (reaction_name, parameter, term)])
         mca_objects.append(
-            self.mca_results['ec%s_%s' % (reaction_name, parameter)])
+            self.ec_results['ec%s_%s' % (reaction_name, parameter)])
         return mca_objects
 
 
@@ -514,10 +514,10 @@ class RateTerm(Term):
         super(RateTerm, self).__init__(parent, mod, name, expression, ltxe)
         self.expression = sympify(expression)
         self._rname = rname
-        self.mca_results = DotDict()
-        self.mca_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
+        self.ec_results = DotDict()
+        self.ec_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                  formatter_factory())
-        self._populate_mca_results()
+        self._populate_ec_results()
         self._percentage = None
 
     @property
@@ -525,13 +525,13 @@ class RateTerm(Term):
         per = (log(self.value) / log(self._parent.value)) * 100
         return per
 
-    def _populate_mca_results(self):
+    def _populate_ec_results(self):
         var_pars = self.mod.species + self.mod.parameters
         for each in var_pars:
             each = sympify(each)
             ec_name = 'pec%s_%s_%s' % (self._parent._rname, each, self._rname)
             ec = diff(self.expression, each) * (each / self.expression)
-            self.mca_results[ec_name] = Term(self._parent, self.mod, ec_name, ec,
+            self.ec_results[ec_name] = Term(self._parent, self.mod, ec_name, ec,
                                           self._ltxe)
 
 
