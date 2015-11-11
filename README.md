@@ -1,6 +1,5 @@
 #PyscesToolbox
 
-
 This is a set of metabolic model analysis tools for PySCeS.
 
 PyscesToolbox currently provides tools for:
@@ -14,6 +13,14 @@ PyscesToolbox currently provides tools for:
 PyscesToolbox was designed to be used within the IPython notebook, but most of the core features should work in a normal Python script.
 
 This project is a work in progress and most features still require proper documentation.
+
+##IMPORTANT NOTICE 
+
+Because this project is still near its infancy, future changes might break older scripts. These types of changes will be kept to a minimum and will be documented here.
+
+Major changes were made on 11/11/2015 that might break scripts coded before this date. These changes are related to the naming of methods and fields. For scripts older than 11/11/2015 we recommend using an older version of PySCeSToolbox (noted under **Installation**). Manual porting of scripts is also possible with details of necessary changes outlined under **Porting scripts to latest version**. 
+
+
 
 ##Requirements
 
@@ -46,6 +53,16 @@ Any existing notebooks should be placed in the ``notebooks`` subdirectory within
 
 PyscesToolbox can be installed from github using pip by using the following two commands in the terminal (for Linux) or in the WinPython Command Prompt (for Windows):
 
+For the pre-11/11/2015 version:
+
+```bash
+pip install git+https://github.com/exe0cdc/ipython-d3networkx.git
+pip install git+https://github.com/PySCeS/PyscesToolbox.git@f63b5ab660f103105750159885608a5f48de1551
+```
+
+
+For the latest version:
+
 ```bash
 pip install git+https://github.com/exe0cdc/ipython-d3networkx.git
 pip install git+https://github.com/PySCeS/PyscesToolbox.git
@@ -64,3 +81,48 @@ To start a PySCeSToolbox session in a IPython notebook:
 import pysces
 import psctb
 ```
+
+##Porting scripts to latest version
+
+Method and variable names and the analysis objects they belong to that were changed on 11/11/2015 are documented in the tables below. To port any older script simply change the old name of any method/variable to the new name.
+
+**RateChar**
+
+|Old name       |New Name    |
+|---------------|------------|
+|save           |save_session|
+|load           |load_session|
+|plot_data      |scan_results|
+|mca_data       |mca_results |
+|plot_decompose |mca_results |
+
+**Thermokin**
+
+|Old name       |New Name        |
+|---------------|----------------|
+|reactions      |reaction_results|
+|mca_data       |ec_results      |
+|reaction name* |J_reaction name |
+|par_scan       |do_par_scan     |
+*reaction name refers to the naming of a reaction as it is defined in the model file.*
+
+**Symca**
+
+|Old name       |New Name    |
+|---------------|------------|
+|CC             |cc_results  |
+|CCn*           |cc_results_n|
+|save           |save_session|
+|load           |load_session|
+|par_scan       |do_par_scan |
+*CCn refers to any of the additional result dictionaries that are created when an internal metabolite is fixed and the `internal_fixed` paramenter of `do_symca` is set to `True`
+
+**Data2D**
+
+|Old name       |New Name    |
+|---------------|------------|
+|plot_data      |scan_results|
+|save_data      |save_results|
+
+
+
