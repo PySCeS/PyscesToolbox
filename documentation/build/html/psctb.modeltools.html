@@ -1,0 +1,456 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>psctb.modeltools package &mdash; PyscesToolbox 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyscesToolbox 1.0 documentation" href="index.html" />
+    <link rel="up" title="psctb package" href="psctb.html" />
+    <link rel="next" title="psctb.utils package" href="psctb.utils.html" />
+    <link rel="prev" title="psctb.latextools package" href="psctb.latextools.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="psctb.utils.html" title="psctb.utils package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="psctb.latextools.html" title="psctb.latextools package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyscesToolbox 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >psctb</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="psctb.html" accesskey="U">psctb package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="psctb-modeltools-package">
+<h1>psctb.modeltools package<a class="headerlink" href="#psctb-modeltools-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-psctb.modeltools._paths">
+<span id="psctb-modeltools-paths-module"></span><h2>psctb.modeltools._paths module<a class="headerlink" href="#module-psctb.modeltools._paths" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="psctb.modeltools._paths.get_model_name">
+<code class="descclassname">psctb.modeltools._paths.</code><code class="descname">get_model_name</code><span class="sig-paren">(</span><em>mod</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.modeltools._paths.get_model_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the file name of a pysces model object sans the file extension.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mod</strong> : PysMod</p>
+<blockquote>
+<div><p>Model of interest.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">str</p>
+<blockquote class="last">
+<div><p>File name of a <cite>mod</cite> sans extension.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="psctb.modeltools._paths.make_path">
+<code class="descclassname">psctb.modeltools._paths.</code><code class="descname">make_path</code><span class="sig-paren">(</span><em>mod</em>, <em>analysis_method</em>, <em>subdirs=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.modeltools._paths.make_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates paths based on model name and analysis type.</p>
+<p>This function is used to create directories (in the case where they don&#8217;t
+already exist) to write analysis  results to and return the path name.
+Subdirectories can also be created.</p>
+<p>/path/to/Pysces/model_name/analysis_method/subdir1/subdir2/</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mod</strong> : PysMod</p>
+<blockquote>
+<div><p>The model being analysed.</p>
+</div></blockquote>
+<p><strong>analysis_method</strong> : str</p>
+<blockquote>
+<div><p>The name of the tool being used to analyse the model.</p>
+</div></blockquote>
+<p><strong>subdirs</strong> : list of str</p>
+<blockquote>
+<div><p>An optional list of subdirectories where each additional entry in the
+list will create a subdirectory in the previous directories.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">str</p>
+<blockquote class="last">
+<div><p>The directory string</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">make_path</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="s">&#39;analysis_method&#39;</span><span class="p">,</span> <span class="n">subdirs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;subdir1&#39;</span><span class="p">,</span> <span class="n">subdir2</span><span class="p">])</span>
+<span class="go">&#39;/path/to/Pysces/model_name/analysis_method/subdir1/subdir2/&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="psctb.modeltools._paths.next_suffix">
+<code class="descclassname">psctb.modeltools._paths.</code><code class="descname">next_suffix</code><span class="sig-paren">(</span><em>directory</em>, <em>base_name</em>, <em>ext=None</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.modeltools._paths.next_suffix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of the next suffix to be appended to a base file name
+when saving a file.</p>
+<p>This function checks a <code class="docutils literal"><span class="pre">directory</span></code> for files containing <code class="docutils literal"><span class="pre">base_name</span></code> and
+returns a number that is equal to the suffix of a file named <code class="docutils literal"><span class="pre">base_name</span></code>
+with the largest suffix plus one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>directory</strong> : str</p>
+<blockquote>
+<div><p>The directory to inspect for files.</p>
+</div></blockquote>
+<p><strong>base_name</strong> : str</p>
+<blockquote>
+<div><p>The base name (sans suffix) to check for.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">int</p>
+<blockquote class="last">
+<div><p>The next suffix to write</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="psctb.modeltools._paths.get_file_path">
+<code class="descclassname">psctb.modeltools._paths.</code><code class="descname">get_file_path</code><span class="sig-paren">(</span><em>working_dir</em>, <em>internal_filename</em>, <em>fmt</em>, <em>fixed=None</em>, <em>file_name=None</em>, <em>write_suffix=True</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.modeltools._paths.get_file_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>An heuristic for determining the correct file name.</p>
+<p>This function determines the file name according to the information
+supplied by the user and the internals of a specific class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>working_dir</strong> : str</p>
+<blockquote>
+<div><p>The working dir of the specific class (where files are saved if no
+file name is supplied)</p>
+</div></blockquote>
+<p><strong>internal_filename</strong> : str</p>
+<blockquote>
+<div><p>The default base name (sans numbered suffix) of files when no other
+details are provided.</p>
+</div></blockquote>
+<p><strong>fmt</strong> : str</p>
+<blockquote>
+<div><p>The format (extension) that the file should be saved in. This is
+used both in determining file name if no file name is provided as
+well as when a file name without extension is provided.</p>
+</div></blockquote>
+<p><strong>fixed</strong> : str, Optional (Default</p>
+<blockquote>
+<div><blockquote>
+<div><p>In the case that a metabolite is fixed, files will be saved in a
+subdirectory of the working directory that corresponds to the
+fixed metabolite.</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str, Optional (Default</span> <span class="classifier-delimiter">:</span> <span class="classifier">None)</span></dt>
+<dd><p class="first last">If a file name is supplied it overwrites all other options except
+<code class="docutils literal"><span class="pre">fmt</span></code> in the case where no extension is supplied.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>Returns</strong></p>
+<p><strong>&#8212;&#8212;-</strong></p>
+<p><strong>str</strong></p>
+<blockquote class="last">
+<div><p>The final file name</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="psctb.modeltools._paths.get_fmt">
+<code class="descclassname">psctb.modeltools._paths.</code><code class="descname">get_fmt</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.modeltools._paths.get_fmt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the extension (fmt) from a file name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>file_name</strong> : str</p>
+<blockquote>
+<div><p>The file to get an extension from</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">str</p>
+<blockquote class="last">
+<div><p>The extension string</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-psctb.modeltools._pscmanipulate">
+<span id="psctb-modeltools-pscmanipulate-module"></span><h2>psctb.modeltools._pscmanipulate module<a class="headerlink" href="#module-psctb.modeltools._pscmanipulate" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="psctb.modeltools._pscmanipulate.psc_to_str">
+<code class="descclassname">psctb.modeltools._pscmanipulate.</code><code class="descname">psc_to_str</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.modeltools._pscmanipulate.psc_to_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a filename and returns a path of where this file should be found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>name</strong> : str</p>
+<blockquote>
+<div><p>A string containing a filename.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">str</p>
+<blockquote class="last">
+<div><p>A string indicating the path to a psc file.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="psctb.modeltools._pscmanipulate.mod_to_str">
+<code class="descclassname">psctb.modeltools._pscmanipulate.</code><code class="descname">mod_to_str</code><span class="sig-paren">(</span><em>mod</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.modeltools._pscmanipulate.mod_to_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an instantiated PySCeS model to a string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mod</strong> : PysMod</p>
+<blockquote>
+<div><p>A Pysces model.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">str</p>
+<blockquote class="last">
+<div><p>A string representation of the contents of a PySCeS model file.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="psctb.modeltools._pscmanipulate.strip_fixed">
+<code class="descclassname">psctb.modeltools._pscmanipulate.</code><code class="descname">strip_fixed</code><span class="sig-paren">(</span><em>fstr</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.modeltools._pscmanipulate.strip_fixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a psc file string and return two strings: (1) The file header
+containing the &#8220;FIX: &#8221; line and (2) the remainder of file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>fstr</strong> : str</p>
+<blockquote>
+<div><p>String representation of psc file.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tuple of str</p>
+<blockquote class="last">
+<div><p>1st element contains file header, second the remainder of the file.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#psctb.modeltools._pscmanipulate.psc_to_str" title="psctb.modeltools._pscmanipulate.psc_to_str"><code class="xref py py-obj docutils literal"><span class="pre">psc_to_str</span></code></a>, <a class="reference internal" href="#psctb.modeltools._pscmanipulate.mod_to_str" title="psctb.modeltools._pscmanipulate.mod_to_str"><code class="xref py py-obj docutils literal"><span class="pre">mod_to_str</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="psctb.modeltools._pscmanipulate.augment_fix_sting">
+<code class="descclassname">psctb.modeltools._pscmanipulate.</code><code class="descname">augment_fix_sting</code><span class="sig-paren">(</span><em>OrigFix</em>, <em>fix</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.modeltools._pscmanipulate.augment_fix_sting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a species to a psc file header.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>OrigFix</strong> : str</p>
+<blockquote>
+<div><p>A psc file header</p>
+</div></blockquote>
+<p><strong>fix</strong> : str</p>
+<blockquote>
+<div><p>Additional species to add to psc file header.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">str</p>
+<blockquote class="last">
+<div><p>A new psc file header that contains the contents of the original
+together with the new fixed species.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="psctb.modeltools._pscmanipulate.fix_metabolite">
+<code class="descclassname">psctb.modeltools._pscmanipulate.</code><code class="descname">fix_metabolite</code><span class="sig-paren">(</span><em>mod</em>, <em>fix</em>, <em>model_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.modeltools._pscmanipulate.fix_metabolite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fix a metabolite in a model and return a new model with the fixed
+metabolite.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mod</strong> : PysMod</p>
+<blockquote>
+<div><p>The original model.</p>
+</div></blockquote>
+<p><strong>fix</strong> : str</p>
+<blockquote>
+<div><p>The metabolite to fix.</p>
+</div></blockquote>
+<p><strong>model_name</strong> : str, optional (Default</p>
+<blockquote>
+<div><p>The file name to use when saving the model (in psc/orca).
+If None it defaults to original_model_name_fix.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">PysMod</p>
+<blockquote class="last">
+<div><p>A new model instance with an additional fixed species.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-psctb.modeltools">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-psctb.modeltools" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">psctb.modeltools package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-psctb.modeltools._paths">psctb.modeltools._paths module</a></li>
+<li><a class="reference internal" href="#module-psctb.modeltools._pscmanipulate">psctb.modeltools._pscmanipulate module</a></li>
+<li><a class="reference internal" href="#module-psctb.modeltools">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="psctb.latextools.html"
+                        title="previous chapter">psctb.latextools package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="psctb.utils.html"
+                        title="next chapter">psctb.utils package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/psctb.modeltools.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Carl Christensen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.4</a>
+      
+      |
+      <a href="_sources/psctb.modeltools.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>
