@@ -94,7 +94,7 @@ Method and variable names and the analysis objects they belong to that were chan
 |load           |load_session|
 |plot_data      |scan_results|
 |mca_data       |mca_results |
-|plot_decompose |mca_results |
+|plot_decompose |do_mca_scan |
 
 **Thermokin**
 
