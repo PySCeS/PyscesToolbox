@@ -272,6 +272,7 @@ def html_table(matrix_or_array_like,
         html_table.append('<caption>%s</caption>' % caption)
     row_count = 0
     for row in raw_table:
+        html_table.append('<tr>')
         for col in row:
             to_append = formatter(col)
 
