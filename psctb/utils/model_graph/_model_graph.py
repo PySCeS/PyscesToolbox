@@ -56,7 +56,7 @@ class ModelGraph(object):
         super(ModelGraph, self).__init__()
         self._eventful_graph = EventfulGraph(sleep=0.05)
         self._force_directed_graph = ForceDirectedGraph(self._eventful_graph)
-        self._force_directed_graph.height = 1000
+        self._force_directed_graph.height = 500
         self._force_directed_graph.width = 900
         self.mod = mod
         self._model_map = ModelMap(mod)
