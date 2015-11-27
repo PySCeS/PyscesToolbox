@@ -7,3 +7,5 @@
 reinstall.sh
 .idea
 *.old
+/documentation/build
+*.ipynb_checkpoints*
