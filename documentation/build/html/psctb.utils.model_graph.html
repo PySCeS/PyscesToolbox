@@ -1,65 +1,144 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>psctb.utils.model_graph package &mdash; PyscesToolbox 1.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="PyscesToolbox 1.0 documentation" href="index.html" />
-    <link rel="up" title="psctb.utils package" href="psctb.utils.html" />
-    <link rel="next" title="psctb.utils.plotting package" href="psctb.utils.plotting.html" />
-    <link rel="prev" title="psctb.utils.misc package" href="psctb.utils.misc.html" />
-   
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>psctb.utils.model_graph package &mdash; PyscesToolbox 1.0 documentation</title>
+  
 
-  </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="psctb.utils.plotting.html" title="psctb.utils.plotting package"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="psctb.utils.misc.html" title="psctb.utils.misc package"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyscesToolbox 1.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" >psctb</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="psctb.html" >psctb package</a> &raquo;</li>
-          <li class="nav-item nav-item-3"><a href="psctb.utils.html" accesskey="U">psctb.utils package</a> &raquo;</li> 
-      </ul>
-    </div>  
+  
+  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="PyscesToolbox 1.0 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> PyscesToolbox
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_usage.html">Basic Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#syntax">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#saving-and-default-directories">Saving and Default Directories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#plotting-and-displaying-results">Plotting and Displaying Results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#data2d">Data2D</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#features">Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#usage-example">Usage example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#scanfig">ScanFig</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#id1">Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#id2">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#tables">Tables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#id3">Usage Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#graphic-representation-of-metabolic-networks">Graphic Representation of Metabolic Networks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#id4">Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#id5">Usage Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="included_files.html">Included Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="included_files.html#example-model">Example Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="included_files.html#example-notebooks">Example Notebooks</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">PyscesToolbox</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>psctb.utils.model_graph package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/psctb.utils.model_graph.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
             
   <div class="section" id="psctb-utils-model-graph-package">
 <h1>psctb.utils.model_graph package<a class="headerlink" href="#psctb-utils-model-graph-package" title="Permalink to this headline">¶</a></h1>
@@ -185,64 +264,60 @@ file_name : str, Optional (default : None)</p>
 
 
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">psctb.utils.model_graph package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-psctb.utils.model_graph._model_graph">psctb.utils.model_graph._model_graph module</a></li>
-<li><a class="reference internal" href="#module-psctb.utils.model_graph">Module contents</a></li>
-</ul>
-</li>
-</ul>
+          <footer>
+  
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="psctb.utils.misc.html"
-                        title="previous chapter">psctb.utils.misc package</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="psctb.utils.plotting.html"
-                        title="next chapter">psctb.utils.plotting package</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/psctb.utils.model_graph.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Carl Christensen.
     </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2015, Carl Christensen.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.4</a>
-      
-      |
-      <a href="_sources/psctb.utils.model_graph.txt"
-          rel="nofollow">Page source</a></li>
-    </div>
 
-    
+    </section>
 
-    
-  </body>
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

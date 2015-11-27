@@ -4,14 +4,6 @@ psctb.analyse._symca package
 Submodules
 ----------
 
-psctb.analyse._symca.LatexOut module
-------------------------------------
-
-.. automodule:: psctb.analyse._symca.LatexOut
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 psctb.analyse._symca._symca module
 ----------------------------------
 

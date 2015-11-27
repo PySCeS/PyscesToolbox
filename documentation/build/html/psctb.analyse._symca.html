@@ -1,85 +1,156 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>psctb.analyse._symca package &mdash; PyscesToolbox 1.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="PyscesToolbox 1.0 documentation" href="index.html" />
-    <link rel="up" title="psctb.analyse package" href="psctb.analyse.html" />
-    <link rel="next" title="psctb.latextools package" href="psctb.latextools.html" />
-    <link rel="prev" title="psctb.analyse package" href="psctb.analyse.html" />
-   
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>psctb.analyse._symca package &mdash; PyscesToolbox 1.0 documentation</title>
+  
 
-  </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="psctb.latextools.html" title="psctb.latextools package"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="psctb.analyse.html" title="psctb.analyse package"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyscesToolbox 1.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" >psctb</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="psctb.html" >psctb package</a> &raquo;</li>
-          <li class="nav-item nav-item-3"><a href="psctb.analyse.html" accesskey="U">psctb.analyse package</a> &raquo;</li> 
-      </ul>
-    </div>  
+  
+  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="PyscesToolbox 1.0 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> PyscesToolbox
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_usage.html">Basic Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#syntax">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#saving-and-default-directories">Saving and default directories</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">PyscesToolbox</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>psctb.analyse._symca package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/psctb.analyse._symca.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
             
   <div class="section" id="psctb-analyse-symca-package">
 <h1>psctb.analyse._symca package<a class="headerlink" href="#psctb-analyse-symca-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="psctb-analyse-symca-latexout-module">
-<h2>psctb.analyse._symca.LatexOut module<a class="headerlink" href="#psctb-analyse-symca-latexout-module" title="Permalink to this headline">¶</a></h2>
-</div>
 <div class="section" id="module-psctb.analyse._symca._symca">
 <span id="psctb-analyse-symca-symca-module"></span><h2>psctb.analyse._symca._symca module<a class="headerlink" href="#module-psctb.analyse._symca._symca" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="psctb.analyse._symca._symca.Symca">
-<em class="property">class </em><code class="descclassname">psctb.analyse._symca._symca.</code><code class="descname">Symca</code><span class="sig-paren">(</span><em>mod</em>, <em>auto_load=False</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca._symca.Symca" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">psctb.analyse._symca._symca.</code><code class="descname">Symca</code><span class="sig-paren">(</span><em>mod</em>, <em>auto_load=False</em>, <em>internal_fixed=False</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca._symca.Symca" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A class that performs Symbolic Metabolic Control Analysis.</p>
+<p>This class takes pysces model as an input and performs symbolic inversion
+of the <code class="docutils literal"><span class="pre">E</span> <span class="pre">matrix</span></code> using <code class="docutils literal"><span class="pre">Sympy</span></code> by calculating the determinant and
+adjoint matrices of this <code class="docutils literal"><span class="pre">E</span> <span class="pre">matrix</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mod</strong> : PysMod</p>
+<blockquote>
+<div><p>The pysces model on which to perform symbolic control analysis.</p>
+</div></blockquote>
+<p><strong>auto_load</strong> : boolean</p>
+<blockquote>
+<div><p>If true</p>
+</div></blockquote>
+<p><strong>Returns</strong></p>
+<p class="last"><strong>&#8212;&#8212;</strong></p>
+</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Attributes</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="psctb.analyse._symca._symca.Symca.do_symca">
-<code class="descname">do_symca</code><span class="sig-paren">(</span><em>auto_save_load=False</em>, <em>internal_fixed=False</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca._symca.Symca.do_symca" title="Permalink to this definition">¶</a></dt>
+<code class="descname">do_symca</code><span class="sig-paren">(</span><em>internal_fixed=False</em>, <em>auto_save_load=False</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca._symca.Symca.do_symca" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -123,8 +194,8 @@
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="psctb.analyse._symca._symca.Symca.load">
-<code class="descname">load</code><span class="sig-paren">(</span><em>file_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca._symca.Symca.load" title="Permalink to this definition">¶</a></dt>
+<dt id="psctb.analyse._symca._symca.Symca.load_session">
+<code class="descname">load_session</code><span class="sig-paren">(</span><em>file_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca._symca.Symca.load_session" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -148,8 +219,13 @@
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="psctb.analyse._symca._symca.Symca.save">
-<code class="descname">save</code><span class="sig-paren">(</span><em>file_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca._symca.Symca.save" title="Permalink to this definition">¶</a></dt>
+<dt id="psctb.analyse._symca._symca.Symca.save_results">
+<code class="descname">save_results</code><span class="sig-paren">(</span><em>file_name=None</em>, <em>separator='</em>, <em>'</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca._symca.Symca.save_results" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="psctb.analyse._symca._symca.Symca.save_session">
+<code class="descname">save_session</code><span class="sig-paren">(</span><em>file_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca._symca.Symca.save_session" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -235,6 +311,11 @@ is None and returns self._value</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="psctb.analyse._symca.ccobjects.CCoef.do_par_scan">
+<code class="descname">do_par_scan</code><span class="sig-paren">(</span><em>parameter</em>, <em>scan_range</em>, <em>scan_type='percentage'</em>, <em>init_return=True</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.ccobjects.CCoef.do_par_scan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="psctb.analyse._symca.ccobjects.CCoef.highlight_patterns">
 <code class="descname">highlight_patterns</code><span class="sig-paren">(</span><em>width=None</em>, <em>height=None</em>, <em>show_dummy_sinks=False</em>, <em>show_external_modifier_links=False</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.ccobjects.CCoef.highlight_patterns" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -257,11 +338,6 @@ is None and returns self._value</p>
 <dl class="attribute">
 <dt id="psctb.analyse._symca.ccobjects.CCoef.latex_numerator">
 <code class="descname">latex_numerator</code><a class="headerlink" href="#psctb.analyse._symca.ccobjects.CCoef.latex_numerator" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="psctb.analyse._symca.ccobjects.CCoef.par_scan">
-<code class="descname">par_scan</code><span class="sig-paren">(</span><em>parameter</em>, <em>scan_range</em>, <em>scan_type='percentage'</em>, <em>init_return=True</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.ccobjects.CCoef.par_scan" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -302,11 +378,6 @@ is None and returns self._value</p>
 <dl class="function">
 <dt id="psctb.analyse._symca.ccobjects.cctype">
 <code class="descclassname">psctb.analyse._symca.ccobjects.</code><code class="descname">cctype</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.ccobjects.cctype" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="psctb.analyse._symca.ccobjects.get_value_eval">
-<code class="descclassname">psctb.analyse._symca.ccobjects.</code><code class="descname">get_value_eval</code><span class="sig-paren">(</span><em>expression</em>, <em>subs_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.ccobjects.get_value_eval" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -391,6 +462,11 @@ ecReationN2_M0 ecReationN2_M1 ecReationN2_M2</p>
 <em class="property">static </em><code class="descname">get_fix_denom</code><span class="sig-paren">(</span><em>lmatrix</em>, <em>species_independent</em>, <em>species_dependent</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.symca_toolbox.SymcaToolBox.get_fix_denom" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="psctb.analyse._symca.symca_toolbox.SymcaToolBox.get_fix_denom_jannie">
+<code class="descname">get_fix_denom_jannie</code><span class="sig-paren">(</span><em>lmatrix</em>, <em>species_independent</em>, <em>species_dependent</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.symca_toolbox.SymcaToolBox.get_fix_denom_jannie" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="staticmethod">
 <dt id="psctb.analyse._symca.symca_toolbox.SymcaToolBox.get_fluxes_vector">
 <em class="property">static </em><code class="descname">get_fluxes_vector</code><span class="sig-paren">(</span><em>mod</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.symca_toolbox.SymcaToolBox.get_fluxes_vector" title="Permalink to this definition">¶</a></dt>
@@ -430,6 +506,21 @@ common denominator (the determinant of the matrix)</p>
 </dd></dl>
 
 <dl class="staticmethod">
+<dt id="psctb.analyse._symca.symca_toolbox.SymcaToolBox.make_CC_dot_dict">
+<em class="property">static </em><code class="descname">make_CC_dot_dict</code><span class="sig-paren">(</span><em>cc_objects</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.symca_toolbox.SymcaToolBox.make_CC_dot_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="psctb.analyse._symca.symca_toolbox.SymcaToolBox.make_inner_dict">
+<em class="property">static </em><code class="descname">make_inner_dict</code><span class="sig-paren">(</span><em>cc_container</em>, <em>cc_container_name</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.symca_toolbox.SymcaToolBox.make_inner_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="psctb.analyse._symca.symca_toolbox.SymcaToolBox.make_internals_dict">
+<em class="property">static </em><code class="descname">make_internals_dict</code><span class="sig-paren">(</span><em>cc_sol</em>, <em>cc_names</em>, <em>common_denom_expr</em>, <em>path_to</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.symca_toolbox.SymcaToolBox.make_internals_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
 <dt id="psctb.analyse._symca.symca_toolbox.SymcaToolBox.maxima_factor">
 <em class="property">static </em><code class="descname">maxima_factor</code><span class="sig-paren">(</span><em>expression</em>, <em>path_to</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.symca_toolbox.SymcaToolBox.maxima_factor" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function is equivalent to the sympy.cancel()
@@ -467,7 +558,7 @@ matrix CC_i_solution</p>
 
 <dl class="staticmethod">
 <dt id="psctb.analyse._symca.symca_toolbox.SymcaToolBox.spawn_cc_objects">
-<em class="property">static </em><code class="descname">spawn_cc_objects</code><span class="sig-paren">(</span><em>mod</em>, <em>cc_dic</em>, <em>ltxe</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.symca_toolbox.SymcaToolBox.spawn_cc_objects" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">spawn_cc_objects</code><span class="sig-paren">(</span><em>mod</em>, <em>cc_names</em>, <em>cc_sol</em>, <em>common_denom_exp</em>, <em>ltxe</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._symca.symca_toolbox.SymcaToolBox.spawn_cc_objects" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
@@ -487,67 +578,60 @@ with independent fluxes or otherwise equal fluxes)</p>
 
 
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">psctb.analyse._symca package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#psctb-analyse-symca-latexout-module">psctb.analyse._symca.LatexOut module</a></li>
-<li><a class="reference internal" href="#module-psctb.analyse._symca._symca">psctb.analyse._symca._symca module</a></li>
-<li><a class="reference internal" href="#module-psctb.analyse._symca.ccobjects">psctb.analyse._symca.ccobjects module</a></li>
-<li><a class="reference internal" href="#module-psctb.analyse._symca.symca_toolbox">psctb.analyse._symca.symca_toolbox module</a></li>
-<li><a class="reference internal" href="#module-psctb.analyse._symca">Module contents</a></li>
-</ul>
-</li>
-</ul>
+          <footer>
+  
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="psctb.analyse.html"
-                        title="previous chapter">psctb.analyse package</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="psctb.latextools.html"
-                        title="next chapter">psctb.latextools package</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/psctb.analyse._symca.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Carl Christensen.
     </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2015, Carl Christensen.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.4</a>
-      
-      |
-      <a href="_sources/psctb.analyse._symca.txt"
-          rel="nofollow">Page source</a></li>
-    </div>
 
-    
+    </section>
 
-    
-  </body>
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>
