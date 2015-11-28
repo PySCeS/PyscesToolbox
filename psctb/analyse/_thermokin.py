@@ -12,10 +12,6 @@ from ..latextools import LatexExpr
 from ..modeltools import make_path, get_file_path
 from ..utils.plotting import Data2D
 from ..utils.misc import do_safe_state, get_value, silence_print
-
-
-
-
 class FormatException(Exception):
     pass
 
@@ -27,7 +23,15 @@ def read_files(path_to_file):
 
 
 def strip_other(raw_lines):
-    return [line[:-1] for line in raw_lines if line.startswith('!T')]
+    valid_prefix_lines =  [line for line in raw_lines if line.startswith('!T')]
+    no_line_endings = []
+    for line in valid_prefix_lines:
+        if line[-1] == '\n':
+            no_line_endings.append(line[:-1])
+        else:
+            no_line_endings.append(line)
+
+    return no_line_endings
 
 
 def correct_fmt(lines):
