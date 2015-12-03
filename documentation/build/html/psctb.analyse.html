@@ -73,7 +73,37 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basic_usage.html">Basic Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="basic_usage.html#syntax">Syntax</a></li>
-<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#saving-and-default-directories">Saving and default directories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#saving-and-default-directories">Saving and Default Directories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#plotting-and-displaying-results">Plotting and Displaying Results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#data2d">Data2D</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#features">Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#usage-example">Usage example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#scanfig">ScanFig</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#id1">Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#id2">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#tables">Tables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#id3">Usage Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#graphic-representation-of-metabolic-networks">Graphic Representation of Metabolic Networks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#id4">Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#id5">Usage Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="included_files.html">Included Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="included_files.html#example-model">Example Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="included_files.html#layout-file">Layout File</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="included_files.html#example-notebooks">Example Notebooks</a></li>
 </ul>
 </li>
 </ul>
@@ -165,77 +195,9 @@
 </div>
 <div class="section" id="module-psctb.analyse._thermokin">
 <span id="psctb-analyse-thermokin-module"></span><h2>psctb.analyse._thermokin module<a class="headerlink" href="#module-psctb.analyse._thermokin" title="Permalink to this headline">¶</a></h2>
-<dl class="exception">
-<dt id="psctb.analyse._thermokin.FormatException">
-<em class="property">exception </em><code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">FormatException</code><a class="headerlink" href="#psctb.analyse._thermokin.FormatException" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
-</dd></dl>
-
-<dl class="class">
-<dt id="psctb.analyse._thermokin.RateEqn">
-<em class="property">class </em><code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">RateEqn</code><span class="sig-paren">(</span><em>mod</em>, <em>name</em>, <em>term_dict</em>, <em>ltxe</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.RateEqn" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p class="rubric">Attributes</p>
-<p class="rubric">Methods</p>
-<dl class="method">
-<dt id="psctb.analyse._thermokin.RateEqn.do_par_scan">
-<code class="descname">do_par_scan</code><span class="sig-paren">(</span><em>parameter</em>, <em>scan_range</em>, <em>scan_type='value'</em>, <em>init_return=True</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.RateEqn.do_par_scan" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="psctb.analyse._thermokin.RateEqn.latex_expression">
-<code class="descname">latex_expression</code><a class="headerlink" href="#psctb.analyse._thermokin.RateEqn.latex_expression" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="psctb.analyse._thermokin.RateEqn.latex_name">
-<code class="descname">latex_name</code><a class="headerlink" href="#psctb.analyse._thermokin.RateEqn.latex_name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="psctb.analyse._thermokin.RateEqn.value">
-<code class="descname">value</code><a class="headerlink" href="#psctb.analyse._thermokin.RateEqn.value" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="psctb.analyse._thermokin.RateTerm">
-<em class="property">class </em><code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">RateTerm</code><span class="sig-paren">(</span><em>parent</em>, <em>mod</em>, <em>name</em>, <em>rname</em>, <em>expression</em>, <em>ltxe</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.RateTerm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#psctb.analyse._thermokin.Term" title="psctb.analyse._thermokin.Term"><code class="xref py py-class docutils literal"><span class="pre">psctb.analyse._thermokin.Term</span></code></a></p>
-<p class="rubric">Attributes</p>
-<dl class="attribute">
-<dt id="psctb.analyse._thermokin.RateTerm.percentage">
-<code class="descname">percentage</code><a class="headerlink" href="#psctb.analyse._thermokin.RateTerm.percentage" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="psctb.analyse._thermokin.Term">
-<em class="property">class </em><code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">Term</code><span class="sig-paren">(</span><em>parent</em>, <em>mod</em>, <em>name</em>, <em>expression</em>, <em>ltxe</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.Term" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p class="rubric">Attributes</p>
-<dl class="attribute">
-<dt id="psctb.analyse._thermokin.Term.latex_expression">
-<code class="descname">latex_expression</code><a class="headerlink" href="#psctb.analyse._thermokin.Term.latex_expression" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="psctb.analyse._thermokin.Term.latex_name">
-<code class="descname">latex_name</code><a class="headerlink" href="#psctb.analyse._thermokin.Term.latex_name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="psctb.analyse._thermokin.Term.value">
-<code class="descname">value</code><a class="headerlink" href="#psctb.analyse._thermokin.Term.value" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="class">
 <dt id="psctb.analyse._thermokin.ThermoKin">
-<em class="property">class </em><code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">ThermoKin</code><span class="sig-paren">(</span><em>mod</em>, <em>path_to_reqn_file=None</em>, <em>ltxe=None</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.ThermoKin" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">ThermoKin</code><span class="sig-paren">(</span><em>mod</em>, <em>path_to_reqn_file=None</em>, <em>overwrite=False</em>, <em>ltxe=None</em>, <em>warnings=True</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.ThermoKin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p class="rubric">Methods</p>
 <dl class="method">
@@ -244,81 +206,6 @@
 <dd></dd></dl>
 
 </dd></dl>
-
-<dl class="function">
-<dt id="psctb.analyse._thermokin.construct_dict">
-<code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">construct_dict</code><span class="sig-paren">(</span><em>lines</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.construct_dict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="psctb.analyse._thermokin.correct_fmt">
-<code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">correct_fmt</code><span class="sig-paren">(</span><em>lines</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.correct_fmt" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="psctb.analyse._thermokin.get_repr_latex">
-<code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">get_repr_latex</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.get_repr_latex" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="psctb.analyse._thermokin.get_reqn_path">
-<code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">get_reqn_path</code><span class="sig-paren">(</span><em>mod</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.get_reqn_path" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the default path and filename of`.reqn` files belonging to a model</p>
-<p>The <cite>.reqn</cite> files which contain rate equations spilt into different
-(arbitrary) components should be saved in the same directory as the model
-file itself by default. It should have the same filename (sans extension) 
-as the model file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mod</strong> : PysMod</p>
-<blockquote>
-<div><p>A pysces model which has corresponding <cite>.reqn</cite> file saved in the same
-directory with the same file name as the model file.</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">str</p>
-<blockquote class="last">
-<div><p>A sting with the path and filename of the <cite>.reqn</cite> file.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="psctb.analyse._thermokin.get_subs_dict">
-<code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">get_subs_dict</code><span class="sig-paren">(</span><em>expression</em>, <em>mod</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.get_subs_dict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="psctb.analyse._thermokin.get_term_dict_from_path">
-<code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">get_term_dict_from_path</code><span class="sig-paren">(</span><em>path_to_read</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.get_term_dict_from_path" title="Permalink to this definition">¶</a></dt>
-<dd><p>Produces and returns a dictionary of filesnames from</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="psctb.analyse._thermokin.get_term_types_from_raw_data">
-<code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">get_term_types_from_raw_data</code><span class="sig-paren">(</span><em>raw_data_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.get_term_types_from_raw_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="psctb.analyse._thermokin.mult">
-<code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">mult</code><span class="sig-paren">(</span><em>lst</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.mult" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="psctb.analyse._thermokin.read_files">
-<code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">read_files</code><span class="sig-paren">(</span><em>path_to_file</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.read_files" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="psctb.analyse._thermokin.strip_other">
-<code class="descclassname">psctb.analyse._thermokin.</code><code class="descname">strip_other</code><span class="sig-paren">(</span><em>raw_lines</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.analyse._thermokin.strip_other" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </div>
 <div class="section" id="module-psctb.analyse">
