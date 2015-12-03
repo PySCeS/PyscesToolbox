@@ -2,40 +2,6 @@
 
 
 
-
-.. parsed-literal::
-
-    Matplotlib "Tkagg" backend not set, defaulting to: "TkAgg"
-    Matplotlib interface loaded (pysces.plt.m)
-    Pitcon routines available
-    NLEQ2 routines available
-    You are using NumPy (1.8.2) with SciPy (0.13.3)
-    PySundials available
-    RateChar is available
-    Parallel scanner is available
-    
-    PySCeS environment
-    ******************
-    pysces.model_dir = /home/carl/Pysces/psc
-    pysces.output_dir = /home/carl/Pysces
-    
-    
-    ***********************************************************************
-    * Welcome to PySCeS (0.9.0) - Python Simulator for Cellular Systems   *
-    *                http://pysces.sourceforge.net                        *
-    * Copyright(C) B.G. Olivier, J.M. Rohwer, J.-H.S. Hofmeyr, 2004-2013  *
-    * Triple-J Group for Molecular Cell Physiology                        *
-    * Stellenbosch University, ZA and VU University Amsterdam, NL         *
-    * PySCeS is distributed under the PySCeS (BSD style) licence, see     *
-    * LICENCE.txt (supplied with this release) for details                *
-    ***********************************************************************
-
-
-.. parsed-literal::
-
-    :0: FutureWarning: IPython widgets are experimental and may change in the future.
-
-
 Basic Usage
 ===========
 
