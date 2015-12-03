@@ -18,5 +18,5 @@ setup(
                       'matplotlib',
                       'd3networkx_psctb',
                       'numpydoc'],
-     dependency_links=['git+https://github.com/exe0cdc/ipython-d3networkx.git'],
+     dependency_links=['git+ssh://github.com/exe0cdc/ipython-d3networkx.git'],
 )
