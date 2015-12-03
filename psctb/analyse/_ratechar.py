@@ -195,12 +195,14 @@ class RateChar(object):
         to_save = {}
         for species in self.mod.species:
             species_object = getattr(self, species)
+            try:
+                column_array = numpy.array(species_object._column_names)
+                scan_results = species_object._scan_results
 
-            column_array = numpy.array(species_object._column_names)
-            scan_results = species_object._scan_results
-
-            to_save['col_{0}'.format(species)] = column_array
-            to_save['res_{0}'.format(species)] = scan_results
+                to_save['col_{0}'.format(species)] = column_array
+                to_save['res_{0}'.format(species)] = scan_results
+            except:
+                pass
         numpy.savez(file_name, **to_save)
 
 
@@ -228,17 +230,20 @@ class RateChar(object):
             raise e
 
         for species in self.mod.species:
-            column_names = [str(each) for each in
-                            list(loaded_data['col_{0}'.format(species)])]
-            scan_results = loaded_data['res_{0}'.format(species)]
-            fixed_species = species
-            fixed_mod, fixed_ss = self._fix_at_ss(fixed_species)
-            rcd = RateCharData(fixed_ss=fixed_ss,
-                               fixed_mod=fixed_mod,
-                               basemod=self.mod, column_names=column_names,
-                               scan_results=scan_results,
-                               model_map=self._model_map, ltxe=self._ltxe)
-            setattr(self, fixed_species, rcd)
+            try:
+                column_names = [str(each) for each in
+                                list(loaded_data['col_{0}'.format(species)])]
+                scan_results = loaded_data['res_{0}'.format(species)]
+                fixed_species = species
+                fixed_mod, fixed_ss = self._fix_at_ss(fixed_species)
+                rcd = RateCharData(fixed_ss=fixed_ss,
+                                   fixed_mod=fixed_mod,
+                                   basemod=self.mod, column_names=column_names,
+                                   scan_results=scan_results,
+                                   model_map=self._model_map, ltxe=self._ltxe)
+                setattr(self, fixed_species, rcd)
+            except:
+                pass
 
 
 class RateCharData(object):
