@@ -16,5 +16,6 @@ setup(
                       'sympy',
                       'pysces',
                       'matplotlib',
-                      'd3networkx_psctb'],
+                      'd3networkx_psctb',
+                      'numpydoc'],
 )
