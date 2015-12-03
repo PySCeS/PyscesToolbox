@@ -11,7 +11,8 @@ __all__ = ['psc_to_str',
            'mod_to_str',
            'strip_fixed',
            'augment_fix_sting',
-           'fix_metabolite']
+           'fix_metabolite',
+           'fix_metabolite_ss']
 
 
 def psc_to_str(name):
@@ -144,3 +145,34 @@ def fix_metabolite(mod, fix, model_name=None):
     new_mod = model(model_name, loader="string", fString=new_fix_head
                     + '\n' + mod_str_sans_fix)
     return new_mod
+
+
+def fix_metabolite_ss(mod, fix, model_name=None):
+    """
+    Fix a metabolite at its steady state in a model and return a new
+    model with the fixed metabolite.
+
+    Parameters
+    ----------
+    mod : PysMod
+        The original model.
+    fix : str
+        The metabolite to fix.
+    model_name : str, optional (Default : none)
+        The file name to use when saving the model (in psc/orca).
+        If None it defaults to original_model_name_fix.
+
+    Returns
+    -------
+    PysMod
+        A new model instance with an additional fixed species.
+
+    See Also
+    --------
+    fix_metabolite
+    """
+    mod.doState()
+    fixed_ss = getattr(mod,fix)
+    fix_mod = fix_metabolite(mod,fix,model_name)
+    setattr(fix_mod,fix,fixed_ss)
+    return fix_mod
