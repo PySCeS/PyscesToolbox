@@ -6,6 +6,7 @@
 import codecs
 from os import listdir, path
 import pypandoc
+import sys
 
 
 # In[12]:
@@ -17,7 +18,7 @@ def get_rst_file_names():
         else:
             return False
     return filter(ends_with_rst,listdir(path.curdir))
-    
+
 
 
 # In[13]:
@@ -26,7 +27,7 @@ def get_lines(file_name):
     with codecs.open(file_name,'r', 'utf-8') as f:
         lines = f.readlines()
     return lines
-    
+
 
 
 # In[14]:
@@ -38,7 +39,7 @@ def save_lines(lines,file_name):
 
 # In[15]:
 
-def fix_note_indentation(lines):    
+def fix_note_indentation(lines):
     for i, line in enumerate(lines):
         if line.startswith('.. note::'):
             counter = i
@@ -112,7 +113,7 @@ def replace_in_all(lines, to_replace, replacement):
 def remove_specified_images(lines):
     new_lines = []
     remove_next = False
-    for line in lines:        
+    for line in lines:
         if line.endswith('#remove_next\n'):
             remove_next = True
         elif remove_next and line.startswith('.. image'):
@@ -120,7 +121,7 @@ def remove_specified_images(lines):
         else:
             new_lines.append(line)
     return new_lines
-        
+
 
 
 # In[82]:
@@ -140,7 +141,7 @@ def convert_html_tables(lines):
             new_lines.append(line)
     new_lines = [line + '\n' for line in ''.join(new_lines).splitlines()]
     return new_lines
-        
+
 
 
 # In[83]:
@@ -151,30 +152,34 @@ if __name__ == "__main__":
     starts_with_to_remove = ['    %matplotlib inline']
     replacements = [('*#','`'),
                    ('#*','`_')]
-    
-    file_names = get_rst_file_names()
+
+    if len(sys.argv) == 1:
+        file_names = get_rst_file_names()
+    else:
+        file_names = sys.argv[1:]
     for file_name in file_names:
+        print "Applying fixes for: ", file_name
         lines = get_lines(file_name)
         fix_note_indentation(lines)
-        
+
         for to_remove in ends_with_to_remove:
             lines = remove_endswith(lines,to_remove)
-            
+
         for to_remove in starts_with_to_remove:
             lines = remove_startsswith(lines,to_remove)
-            
+
         for to_replace, replacement in replacements:
             lines = replace_in_all(lines, to_replace, replacement)
-        
+
         lines = remove_specified_images(lines)
         lines = convert_html_tables(lines)
-        
+
         for block_to_remove in to_remove_block_strings:
             lines = remove_empty_block(lines, block_to_remove)
-        
-            
+
+
         save_lines(lines, file_name)
-        
+
 
 
 # In[ ]:
