@@ -1,3 +1,5 @@
+[![Documentation Status](https://readthedocs.org/projects/pyscestoolbox/badge/?version=latest)](http://pyscestoolbox.readthedocs.org/en/latest/?badge=latest)
+
 #PyscesToolbox
 
 This is a set of metabolic model analysis tools for PySCeS.
@@ -12,7 +14,8 @@ PyscesToolbox currently provides tools for:
 
 PyscesToolbox was designed to be used within the IPython notebook, but most of the core features should work in a normal Python script.
 
-This project is a work in progress and most features still require proper documentation.
+This project is a work in progress and most features still require proper documentation. Partial documentation can be found at [http://pyscestoolbox.readthedocs.org](http://pyscestoolbox.readthedocs.org).
+
 
 ##IMPORTANT NOTICE 
 
