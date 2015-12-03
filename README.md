@@ -1,4 +1,4 @@
-[![Documentation Status](https://readthedocs.org/projects/pyscestoolbox/badge/?version=latest)](http://pyscestoolbox.readthedocs.org/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/pyscestoolbox/badge/?version=latest)](https://readthedocs.org/projects/pyscestoolbox/badge/?version=latest)
 
 #PyscesToolbox
 
