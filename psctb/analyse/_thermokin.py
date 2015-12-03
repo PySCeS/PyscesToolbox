@@ -1,7 +1,9 @@
-from ._thermokin_file_tools import get_subs_dict, get_reqn_path, \
-    get_term_dict_from_path, get_term_types_from_raw_data
-
 __author__ = 'carl'
+
+from os import path
+
+from ._thermokin_file_tools import get_subs_dict, get_reqn_path, \
+    get_term_dict_from_path, get_term_types_from_raw_data, create_reqn_data, write_reqn_file
 
 from sympy import sympify, diff
 from numpy import log, array, float, NaN, nanmin, nanmax, savetxt
@@ -66,9 +68,13 @@ def silent_state(mod):
     mod.doMca()
     mod.doState()
 
+def print_f(message,status):
+    if status:
+        print message
+
 
 class ThermoKin(object):
-    def __init__(self, mod, path_to_reqn_file=None, ltxe=None):
+    def __init__(self, mod, path_to_reqn_file=None, overwrite=False ,ltxe=None, warnings=True):
         super(ThermoKin, self).__init__()
         self.mod = mod
 
@@ -86,6 +92,20 @@ class ThermoKin(object):
             self._path_to = path_to_reqn_file
         else:
             self._path_to = get_reqn_path(self.mod)
+
+
+        condition_1 = path.exists(self._path_to) and overwrite
+        condition_2 = not path.exists(self._path_to)
+        if condition_1:
+            print_f('The file %s will be overwritten with automatically generated file' % self._path_to,warnings)
+        elif condition_2:
+            print_f('A new file will be created at %s' % self._path_to,warnings)
+        if condition_1 or condition_2:
+            ma_terms, vc_binding_terms, messages = create_reqn_data(mod)
+            for k, v in messages.iteritems():
+                print_f( '{:10.10}:{}'.format(k,v),warnings)
+            write_reqn_file(self._path_to,mod.ModelFile,ma_terms,vc_binding_terms,messages)
+
 
         self._raw_data = get_term_dict_from_path(self._path_to)
         self._ltxe.add_term_types(get_term_types_from_raw_data(self._raw_data))
