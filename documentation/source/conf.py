@@ -374,5 +374,5 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
             return Mock()
 
-MOCK_MODULES = ['pygtk', 'gtk', 'gobject', 'argparse', 'numpy', 'pandas','matplotlib']
+MOCK_MODULES = ['pygtk', 'gtk', 'gobject', 'argparse', 'numpy', 'pandas','matplotlib','IPython']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
