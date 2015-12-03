@@ -548,6 +548,13 @@ nodes will be placed randomly. Nodes are snap to an invisible grid.
 
     model_graph.show()
 
+
+
+
+
+.. image:: basic_usage_files/basic_usage_51_0.png
+
+
 A layout file for the ``example_model`` is
 `included <included_files.html#layout-file>`__ (see link for details)
 and can be loaded by specifying the location of the layout file on the
@@ -559,6 +566,13 @@ disk during ``ModelGraph`` instantiation.
     path_to_layout = path.expanduser('~/Pysces/psc/example_model_layout.dict')
     model_graph = psctb.ModelGraph(mod, pos_dic=path_to_layout)
     model_graph.show()
+
+
+
+
+
+.. image:: basic_usage_files/basic_usage_54_0.png
+
 
 Clicking the ``Save Layout`` button saves this layout to the
 ``~/Pysces/example_model/model_graph`` or
@@ -573,3 +587,10 @@ Now any future instantiation of a ``ModelGraph`` object for
 
     model_graph = psctb.ModelGraph(mod)
     model_graph.show()
+
+
+
+
+
+.. image:: basic_usage_files/basic_usage_58_0.png
+
