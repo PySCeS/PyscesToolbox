@@ -17,11 +17,11 @@ PyscesToolbox was designed to be used within the IPython notebook, but most of t
 This project is a work in progress and most features still require proper documentation. Partial documentation can be found at [http://pyscestoolbox.readthedocs.org](http://pyscestoolbox.readthedocs.org).
 
 
-##IMPORTANT NOTICE 
+##IMPORTANT NOTICE
 
 Because this project is still in its infancy, future changes might break older scripts. These types of changes will be kept to a minimum and will be documented here.
 
-Major changes were made on 11/11/2015 that might break scripts coded before this date. These changes are related to the naming of methods and fields. For scripts older than 11/11/2015 we recommend using an older version of PySCeSToolbox (noted under **Installation**). Manual porting of scripts is also possible with details of necessary changes outlined under **Porting scripts to latest version**. 
+Major changes were made on 11/11/2015 that might break scripts coded before this date. These changes are related to the naming of methods and fields. For scripts older than 11/11/2015 we recommend using an older version of PySCeSToolbox (noted under **Installation**). Manual porting of scripts is also possible with details of necessary changes outlined under **Porting scripts to latest version**.
 
 
 
@@ -36,21 +36,29 @@ Major changes were made on 11/11/2015 that might break scripts coded before this
 
 **Notes:**
 
-We recommend running PySCeSToolbox on Linux due to the ease of installing the Python environment, however it is compatible with Windows (see below). 
+We recommend running PySCeSToolbox on Linux due to the ease of installing the Python environment, however it is compatible with Windows (see below).
 
-Any versions of the scipy stack components released in or after 2014 should work, the only hard requirement is an IPython version in the 3.x.x series as PyscesToolbox relies quite heavily on the features of the IPython notebook and its widget system.
+Any versions of the SciPy stack components released in or after 2014 should work, the only hard requirement is an IPython version in the 3.x.x series as PyscesToolbox relies quite heavily on the features of the IPython notebook and its widget system.
 
 Required packages should automatically download and install when using the commands specified under **Installation** below.
 
 Maxima is only a requirement for SymCA. Currently this functionality is not supported on Windows, but will be included in the near future.
 
+**For readers of "Tracing regulatory routes in metabolism using generalised supply-demand analysis" published in BMC Systems Biology on 03/12/2015**:
+
+To use the IPython notebook file included as "Additional file 5" in the paper, please install the **latest version** of PySCeSToolbox specified under **Installation**.
+
+The two PySCeS MDL model files included as "Addition file 1" and "Addition file 2" are required to run the notebook. They should be renamed to "Hoefnagel_moiety_ratio.psc" and "Curien.psc", respectively. Further instructions are included within the notebook and on this page.
+
+Firefox users should download these files using a different browser or switch to the new beta version of the BMC Systems Biology website.
+
 **For Windows users:**
 
-Git for Windows can be installed from the link specified under **Requirements** above. During the installation when prompted with **Adjust your PATH environment** be sure to select the option **Use Git from the Windows Command Prompt**. 
+Git for Windows can be installed from the link specified under **Requirements** above. During the installation when prompted with **Adjust your PATH environment** be sure to select the option **Use Git from the Windows Command Prompt**.
 
 We recommend the WinPython_2.7 32bit distribution ([http://winpython.sourceforge.net/](http://winpython.sourceforge.net/)). This portable scientific python distribution includes a variety of scientific packages out of the box and significantly streamlines the experience of working with Python on Windows. It can also coexist with other Python installations on a single system. Other alternatives include Anaconda, Enthought Canopy and Python(x,y).
 
-Any existing notebooks should be placed in the ``notebooks`` subdirectory within your WinPython installation. 
+Any existing notebooks should be placed in the ``notebooks`` subdirectory within your WinPython installation.
 
 ##Installation
 
@@ -75,7 +83,7 @@ pip install git+https://github.com/PySCeS/PyscesToolbox.git
 
 To start a PySCeSToolbox session in a IPython notebook:
 
- 1. Start up the IPython Notebook using the ``ipython notebook`` command in the terminal on Linux or by opening "IPython Notebook.exe" on Windows 
+ 1. Start up the IPython Notebook using the ``ipython notebook`` command in the terminal on Linux or by opening "IPython Notebook.exe" on Windows
  2. Create a new notebook by clicking the ``New`` button on the top right of the window and selecting ``Python 2``
  3. Run the following three commands in the first cell:
 
@@ -84,6 +92,8 @@ To start a PySCeSToolbox session in a IPython notebook:
 import pysces
 import psctb
 ```
+
+Model files must be placed in `~/Pysces/psc/` if using Linux or `C:\Pysces\psc\` for Windows.
 
 ##Porting scripts to latest version
 
