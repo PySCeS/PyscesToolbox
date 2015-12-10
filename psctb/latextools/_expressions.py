@@ -242,7 +242,7 @@ class LatexExpr(object):
         if type(expression) == str:
             expression = sympify(expression)
 
-        # symbol subtitution in sympy takes longer for larger dicts
+        # symbol substitution in sympy takes longer for larger dicts
         # therefore I only get the symbols that I need
         # for mcanut model substitution of a 2 symbol expression
         # takes 3xxms for conversion with the full dict, but
@@ -258,7 +258,7 @@ class LatexExpr(object):
             each = str(each)
             if each[:2] == 'CP':
                 smaller_dict[each] = each
-            else:
+            elif each in self.subs_dict:
                 smaller_dict[each] = self.subs_dict[each]
 
         # using smaller_dict here instead of self.subs_dict
