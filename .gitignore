@@ -9,3 +9,5 @@ reinstall.sh
 *.old
 /documentation/build
 *.ipynb_checkpoints*
+doctemp.odt
+tk_test.py
