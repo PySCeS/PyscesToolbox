@@ -6,3 +6,4 @@ from .analyse import Symca
 from .analyse import RateChar
 from .analyse import ThermoKin
 from .utils.model_graph import ModelGraph
+from . import extras
