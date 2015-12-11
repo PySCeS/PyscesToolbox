@@ -3,7 +3,7 @@ __author__ = 'carl'
 from os import path
 
 from ._thermokin_file_tools import get_subs_dict, get_reqn_path, \
-    get_term_dict_from_path, get_term_types_from_raw_data, create_reqn_data, write_reqn_file
+    get_all_terms, get_term_types_from_raw_data, create_reqn_data, write_reqn_file
 
 from sympy import sympify, diff
 from numpy import log, array, float, NaN, nanmin, nanmax, savetxt
@@ -74,7 +74,7 @@ def print_f(message,status):
 
 
 class ThermoKin(object):
-    def __init__(self, mod, path_to_reqn_file=None, overwrite=False ,ltxe=None, warnings=True):
+    def __init__(self, mod, path_to_reqn_file=None, overwrite=False, warnings=True, ltxe=None):
         super(ThermoKin, self).__init__()
         self.mod = mod
 
@@ -93,40 +93,51 @@ class ThermoKin(object):
         else:
             self._path_to = get_reqn_path(self.mod)
 
-
-        condition_1 = path.exists(self._path_to) and overwrite
-        condition_2 = not path.exists(self._path_to)
-        if condition_1:
-            print_f('The file %s will be overwritten with automatically generated file' % self._path_to,warnings)
-        elif condition_2:
-            print_f('A new file will be created at %s' % self._path_to,warnings)
-        if condition_1 or condition_2:
-            ma_terms, vc_binding_terms, messages = create_reqn_data(mod)
-            for k, v in messages.iteritems():
-                print_f( '{:10.10}:{}'.format(k,v),warnings)
-            write_reqn_file(self._path_to,mod.ModelFile,ma_terms,vc_binding_terms,messages)
+        self._do_auto_actions(mod, overwrite, warnings)
+        self._raw_data, self._add_raw_data = get_all_terms(self._path_to)
 
 
-        self._raw_data = get_term_dict_from_path(self._path_to)
-        self._ltxe.add_term_types(get_term_types_from_raw_data(self._raw_data))
+
+        term_types = get_term_types_from_raw_data(self._raw_data).union(get_term_types_from_raw_data(self._add_raw_data))
+        self._ltxe.add_term_types(term_types)
+
 
         self._populate_object()
         self._populate_ec_results()
 
+    def _do_auto_actions(self, mod, overwrite, warnings):
+        condition_1 = path.exists(self._path_to) and overwrite
+        condition_2 = not path.exists(self._path_to)
+        if condition_1:
+            print_f(
+                'The file %s will be overwritten with automatically generated file.' % self._path_to,
+                warnings)
+        elif condition_2:
+            print_f('A new file will be created at "%s".' % self._path_to,
+                    warnings)
+        if condition_1 or condition_2:
+            ma_terms, vc_binding_terms, messages = create_reqn_data(mod)
+            for k, v in messages.iteritems():
+                print_f('{:10.10}: {}'.format(k, v), warnings)
+            write_reqn_file(self._path_to, mod.ModelFile, ma_terms,
+                            vc_binding_terms, messages)
+
     def _populate_object(self):
-        reacts = []
         self.reaction_results = DotDict()
         self.reaction_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                   formatter_factory())
         for reaction, terms_dict in self._raw_data.iteritems():
+            additional_terms = self._add_raw_data.get(reaction)
             reqn_obj = RateEqn(self.mod,
                                reaction,
                                terms_dict,
-                               self._ltxe)
+                               self._ltxe,
+                               additional_terms)
             setattr(self, 'J_' + reaction, reqn_obj)
             self.reaction_results['J_' + reaction] = reqn_obj
             for term in reqn_obj.terms.itervalues():
                 self.reaction_results[term.name] = term
+
 
     def _populate_ec_results(self):
         self.ec_results = DotDict()
@@ -188,19 +199,19 @@ class ThermoKin(object):
 
 
 class RateEqn(object):
-    def __init__(self, mod, name, term_dict, ltxe):
+    def __init__(self, mod, name, term_dict, ltxe, additional_terms= None):
         super(RateEqn, self).__init__()
         self.mod = mod
         self.terms = DotDict()
         self.terms._make_repr('"$" + v.latex_name + "$"', 'v.value',
                               formatter_factory())
-        self.expression = 1
+        self._unfac_expression = 1
         self.name = 'J_' + name
         self._rname = name
         self._ltxe = ltxe
 
         for val in term_dict.itervalues():
-            self.expression = self.expression * (sympify(val))
+            self._unfac_expression = self._unfac_expression * (sympify(val))
         for term_name, expression in term_dict.iteritems():
             term = RateTerm(parent=self,
                             mod=self.mod,
@@ -211,14 +222,30 @@ class RateEqn(object):
             setattr(self, term_name, term)
             self.terms[term_name] = term
 
+        if additional_terms:
+            for term_name, expression in additional_terms.iteritems():
+                term = AdditionalTerm(parent=self,
+                                      mod=self.mod,
+                                      name='J_%s_%s' % (self._rname, term_name),
+                                      rname=term_name,
+                                      expression=expression,
+                                      ltxe=self._ltxe)
+                setattr(self, term_name, term)
+                self.terms[term_name] = term
+
+
+
+
         self._value = None
-        self._str_expression = str(self.expression)
+        self._str_expression_ = None
+        self._expression = None
         self._latex_expression = None
         self._latex_name = None
 
         self.ec_results = DotDict()
         self.ec_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                  formatter_factory())
+
 
         self._populate_ec_results()
 
@@ -235,6 +262,19 @@ class RateEqn(object):
 
     def _repr_latex_(self):
         return get_repr_latex(self)
+
+    @property
+    def _str_expression(self):
+        if not self._str_expression_:
+            self._str_expression_ = str(self.expression)
+        return self._str_expression_
+
+    @property
+    def expression(self):
+        if not self._expression:
+            self._expression = self._unfac_expression.factor()
+        return self._expression
+
 
     @property
     def value(self):
@@ -258,16 +298,18 @@ class RateEqn(object):
     def _calc_value(self):
         subs_dict = get_subs_dict(self.expression, self.mod)
         for each in self.terms.itervalues():
-            each._calc_value(subs_dict)
-        self._value = mult([each._value for each in self.terms.itervalues()])
+            if type(each) is not AdditionalTerm:
+                each._calc_value(subs_dict)
+        self._value = mult([each._value for each in self.terms.itervalues() if type(each) is not AdditionalTerm])
 
     def _perscan(self, parameter, scan_range):
-        scan_res = [list() for _ in range(len(self.terms.values()) + 1)]
+        non_additionals = [value for value in self.terms.values() if type(value) is not AdditionalTerm]
+        scan_res = [list() for _ in range(len(non_additionals) + 1)]
         scan_res[0] = scan_range
 
         for parvalue in scan_range:
             state_valid = do_safe_state(self.mod, parameter, parvalue)
-            for i, term in enumerate(self.terms.values()):
+            for i, term in enumerate(non_additionals):
                 if state_valid:
                     scan_res[i + 1].append(term.percentage)
                 else:
@@ -321,7 +363,8 @@ class RateEqn(object):
 
         if scan_type is 'percentage':
             column_names = [parameter] + [term.name for term in
-                                          self.terms.values()]
+                                          self.terms.values()
+                                          if type(term) is not AdditionalTerm]
             y_label = 'Term Percentage Contribution'
             scan_res = self._perscan(parameter, scan_range)
             yscale = 'linear'
@@ -340,7 +383,7 @@ class RateEqn(object):
             mca_objects = self._get_mca_objects(parameter)
             column_names = [parameter] + [obj.name for obj in mca_objects]
 
-            y_label = '$\\varepsilon^{%s}_{%s}$' % (self._rname, parameter)
+            y_label = 'Elasticity Coefficient'
             scan_res = self._evalscan(parameter, scan_range)
             yscale = 'linear'
             data_array = array(scan_res, dtype=float).transpose()
@@ -348,7 +391,7 @@ class RateEqn(object):
             additional_cat_classes = {
                 'All Coefficients': ['Term Elasticities']}
             additional_cats = {
-                'Term Elasticities': [elas.name for elas in mca_objects][:-1]}
+                'Term Elasticities': [elas.name for elas in mca_objects if elas.name.startswith('p')]}
 
         if init_return:
             self.mod.SetQuiet()
@@ -384,11 +427,15 @@ class RateEqn(object):
         terms = self.terms.keys()
         reaction_name = self._rname
         mca_objects = []
-        for term in terms:
-            mca_objects.append(self.ec_results[
-                'pec%s_%s_%s' % (reaction_name, parameter, term)])
-        mca_objects.append(
-            self.ec_results['ec%s_%s' % (reaction_name, parameter)])
+        reaction = getattr(ModelMap(self.mod),self._rname)
+        sp_params = reaction.hasReagents() + reaction.hasModifiers() + reaction.hasParameters()
+        for s_p in sp_params:
+            for term in terms:
+                mca_objects.append(self.ec_results[
+                    'pec%s_%s_%s' % (reaction_name, s_p, term)])
+            mca_objects.append(
+                self.ec_results['ec%s_%s' % (reaction_name, s_p)])
+
         return mca_objects
 
 
@@ -396,17 +443,31 @@ class Term(object):
     def __init__(self, parent, mod, name, expression, ltxe):
         super(Term, self).__init__()
         self.name = name
-        self.expression = sympify(expression).factor()
-        self._str_expression = str(self.expression)
+        self._unfac_expression = sympify(expression)
         self._parent = parent
         self.mod = mod
+        self._ltxe = ltxe
+        # properties
+        self._expression = None
+        self._str_expression_ = None
         self._value = None
         self._latex_name = None
         self._latex_expression = None
-        self._ltxe = ltxe
 
     def _repr_latex_(self):
         return get_repr_latex(self)
+
+    @property
+    def _str_expression(self):
+        if not self._str_expression_:
+            self._str_expression_ = str(self.expression)
+        return self._str_expression_
+
+    @property
+    def expression(self):
+        if not self._expression:
+            self._expression = self._unfac_expression.factor()
+        return self._expression
 
     @property
     def value(self):
@@ -436,13 +497,18 @@ class Term(object):
 class RateTerm(Term):
     def __init__(self, parent, mod, name, rname, expression, ltxe):
         super(RateTerm, self).__init__(parent, mod, name, expression, ltxe)
-        self.expression = sympify(expression)
         self._rname = rname
         self.ec_results = DotDict()
         self.ec_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                  formatter_factory())
         self._populate_ec_results()
         self._percentage = None
+
+    @property
+    def expression(self):
+        if not self._expression:
+            self._expression = self._unfac_expression
+        return self._expression
 
     @property
     def percentage(self):
@@ -458,4 +524,8 @@ class RateTerm(Term):
             self.ec_results[ec_name] = Term(self._parent, self.mod, ec_name, ec,
                                           self._ltxe)
 
+class AdditionalTerm(RateTerm):
+    @property
+    def percentage(self):
+        return 0.0
 

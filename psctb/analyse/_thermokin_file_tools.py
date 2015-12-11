@@ -33,7 +33,7 @@ class FormatException(Exception):
     pass
 
 
-def read_files(path_to_file):
+def read_reqn_file(path_to_file):
     """
     Reads the contents of a file and returns it as a list of lines.
 
@@ -53,48 +53,61 @@ def read_files(path_to_file):
     return lines
 
 
-def strip_other(raw_lines):
+def get_terms(raw_lines, term_type):
     """
     Takes a list of strings and returns a new list containing only
-    lines starting with "!T" and strips line endings.
+    lines starting with `term_type` and strips line endings.
+
+    Term can be either of the "main" (or `!T`) type or additional (or
+    `!G`) type
 
     Parameters
     ----------
     raw_lines : list of str
+        List of lines from a '.reqn' file.
+    term_type : str
+        This string specifies the type of term.
 
     Returns
     -------
     list of str
     """
-    valid_prefix_lines = [line for line in raw_lines if line.startswith('!T')]
+    assert term_type == '!T' or term_type == '!G', 'Invalid term type specified'
+    valid_prefix_lines = [line for line in raw_lines if line.startswith(term_type)]
     no_line_endings = []
     for line in valid_prefix_lines:
         if line[-1] == '\n':
             no_line_endings.append(line[:-1])
         else:
             no_line_endings.append(line)
-
     return no_line_endings
 
 
-def correct_fmt(lines):
+def check_term_format(lines, term_type):
     """
     Inspects a list of string for the correct ThermoKin syntax. Returns
     `True` in case of correct format. Throws exception otherwise.
 
-    Correct format is a str matching the pattern '!T{\w*}{\w*} .*' .
+    Correct format is a str matching the pattern "X{\w*}{\w*} .*" . Where
+    "X" is either "!G" or "!T" as specified by `term_type`.
+
     Parameters
     ----------
     lines : list of str
+        Clean list of lines from a '.reqn' file.
+
+    term_type : str
+        This string specifies the type of term.
 
     Returns
     -------
     bool
 
     """
+    assert term_type == '!T' or term_type == '!G', 'Invalid term type specified'
     errors_in = []
     for i, line in enumerate(lines):
-        if not match('!T{\w*}{\w*} .*', line):
+        if not match(term_type + '{\w*}{\w*} .*', line):
             errors_in.append(str(i))
     if len(errors_in) == 0:
         return True
@@ -117,7 +130,7 @@ def construct_dict(lines):
 
     Returns
     -------
-    dict of str:dict of str:str
+    dict of str:{str:str}
     """
     outer_dict = {}
     for line in lines:
@@ -146,7 +159,7 @@ def get_subs_dict(expression, mod):
 
     Returns
     -------
-    dict of sympy symbol:float
+    dict of sympy.Symbol:float
 
     """
     subs_dict = {}
@@ -185,28 +198,36 @@ def get_reqn_path(mod):
     return path.join(mod.ModelDir, fname_ext)
 
 
-def get_term_dict_from_path(path_to_read):
+def get_term_dict(raw_lines, term_type):
     """
-    Reads a '.reqn' file at provided location and, if the file is
-    defined correctly a dict of str:{str:str} is returned representing
-    the file contents.
+    Returns the term dictionary from a list of raw lines from a file.
 
-
+    The contents of a '.reqn' file is read and passed to this function.
+    Here the contents is parsed and 'main terms' are extracted and
+    returned as a dict of str:{str:str}.
 
     Parameters
     ----------
-    path_to_read : str
+    raw_lines : list of str
+        List of lines from a '.reqn' file.
 
     Returns
     -------
     dict of str:{str:str}
     """
-
-    raw_lines = read_files(path_to_read)
-    clean_lines = strip_other(raw_lines)
-    if correct_fmt(clean_lines):
-        term_dict = construct_dict(clean_lines)
+    clean_terms = get_terms(raw_lines, term_type)
+    if check_term_format(clean_terms, term_type):
+        term_dict = construct_dict(clean_terms)
         return term_dict
+
+
+def get_all_terms(path_to_read):
+    raw_lines = read_reqn_file(path_to_read)
+    main_terms = get_term_dict(raw_lines, '!T')
+    add_terms = get_term_dict(raw_lines, '!G')
+    return  main_terms, add_terms
+
+
 
 
 # File writing/validation functions
@@ -373,10 +394,6 @@ def get_ma_terms(mod, sympy_terms):
 
         substrates = [sympify(substrate) for substrate in
                       reaction_map.hasSubstrates()]
-
-        # stoichiometry = {sympify(metabolite): np.abs(value) for
-        #                  (metabolite, value) in
-        #                  reaction_map.stoichiometry.iteritems()}
 
         products = [sympify(product) for product in reaction_map.hasProducts()]
 
@@ -658,12 +675,53 @@ def write_reqn_file(file_name, model_name, ma_terms, vc_binding_terms, messages)
             f.write('!T{%s}{bind_vc} %s\n' % (
                 reaction_name, vc_binding_terms[reaction_name]))
             f.write('\n')
+
         for k, v in messages.iteritems():
             if k not in already_written:
                 f.write('# %s :%s\n' % (k, v))
 
 
 # There functions are not used anymore
+#
+# def get_gamma_keq_terms(mod, sympy_terms):
+#     model_map = pysces.ModelMap(mod)  # model map to get substrates, products
+#     # and parameters for each reaction
+#
+#     messages = {}
+#     gamma_keq_terms = {}
+#     for name, terms in sympy_terms.iteritems():
+#         reaction_map = getattr(model_map, name)
+#
+#         substrates = [sympify(substrate) for substrate in
+#                       reaction_map.hasSubstrates()]
+#
+#         products = [sympify(product) for product in reaction_map.hasProducts()]
+#
+#         if len(terms) == 2:  # condition for reversible reactions
+#             # make sure negative term is second in term list
+#             terms = sort_terms(terms)
+#             # divide pos term by neg term and factorise
+#             expressions = (-terms[0] / terms[1]).factor()
+#             # get substrate, product and keq terms (and strategy)
+#             st, pt, keq, _ = get_st_pt_keq(expressions, substrates,
+#                                                  products)
+#             if all([st, pt, keq]):
+#                 gamma_keq_terms[name] = pt / (keq*st)
+#                 messages[name] = 'successful generation of gamma/keq term'
+#             else:
+#                 messages[name] = 'generation of gamma/keq term failed'
+#
+#     return gamma_keq_terms, messages
+#
+# def create_gamma_keq_reqn_data(mod):
+#     string_formulas = get_str_formulas(mod)
+#     string_formulas = replace_pow(string_formulas)
+#     sympy_formulas = get_sympy_formulas(string_formulas)
+#     sympy_terms = get_sympy_terms(sympy_formulas)
+#     sympy_terms = filter_irreversible(sympy_terms)
+#     gamma_keq, messages = get_gamma_keq_terms(mod, sympy_terms)
+#     return  gamma_keq, messages
+#
 # def get_irr_ma(expression, parameters, substrates, stoichiometry):
 #     """
 #     Returns a mass action expression for an irreversible reaction (which
