@@ -80,20 +80,22 @@ def make_additionals(list_of_cats):
     return {'Other': ['Additional Lines']}, {'Additional Lines': list_of_cats}
 
 
-def find_subs_ma(mod, reaction_name):
+def find_any_ma(mod, reaction_name):
     """
     Based on `reaction` in a model `mod` return a string of the name of
-    any substrate of that reaction with the string "_ma" appended to it.
+    any species of that reaction with the string "_ma" appended to it.
     This is used to find the index of an elasticity of a "mass action"
     term in a Data2d `scan_res.scan_out` list that is used to select the
     column representing the results of a scan for that elasticity term
     from `scan_results.scan_results`. (Elasticities of mass action terms
-    towards all subtrates are equivalent).
+    towards all substrates and products are equivalent except in
+    case of ratios).
     """
     mm = pysces.ModelMap(mod)
     reaction = getattr(mm, reaction_name)
-    substrates = reaction.hasSubstrates()
-    return substrates[0] + '_ma'
+    substrates = [subs + '_ma' for subs in reaction.hasSubstrates()]
+    products = [prod + '_ma' for prod in reaction.hasProducts()]
+    return {'substrates': substrates, 'products': products}
 
 
 def save_data2d(data_2dobj, file_name):
@@ -124,7 +126,8 @@ def load_data2d(file_name, mod=None, ltxe=None):
     return data_2dobj
 
 
-def generate_results(mod, tk, parameters, reactions):
+def generate_results(mod, tk, parameters, reactions, start=100, end=100,
+                     scan_points=100):
     """
     Given a model, a thermokin object a list of parameters and a list
     of reactions, perform parameter scans for each parameter, reaction
@@ -141,9 +144,9 @@ def generate_results(mod, tk, parameters, reactions):
         parameter_results[parameter] = {}
 
         parameter_init = getattr(mod, parameter)
-        scan_range = np.logspace(np.log10(parameter_init / 100),
-                                 np.log10(parameter_init * 100),
-                                 100)
+        scan_range = np.logspace(np.log10(parameter_init / start),
+                                 np.log10(parameter_init * end),
+                                 scan_points)
         for reaction in reactions:
             parameter_results[parameter][reaction] = {}
             data_1 = getattr(tk, 'J_' + reaction).do_par_scan(
@@ -187,24 +190,36 @@ def rest_from_data_1(data_1, optionals=None):
         parameter_init = optionals['parameter_init']
         reaction = optionals['reaction']
 
-    ma_term_index = data_1.scan_results.scan_out.index('pec%s_%s' % (
-        reaction,
-        find_subs_ma(
-                mod,
-                reaction)))
+    species_type = None
+    for k, v in find_any_ma(mod, reaction).iteritems():
+        for species in v:
+            try:
+                ma_term_index = data_1.scan_results.scan_out.index(
+                    'pec%s_%s' % (
+                        reaction,
+                        species))
+                species_type = k
+                break
+            except:
+                pass
+        if species_type: break
+
+    plot_1 = data_1.plot()
+    plot_1.ax.set_ylim(-1, 5)
 
     x = scan_range
     y1 = data_1.scan_results.scan_results[:, ma_term_index]
 
-    plot_1 = data_1.plot()
-    plot_1.ax.set_ylim(-1, 5)
-    do_vspans(plot_1.ax, x, y1, ['<=(1/(1-0.1))', '>=1/(1-0.9)'],
-              ['green', 'blue', ])
+    if species_type == 'substrates':
+        y2 = -((1 / y1) - 1)
+    elif species_type == 'products':
+        y2 = (-1 / (1 / y1 - 1))
+
+    do_vspans(plot_1.ax, x, y2, ['<=0.1', '>=0.9'], ['green', 'blue', ])
     plot_1.ax.axvline(parameter_init, ls=':', color='gray')
     plot_1.toggle_category('Elasticity Coefficients', True)
     plot_1.toggle_category('Term Elasticities', True)
 
-    y2 = -((1 / y1) - 1)
     a1, a2 = make_additionals(['GammaKeq'])
     data_2 = Data2D(mod,
                     [parameter, 'GammaKeq'],
