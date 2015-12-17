@@ -109,13 +109,14 @@ class ThermoKin(object):
         gamma_keq_todo = []
         add_raw_data = self._add_raw_data
         for reaction in self._raw_data.iterkeys():
-            if not add_raw_data.get(reaction) or not add_raw_data.get(reaction).get('gamma_keq'):
+            if not add_raw_data.get(reaction) or not add_raw_data.get(
+                    reaction).get('gamma_keq'):
                 gamma_keq_todo.append(reaction)
         if len(gamma_keq_todo) != 0:
             reaction_printout = ', '.join(gamma_keq_todo[:-1]) + ' or ' + \
                                 gamma_keq_todo[-1]
             print_f('%s does not contain Gamma/Keq terms for %s:' % (
-                    self._path_to, reaction_printout),warnings)
+                self._path_to, reaction_printout), warnings)
             gamma_keq_data, messages = create_gamma_keq_reqn_data(self.mod)
             for required in gamma_keq_todo:
                 print_f('{:10.10}: {}'.format(required, messages[required]),
@@ -129,13 +130,14 @@ class ThermoKin(object):
         condition_2 = not path.exists(self._path_to)
         if condition_1:
             print_f(
-                'The file %s will be overwritten with automatically generated file.' % self._path_to,
-                warnings)
+                    'The file %s will be overwritten with automatically generated file.' % self._path_to,
+                    warnings)
         elif condition_2:
             print_f('A new file will be created at "%s".' % self._path_to,
                     warnings)
         if condition_1 or condition_2:
-            ma_terms, vc_binding_terms, gamma_keq_terms, messages = create_reqn_data(self.mod)
+            ma_terms, vc_binding_terms, gamma_keq_terms, messages = create_reqn_data(
+                    self.mod)
             for k, v in messages.iteritems():
                 print_f('{:10.10}: {}'.format(k, v), warnings)
             write_reqn_file(self._path_to, self.mod.ModelFile, ma_terms,
@@ -269,7 +271,7 @@ class RateEqn(object):
             each = sympify(each)
             ec = diff(self.expression, each) * (each / self.expression)
             ec_name = 'ec%s_%s' % (self._rname, each)
-            self.ec_results[ec_name] = Term(self, self.mod, ec_name, ec,
+            self.ec_results[ec_name] = Term(self, self.mod, ec_name, self._rname, ec,
                                             self._ltxe)
         for each in self.terms.itervalues():
             self.ec_results.update(each.ec_results)
@@ -351,7 +353,8 @@ class RateEqn(object):
 
     def _evalscan(self, parameter, scan_range):
         mca_objects = [ec_term for ec_term in self.ec_results.values() if
-                       ec_term.expression != 0 and not ec_term.name.endswith('gamma_keq')]
+                       ec_term.expression != 0 and not ec_term.name.endswith(
+                               'gamma_keq')]
 
         scan_res = [list() for _ in range(len(mca_objects) + 1)]
         scan_res[0] = scan_range
@@ -376,8 +379,10 @@ class RateEqn(object):
             'All Fluxes/Reactions/Species': ['Term Rates']}
         additional_cats = {
             'Term Rates': [term.name for term in self.terms.values()]}
+        category_manifest = {'Flux Rates':True, 'Term Rates':True}
 
-        if scan_type is 'percentage':
+
+        if scan_type == 'percentage':
             column_names = [parameter] + [term.name for term in
                                           self.terms.values()
                                           if
@@ -386,8 +391,10 @@ class RateEqn(object):
             scan_res = self._perscan(parameter, scan_range)
             yscale = 'linear'
             data_array = array(scan_res, dtype=float).transpose()
-            ylim = [nanmin(data_array[:,1:]), find_max(data_array[:,1:]) * 1.1]
-        elif scan_type is 'value':
+            ylim = [nanmin(data_array[:, 1:]),
+                    find_max(data_array[:, 1:]) * 1.1]
+
+        elif scan_type == 'value':
             column_names = [parameter] + [term.name for term in
                                           self.terms.values()] + [self.name]
             y_label = 'Reaction/Term rate'
@@ -396,9 +403,10 @@ class RateEqn(object):
             data_array = array(scan_res, dtype=float).transpose()
             ylim = [find_min(data_array[:, 1:]),
                     find_max(data_array[:, 1:]) * 2]
-        elif scan_type is 'elasticity':
+        elif scan_type == 'elasticity':
             mca_objects = [ec_term for ec_term in self.ec_results.values() if
-                           ec_term.expression != 0 and not ec_term.name.endswith('gamma_keq')]
+                           ec_term.expression != 0 and not ec_term.name.endswith(
+                                   'gamma_keq')]
             column_names = [parameter] + [obj.name for obj in mca_objects]
 
             y_label = 'Elasticity Coefficient'
@@ -409,8 +417,12 @@ class RateEqn(object):
             additional_cat_classes = {
                 'All Coefficients': ['Term Elasticities']}
             additional_cats = {
-                'Term Elasticities': [elas.name for elas in mca_objects if
-                                      elas.name.startswith('p')]}
+                'Term Elasticities': [ec_term.name for ec_term in mca_objects if
+                                      ec_term.name.startswith('p')]}
+
+            category_manifest = {pec: True for pec in additional_cats['Term Elasticities']}
+            category_manifest['Elasticity Coefficients'] = True
+            category_manifest['Term Elasticities'] = True
 
         if init_return:
             self.mod.SetQuiet()
@@ -444,14 +456,34 @@ class RateEqn(object):
                       analysis_method='thermokin',
                       ax_properties=ax_properties,
                       additional_cat_classes=additional_cat_classes,
-                      additional_cats=additional_cats)
+                      additional_cats=additional_cats,
+                      category_manifest=category_manifest)
+
+        if scan_type == 'elasticity':
+            ec_names = [ec_term.name for ec_term in mca_objects if ec_term.name.startswith('ec')]
+            for line in data._lines:
+                for ec_name in ec_names:
+                    condition1 = line.name != ec_name
+                    condition2 = self.ec_results[line.name]._rname == ec_name
+                    if condition1 and condition2:
+                        line.categories.append(ec_name)
+
+        # # this is a very ugly hack
+        # def plot(self=data):
+        #     scan_fig = data._plot()
+        #     scan_fig.ax.axhline(0.3,color='black')
+        #     return scan_fig
+        # data._plot = data.plot
+        # data.plot = plot
+
         return data
 
 
 class Term(object):
-    def __init__(self, parent, mod, name, expression, ltxe):
+    def __init__(self, parent, mod, name, rname, expression, ltxe):
         super(Term, self).__init__()
         self.name = name
+        self._rname = rname
         self._unfac_expression = sympify(expression)
         self._parent = parent
         self.mod = mod
@@ -505,8 +537,7 @@ class Term(object):
 
 class RateTerm(Term):
     def __init__(self, parent, mod, name, rname, expression, ltxe):
-        super(RateTerm, self).__init__(parent, mod, name, expression, ltxe)
-        self._rname = rname
+        super(RateTerm, self).__init__(parent, mod, name, rname, expression, ltxe)
         self.ec_results = DotDict()
         self.ec_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                    formatter_factory())
@@ -529,11 +560,15 @@ class RateTerm(Term):
         expression_symbols.update(self._unfac_expression.atoms(Symbol))
         for each in expression_symbols:
             each = sympify(each)
-            ec_name = 'pec%s_%s_%s' % (self._parent._rname, each, self._rname)
+            ec_name = 'ec%s_%s' % (self._parent._rname, each)
+            pec_name = 'p%s_%s' % (ec_name, self._rname)
             ec = diff(self.expression, each) * (each / self.expression)
-            self.ec_results[ec_name] = Term(self._parent, self.mod, ec_name,
-                                            ec,
-                                            self._ltxe)
+            self.ec_results[pec_name] = Term(self._parent,
+                                             self.mod,
+                                             pec_name,
+                                             ec_name,
+                                             ec,
+                                             self._ltxe)
 
 
 class AdditionalRateTerm(RateTerm):
@@ -543,7 +578,7 @@ class AdditionalRateTerm(RateTerm):
 
 
 class AdditionalTerm(Term):
-    def __init__(self, parent, mod, name, expression, ltxe):
-        super(AdditionalTerm, self).__init__(parent, mod, name, expression,
+    def __init__(self, parent, mod, name, rname, expression, ltxe):
+        super(AdditionalTerm, self).__init__(parent, mod, name, rname, expression,
                                              ltxe)
         self._parent = None
