@@ -1,22 +1,23 @@
 __author__ = 'carl'
 
+from numpy import log10, array, float, NaN, nanmin, nanmax, savetxt
 from os import path
 
-from ._thermokin_file_tools import get_subs_dict, get_reqn_path, \
-    get_all_terms, get_term_types_from_raw_data, create_reqn_data, write_reqn_file
-
-from sympy import sympify, diff
-from numpy import log, array, float, NaN, nanmin, nanmax, savetxt
 from pysces import ModelMap
+from sympy import sympify, diff, Symbol
 
-
-from ..utils.misc import DotDict, formatter_factory, find_min, find_max
+from ._thermokin_file_tools import get_subs_dict, get_reqn_path, \
+    get_all_terms, get_term_types_from_raw_data, create_reqn_data, \
+    write_reqn_file, create_gamma_keq_reqn_data
 from ..latextools import LatexExpr
 from ..modeltools import make_path, get_file_path
+from ..utils.misc import DotDict, formatter_factory, find_min, find_max
+from ..utils.misc import do_safe_state, get_value, silence_print, print_f
 from ..utils.plotting import Data2D
-from ..utils.misc import do_safe_state, get_value, silence_print
+
 
 __all__ = ['ThermoKin']
+
 
 def mult(lst):
     """
@@ -63,18 +64,16 @@ def get_repr_latex(obj):
                   obj.latex_expression,
                   obj.value)
 
+
 @silence_print
 def silent_state(mod):
     mod.doMca()
     mod.doState()
 
-def print_f(message,status):
-    if status:
-        print message
-
 
 class ThermoKin(object):
-    def __init__(self, mod, path_to_reqn_file=None, overwrite=False, warnings=True, ltxe=None):
+    def __init__(self, mod, path_to_reqn_file=None, overwrite=False,
+                 warnings=True, ltxe=None):
         super(ThermoKin, self).__init__()
         self.mod = mod
 
@@ -93,39 +92,61 @@ class ThermoKin(object):
         else:
             self._path_to = get_reqn_path(self.mod)
 
-        self._do_auto_actions(mod, overwrite, warnings)
+        self._do_auto_actions(overwrite, warnings)
         self._raw_data, self._add_raw_data = get_all_terms(self._path_to)
+        self._do_gamma_keq(overwrite, warnings)
 
-
-
-        term_types = get_term_types_from_raw_data(self._raw_data).union(get_term_types_from_raw_data(self._add_raw_data))
+        term_types = get_term_types_from_raw_data(self._raw_data).union(
+                get_term_types_from_raw_data(self._add_raw_data))
         self._ltxe.add_term_types(term_types)
-
 
         self._populate_object()
         self._populate_ec_results()
 
-    def _do_auto_actions(self, mod, overwrite, warnings):
+    def _do_gamma_keq(self, overwrite, warnings):
+        if overwrite:
+            return None
+        gamma_keq_todo = []
+        add_raw_data = self._add_raw_data
+        for reaction in self._raw_data.iterkeys():
+            if not add_raw_data.get(reaction) or not add_raw_data.get(
+                    reaction).get('gamma_keq'):
+                gamma_keq_todo.append(reaction)
+        if len(gamma_keq_todo) != 0:
+            reaction_printout = ', '.join(gamma_keq_todo[:-1]) + ' or ' + \
+                                gamma_keq_todo[-1]
+            print_f('%s does not contain Gamma/Keq terms for %s:' % (
+                self._path_to, reaction_printout), warnings)
+            gamma_keq_data, messages = create_gamma_keq_reqn_data(self.mod)
+            for required in gamma_keq_todo:
+                print_f('{:10.10}: {}'.format(required, messages[required]),
+                        warnings)
+                if required not in add_raw_data:
+                    add_raw_data[required] = {}
+                add_raw_data[required]['gamma_keq'] = gamma_keq_data[required]
+
+    def _do_auto_actions(self, overwrite, warnings):
         condition_1 = path.exists(self._path_to) and overwrite
         condition_2 = not path.exists(self._path_to)
         if condition_1:
             print_f(
-                'The file %s will be overwritten with automatically generated file.' % self._path_to,
-                warnings)
+                    'The file %s will be overwritten with automatically generated file.' % self._path_to,
+                    warnings)
         elif condition_2:
             print_f('A new file will be created at "%s".' % self._path_to,
                     warnings)
         if condition_1 or condition_2:
-            ma_terms, vc_binding_terms, messages = create_reqn_data(mod)
+            ma_terms, vc_binding_terms, gamma_keq_terms, messages = create_reqn_data(
+                    self.mod)
             for k, v in messages.iteritems():
                 print_f('{:10.10}: {}'.format(k, v), warnings)
-            write_reqn_file(self._path_to, mod.ModelFile, ma_terms,
-                            vc_binding_terms, messages)
+            write_reqn_file(self._path_to, self.mod.ModelFile, ma_terms,
+                            vc_binding_terms, gamma_keq_terms, messages)
 
     def _populate_object(self):
         self.reaction_results = DotDict()
         self.reaction_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
-                                  formatter_factory())
+                                         formatter_factory())
         for reaction, terms_dict in self._raw_data.iteritems():
             additional_terms = self._add_raw_data.get(reaction)
             reqn_obj = RateEqn(self.mod,
@@ -138,21 +159,19 @@ class ThermoKin(object):
             for term in reqn_obj.terms.itervalues():
                 self.reaction_results[term.name] = term
 
-
     def _populate_ec_results(self):
         self.ec_results = DotDict()
         self.ec_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
-                                 formatter_factory())
+                                   formatter_factory())
 
         for rate_eqn in self.reaction_results.itervalues():
             self.ec_results.update(rate_eqn.ec_results)
 
-
     def save_results(self, file_name=None, separator=','):
         file_name = get_file_path(working_dir=self._working_dir,
-                                             internal_filename='tk_summary',
-                                             fmt='csv',
-                                             file_name=file_name, )
+                                  internal_filename='tk_summary',
+                                  fmt='csv',
+                                  file_name=file_name, )
 
         values = []
         max_len = 0
@@ -165,10 +184,11 @@ class ThermoKin(object):
             if len(cols[3]) > max_len:
                 max_len = len(cols[3])
 
-
-        for elasticity_name in sorted([ec for ec in self.ec_results.keys() if ec.startswith('ec')]):
+        for elasticity_name in sorted(
+                [ec for ec in self.ec_results.keys() if ec.startswith('ec')]):
             if self.ec_results[elasticity_name].expression != 0:
-                related_ecs = sorted([ec for ec in self.ec_results.keys() if elasticity_name in ec])
+                related_ecs = sorted([ec for ec in self.ec_results.keys() if
+                                      elasticity_name in ec])
                 for related_ec_name in related_ecs:
                     cols = (related_ec_name,
                             self.ec_results[related_ec_name].value,
@@ -179,27 +199,26 @@ class ThermoKin(object):
                         max_len = len(cols[3])
 
         str_fmt = 'S%s' % max_len
-        head = ['name','value','latex_name','latex_expression']
+        head = ['name', 'value', 'latex_name', 'latex_expression']
         X = array(values,
-                  dtype=[(head[0],str_fmt),
-                         (head[1],'float'),
-                         (head[2],str_fmt),
-                         (head[3],str_fmt)])
-
+                  dtype=[(head[0], str_fmt),
+                         (head[1], 'float'),
+                         (head[2], str_fmt),
+                         (head[3], str_fmt)])
 
         try:
             savetxt(fname=file_name,
                     X=X,
                     header=','.join(head),
                     delimiter=separator,
-                    fmt=['%s','%.9f','%s','%s'],)
+                    fmt=['%s', '%.9f', '%s', '%s'], )
 
         except IOError as e:
             print e.strerror
 
 
 class RateEqn(object):
-    def __init__(self, mod, name, term_dict, ltxe, additional_terms= None):
+    def __init__(self, mod, name, term_dict, ltxe, additional_terms=None):
         super(RateEqn, self).__init__()
         self.mod = mod
         self.terms = DotDict()
@@ -224,17 +243,15 @@ class RateEqn(object):
 
         if additional_terms:
             for term_name, expression in additional_terms.iteritems():
-                term = AdditionalTerm(parent=self,
-                                      mod=self.mod,
-                                      name='J_%s_%s' % (self._rname, term_name),
-                                      rname=term_name,
-                                      expression=expression,
-                                      ltxe=self._ltxe)
+                term = AdditionalRateTerm(parent=self,
+                                          mod=self.mod,
+                                          name='J_%s_%s' % (
+                                              self._rname, term_name),
+                                          rname=term_name,
+                                          expression=expression,
+                                          ltxe=self._ltxe)
                 setattr(self, term_name, term)
                 self.terms[term_name] = term
-
-
-
 
         self._value = None
         self._str_expression_ = None
@@ -244,19 +261,18 @@ class RateEqn(object):
 
         self.ec_results = DotDict()
         self.ec_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
-                                 formatter_factory())
-
+                                   formatter_factory())
 
         self._populate_ec_results()
 
     def _populate_ec_results(self):
-        var_pars = self.mod.parameters + self.mod.species
-        for each in var_pars:
+        expression_symbols = self._unfac_expression.atoms(Symbol)
+        for each in expression_symbols:
             each = sympify(each)
             ec = diff(self.expression, each) * (each / self.expression)
             ec_name = 'ec%s_%s' % (self._rname, each)
-            self.ec_results[ec_name] = Term(self, self.mod, ec_name, ec,
-                                          self._ltxe)
+            self.ec_results[ec_name] = Term(self, self.mod, ec_name, self._rname, ec,
+                                            self._ltxe)
         for each in self.terms.itervalues():
             self.ec_results.update(each.ec_results)
 
@@ -275,7 +291,6 @@ class RateEqn(object):
             self._expression = self._unfac_expression.factor()
         return self._expression
 
-
     @property
     def value(self):
         self._calc_value()
@@ -291,19 +306,21 @@ class RateEqn(object):
     def latex_expression(self):
         if not self._latex_expression:
             self._latex_expression = self._ltxe.expression_to_latex(
-                self.expression,
-                mul_symbol='dot')
+                    self.expression,
+                    mul_symbol='dot')
         return self._latex_expression
 
     def _calc_value(self):
         subs_dict = get_subs_dict(self.expression, self.mod)
         for each in self.terms.itervalues():
-            if type(each) is not AdditionalTerm:
+            if type(each) is not AdditionalRateTerm:
                 each._calc_value(subs_dict)
-        self._value = mult([each._value for each in self.terms.itervalues() if type(each) is not AdditionalTerm])
+        self._value = mult([each._value for each in self.terms.itervalues() if
+                            type(each) is not AdditionalRateTerm])
 
     def _perscan(self, parameter, scan_range):
-        non_additionals = [value for value in self.terms.values() if type(value) is not AdditionalTerm]
+        non_additionals = [value for value in self.terms.values() if
+                           type(value) is not AdditionalRateTerm]
         scan_res = [list() for _ in range(len(non_additionals) + 1)]
         scan_res[0] = scan_range
 
@@ -335,7 +352,9 @@ class RateEqn(object):
         return scan_res
 
     def _evalscan(self, parameter, scan_range):
-        mca_objects = self._get_mca_objects(parameter)
+        mca_objects = [ec_term for ec_term in self.ec_results.values() if
+                       ec_term.expression != 0 and not ec_term.name.endswith(
+                               'gamma_keq')]
 
         scan_res = [list() for _ in range(len(mca_objects) + 1)]
         scan_res[0] = scan_range
@@ -351,7 +370,7 @@ class RateEqn(object):
         return scan_res
 
     def do_par_scan(self, parameter, scan_range, scan_type='value',
-                 init_return=True):
+                    init_return=True):
 
         assert scan_type in ['percentage', 'value', 'elasticity']
         init = getattr(self.mod, parameter)
@@ -360,27 +379,34 @@ class RateEqn(object):
             'All Fluxes/Reactions/Species': ['Term Rates']}
         additional_cats = {
             'Term Rates': [term.name for term in self.terms.values()]}
+        category_manifest = {'Flux Rates':True, 'Term Rates':True}
 
-        if scan_type is 'percentage':
+
+        if scan_type == 'percentage':
             column_names = [parameter] + [term.name for term in
                                           self.terms.values()
-                                          if type(term) is not AdditionalTerm]
+                                          if
+                                          type(term) is not AdditionalRateTerm]
             y_label = 'Term Percentage Contribution'
             scan_res = self._perscan(parameter, scan_range)
             yscale = 'linear'
             data_array = array(scan_res, dtype=float).transpose()
-            ylim = [nanmin(data_array), find_max(data_array) * 1.1]
-        elif scan_type is 'value':
+            ylim = [nanmin(data_array[:, 1:]),
+                    find_max(data_array[:, 1:]) * 1.1]
+
+        elif scan_type == 'value':
             column_names = [parameter] + [term.name for term in
                                           self.terms.values()] + [self.name]
-            y_label = 'Reation/Term rate'
+            y_label = 'Reaction/Term rate'
             scan_res = self._valscan(parameter, scan_range)
             yscale = 'log'
             data_array = array(scan_res, dtype=float).transpose()
             ylim = [find_min(data_array[:, 1:]),
                     find_max(data_array[:, 1:]) * 2]
-        elif scan_type is 'elasticity':
-            mca_objects = self._get_mca_objects(parameter)
+        elif scan_type == 'elasticity':
+            mca_objects = [ec_term for ec_term in self.ec_results.values() if
+                           ec_term.expression != 0 and not ec_term.name.endswith(
+                                   'gamma_keq')]
             column_names = [parameter] + [obj.name for obj in mca_objects]
 
             y_label = 'Elasticity Coefficient'
@@ -391,7 +417,12 @@ class RateEqn(object):
             additional_cat_classes = {
                 'All Coefficients': ['Term Elasticities']}
             additional_cats = {
-                'Term Elasticities': [elas.name for elas in mca_objects if elas.name.startswith('p')]}
+                'Term Elasticities': [ec_term.name for ec_term in mca_objects if
+                                      ec_term.name.startswith('p')]}
+
+            category_manifest = {pec: True for pec in additional_cats['Term Elasticities']}
+            category_manifest['Elasticity Coefficients'] = True
+            category_manifest['Term Elasticities'] = True
 
         if init_return:
             self.mod.SetQuiet()
@@ -406,6 +437,10 @@ class RateEqn(object):
         else:
             x_label = parameter
 
+        # Assertions prevents unbound local variables therefore pycharm 
+        # inspection can be disabled for the two statements below
+
+        # noinspection PyUnboundLocalVariable
         ax_properties = {'ylabel': y_label,
                          'xlabel': x_label,
                          'xscale': 'log',
@@ -413,6 +448,7 @@ class RateEqn(object):
                          'xlim': [find_min(scan_range), find_max(scan_range)],
                          'ylim': ylim}
 
+        # noinspection PyUnboundLocalVariable
         data = Data2D(mod=self.mod,
                       column_names=column_names,
                       data_array=data_array,
@@ -420,29 +456,34 @@ class RateEqn(object):
                       analysis_method='thermokin',
                       ax_properties=ax_properties,
                       additional_cat_classes=additional_cat_classes,
-                      additional_cats=additional_cats)
+                      additional_cats=additional_cats,
+                      category_manifest=category_manifest)
+
+        if scan_type == 'elasticity':
+            ec_names = [ec_term.name for ec_term in mca_objects if ec_term.name.startswith('ec')]
+            for line in data._lines:
+                for ec_name in ec_names:
+                    condition1 = line.name != ec_name
+                    condition2 = self.ec_results[line.name]._rname == ec_name
+                    if condition1 and condition2:
+                        line.categories.append(ec_name)
+
+        # # this is a very ugly hack
+        # def plot(self=data):
+        #     scan_fig = data._plot()
+        #     scan_fig.ax.axhline(0.3,color='black')
+        #     return scan_fig
+        # data._plot = data.plot
+        # data.plot = plot
+
         return data
-
-    def _get_mca_objects(self, parameter):
-        terms = self.terms.keys()
-        reaction_name = self._rname
-        mca_objects = []
-        reaction = getattr(ModelMap(self.mod),self._rname)
-        sp_params = reaction.hasReagents() + reaction.hasModifiers() + reaction.hasParameters()
-        for s_p in sp_params:
-            for term in terms:
-                mca_objects.append(self.ec_results[
-                    'pec%s_%s_%s' % (reaction_name, s_p, term)])
-            mca_objects.append(
-                self.ec_results['ec%s_%s' % (reaction_name, s_p)])
-
-        return mca_objects
 
 
 class Term(object):
-    def __init__(self, parent, mod, name, expression, ltxe):
+    def __init__(self, parent, mod, name, rname, expression, ltxe):
         super(Term, self).__init__()
         self.name = name
+        self._rname = rname
         self._unfac_expression = sympify(expression)
         self._parent = parent
         self.mod = mod
@@ -484,8 +525,8 @@ class Term(object):
     def latex_expression(self):
         if not self._latex_expression:
             self._latex_expression = self._ltxe.expression_to_latex(
-                self.expression,
-                mul_symbol='dot')
+                    self.expression,
+                    mul_symbol='dot')
         return self._latex_expression
 
     def _calc_value(self, subs_dict=None):
@@ -496,11 +537,10 @@ class Term(object):
 
 class RateTerm(Term):
     def __init__(self, parent, mod, name, rname, expression, ltxe):
-        super(RateTerm, self).__init__(parent, mod, name, expression, ltxe)
-        self._rname = rname
+        super(RateTerm, self).__init__(parent, mod, name, rname, expression, ltxe)
         self.ec_results = DotDict()
         self.ec_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
-                                 formatter_factory())
+                                   formatter_factory())
         self._populate_ec_results()
         self._percentage = None
 
@@ -512,20 +552,33 @@ class RateTerm(Term):
 
     @property
     def percentage(self):
-        per = (log(self.value) / log(self._parent.value)) * 100
+        per = (log10(self.value) / log10(self._parent.value)) * 100
         return per
 
     def _populate_ec_results(self):
-        var_pars = self.mod.species + self.mod.parameters
-        for each in var_pars:
+        expression_symbols = self._parent._unfac_expression.atoms(Symbol)
+        expression_symbols.update(self._unfac_expression.atoms(Symbol))
+        for each in expression_symbols:
             each = sympify(each)
-            ec_name = 'pec%s_%s_%s' % (self._parent._rname, each, self._rname)
+            ec_name = 'ec%s_%s' % (self._parent._rname, each)
+            pec_name = 'p%s_%s' % (ec_name, self._rname)
             ec = diff(self.expression, each) * (each / self.expression)
-            self.ec_results[ec_name] = Term(self._parent, self.mod, ec_name, ec,
-                                          self._ltxe)
+            self.ec_results[pec_name] = Term(self._parent,
+                                             self.mod,
+                                             pec_name,
+                                             ec_name,
+                                             ec,
+                                             self._ltxe)
 
-class AdditionalTerm(RateTerm):
+
+class AdditionalRateTerm(RateTerm):
     @property
     def percentage(self):
         return 0.0
 
+
+class AdditionalTerm(Term):
+    def __init__(self, parent, mod, name, rname, expression, ltxe):
+        super(AdditionalTerm, self).__init__(parent, mod, name, rname, expression,
+                                             ltxe)
+        self._parent = None

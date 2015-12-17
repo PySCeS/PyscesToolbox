@@ -30,7 +30,8 @@ __all__ = ['cc_list',
            'extract_model',
            'get_value',
            'get_value_eval',
-           'get_value_sympy',]
+           'get_value_sympy',
+           'print_f']
 
 def extract_model(obj):
     mod = obj
@@ -536,6 +537,19 @@ def group_sort(old_list, num_of_groups):
     new_list = [old_list[pos] for pos in groups]
 
     return new_list
+
+
+def print_f(message, status):
+    """
+    Prints a message if status is `True`
+    Parameters
+    ----------
+    message : object
+        Any object with a `__str__` method.
+    status : bool
+    """
+    if status:
+        print message
 
 
 class PseudoDotDict:
