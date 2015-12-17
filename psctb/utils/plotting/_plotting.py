@@ -193,7 +193,7 @@ class Data2D(object):
     file_name : str, Optional (Default : None)
         The name that should be prepended to files produced any ``ScanFig``
         objects produced by ``Data2D``. If None, defaults to 'scan_fig'.
-    additional_save_resultscat_classes : dict, Optional (Default : None)
+    additional_cat_classes : dict, Optional (Default : None)
         A dictionary containing additional line class categories for
         ``ScanFig`` construction. Each ``data_array`` column contains results
         representing a specific category of result (elasticity, flux,
@@ -243,6 +243,11 @@ class Data2D(object):
         self._column_names = column_names
         self._scan_results = data_array
 
+        if not category_manifest:
+            category_manifest = {}
+        self._category_manifest = category_manifest
+
+        self._axvline = axvline
 
 
         self.mod = mod
@@ -299,17 +304,18 @@ class Data2D(object):
         # which all the  different control coefficient buttons will be
         # arranged.
 
-        self._additional_cat_classes = {}
-        if additional_cat_classes:
-            self._additional_cat_classes = additional_cat_classes
 
-        self._additional_cats = {}
-        if additional_cats:
-            self._additional_cats = additional_cats
+        if not additional_cat_classes:
+            additional_cat_classes = {}
+        self._additional_cat_classes = additional_cat_classes
 
-        #self._setup_categories()
+        if not additional_cats:
+            additional_cats = {}
+        self._additional_cats = additional_cats
+
+
         self._setup_lines()
-        #self._category_classes.update(self._scan_types)
+
         if num_of_groups:
             self._lines = group_sort(self._lines, num_of_groups)
 
@@ -432,7 +438,7 @@ class Data2D(object):
         species = mm.hasSpecies()
         x_name = ''
         # TODO Enable lower case "time" as well as well as making generic for minutes/hours
-        if self.scan_results.scan_in == 'Time':
+        if self.scan_results.scan_in.lower() == 'time':
             x_name = 'Time'
         elif self.scan_results.scan_in in species:
             x_name = '[%s]' % self.scan_results.scan_in
@@ -460,6 +466,19 @@ class Data2D(object):
                            working_dir=path.join(self._working_dir,
                                                  self.scan_results.scan_in, ),
                            base_name=base_name, )
+
+        for k,v in self._category_manifest.iteritems():
+            scan_fig.toggle_category(k,v)
+
+        if self._axvline:
+            scan_in = self.scan_results.scan_in
+            if scan_in.lower() != 'time':
+                try:
+                    init_val = getattr(self.mod,scan_in)
+                    scan_fig.ax.axvline(init_val,ls=':',color='gray')
+                except:
+                    print_f('Model has attribute "%s' % scan_in)
+
         return scan_fig
 
     def save_results(self, file_name=None, separator=','):
