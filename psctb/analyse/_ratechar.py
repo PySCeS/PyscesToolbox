@@ -1028,7 +1028,7 @@ class RateCharData(object):
         rc_out_arr = [scanner.UserOutputResults[:, 0]] + rc_data
         rc_out_arr = numpy.vstack(rc_out_arr).transpose()
         rc_data_obj = Data2D(mod=self.mod,
-                             column_names = [self.scan_results.fixed] + prc_names + rc_names,
+                             column_names=[self.scan_results.fixed] + prc_names + rc_names,
                              data_array=rc_out_arr,
                              ltxe=self._ltxe,
                              analysis_method=self._analysis_method,
