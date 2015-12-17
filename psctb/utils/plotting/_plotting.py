@@ -193,7 +193,7 @@ class Data2D(object):
     file_name : str, Optional (Default : None)
         The name that should be prepended to files produced any ``ScanFig``
         objects produced by ``Data2D``. If None, defaults to 'scan_fig'.
-    additional_cat_classes : dict, Optional (Default : None)
+    additional_save_resultscat_classes : dict, Optional (Default : None)
         A dictionary containing additional line class categories for
         ``ScanFig`` construction. Each ``data_array`` column contains results
         representing a specific category of result (elasticity, flux,
@@ -230,7 +230,9 @@ class Data2D(object):
                  additional_cat_classes=None,
                  additional_cats=None,
                  num_of_groups=None,
-                 working_dir=None):
+                 working_dir=None,
+                 category_manifest=None,
+                 axvline=True):
         self.scan_results = DotDict()
         self.scan_results['scan_in'] = column_names[0]
         self.scan_results['scan_out'] = column_names[1:]
@@ -297,8 +299,23 @@ class Data2D(object):
         # which all the  different control coefficient buttons will be
         # arranged.
 
-        self._category_classes = \
-            OrderedDict([('All Coefficients',
+        self._additional_cat_classes = {}
+        if additional_cat_classes:
+            self._additional_cat_classes = additional_cat_classes
+
+        self._additional_cats = {}
+        if additional_cats:
+            self._additional_cats = additional_cats
+
+        #self._setup_categories()
+        self._setup_lines()
+        #self._category_classes.update(self._scan_types)
+        if num_of_groups:
+            self._lines = group_sort(self._lines, num_of_groups)
+
+    @property
+    def _category_classes(self):
+        category_classes = OrderedDict([('All Coefficients',
                           ['Elasticity Coefficients',
                            'Control Coefficients',
                            'Response Coefficients',
@@ -310,48 +327,44 @@ class Data2D(object):
                            'Species Concentrations',
                            'Steady-State Species Concentrations'])])
 
-        if additional_cat_classes:
-            for k, v in additional_cat_classes.iteritems():
-                if k in self._category_classes:
-                    lst = self._category_classes[k]
-                    new_lst = list(set(lst + v))
-                    self._category_classes[k] = new_lst
-                else:
-                    self._category_classes[k] = v
+        additional_cat_classes = self._additional_cat_classes
+        for k, v in additional_cat_classes.iteritems():
+            if k in category_classes:
+                lst = category_classes[k]
+                new_lst = list(set(lst + v))
+                category_classes[k] = new_lst
+            else:
+                category_classes[k] = v
+        category_classes.update(self._scan_types)
+        return category_classes
 
-        self._scan_types = \
-            OrderedDict([
-                ('Flux Rates',
-                 ['J_' + reaction for reaction in mod.reactions]),
-                ('Reaction Rates', [reaction for reaction in mod.reactions]),
-                ('Species Concentrations', mod.species),
-                ('Steady-State Species Concentrations',
-                 [sp + '_ss' for sp in mod.species]),
-                ('Elasticity Coefficients', ec_list(mod)),
-                ('Control Coefficients', cc_list(mod)),
-                ('Response Coefficients', rc_list(mod)),
-                ('Partial Response Coefficients', prc_list(mod)),
-                ('Control Patterns', ['CP' + str(n)
-                                      for n in
-                                      range(1, len(self._column_names))])
-            ])
+    @property
+    def _scan_types(self):
+        scan_types = OrderedDict([
+        ('Flux Rates', ['J_' + reaction for reaction in self.mod.reactions]),
+        ('Reaction Rates', [reaction for reaction in self.mod.reactions]),
+        ('Species Concentrations', self.mod.species),
+        ('Steady-State Species Concentrations',[sp + '_ss' for sp in self.mod.species]),
+        ('Elasticity Coefficients', ec_list(self.mod)),
+        ('Control Coefficients', cc_list(self.mod)),
+        ('Response Coefficients', rc_list(self.mod)),
+        ('Partial Response Coefficients', prc_list(self.mod)),
+        ('Control Patterns', ['CP' + str(n)
+                              for n in range(1, len(self._column_names))])])
 
+        additional_cats = self._additional_cats
         if additional_cats:
             for k, v in additional_cats.iteritems():
-                if k in self._scan_types:
-                    lst = self._scan_types[k]
+                if k in scan_types:
+                    lst = scan_types[k]
                     new_lst = list(set(lst + v))
-                    self._scan_types[k] = new_lst
+                    scan_types[k] = new_lst
                 else:
-                    self._scan_types[k] = v
+                    scan_types[k] = v
+        return scan_types
 
-        self._setup_categories()
-        self._setup_lines()
-        self._category_classes.update(self._scan_types)
-        if num_of_groups:
-            self._lines = group_sort(self._lines, num_of_groups)
-
-    def _setup_categories(self):
+    @property
+    def _column_categories(self):
         """
         This method sets up the categories for each data column stored by this
         object. These categories are stored in a dictionary as
@@ -374,7 +387,7 @@ class Data2D(object):
                     column_categories[column].append(k)
                     break
 
-        self._column_categories = column_categories
+        return column_categories
 
     def _setup_lines(self):
         """
@@ -386,12 +399,13 @@ class Data2D(object):
         this method sets up that list. The ``self._column_categories``
         dictionary is used here.
         """
+        _column_categories = self._column_categories
         lines = []
         for i, each in enumerate(self.scan_results.scan_out):
             line = LineData(name=each,
                             x_data=self.scan_results.scan_range,
                             y_data=self.scan_results.scan_results[:, i],
-                            categories=self._column_categories[each],
+                            categories=_column_categories[each],
                             properties={'label':
                                             '$%s$' %
                                             (self._ltxe.expression_to_latex(
@@ -419,7 +433,7 @@ class Data2D(object):
         x_name = ''
         # TODO Enable lower case "time" as well as well as making generic for minutes/hours
         if self.scan_results.scan_in == 'Time':
-            x_name = 'Time (s)'
+            x_name = 'Time'
         elif self.scan_results.scan_in in species:
             x_name = '[%s]' % self.scan_results.scan_in
         elif self.scan_results.scan_in in self.mod.parameters:
@@ -581,7 +595,14 @@ class ScanFig(object):
             self.ax.set_color_cycle(cmap)
 
         if category_classes:
-            self._category_classes = category_classes
+            new_cat_classes = OrderedDict()
+            for k, v in category_classes.iteritems():
+                for each in self._categories.iterkeys():
+                    if each in v:
+                        if not k in new_cat_classes:
+                            new_cat_classes[k] = []
+                        new_cat_classes[k].append(each)
+            self._category_classes = new_cat_classes
         else:
             self._category_classes = {'': [k for k in self._categories]}
 
