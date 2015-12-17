@@ -6,6 +6,7 @@ from sympy import Symbol, sympify
 from datetime import datetime
 
 
+
 # File reading/validation functions
 def get_term_types_from_raw_data(raw_data_dict):
     """
@@ -645,10 +646,52 @@ def create_reqn_data(mod):
     string_formulas = replace_pow(string_formulas)
     sympy_formulas = get_sympy_formulas(string_formulas)
     sympy_terms = get_sympy_terms(sympy_formulas)
-    # sympy_terms = filter_irreversible(sympy_terms)
+    non_irr = filter_irreversible(sympy_terms)
+    gamma_keq_terms, _ = get_gamma_keq_terms(mod, non_irr)
     ma_terms, messages = get_ma_terms(mod, sympy_terms)
     binding_vc_terms = get_binding_vc_terms(sympy_formulas, ma_terms)
-    return ma_terms, binding_vc_terms, messages
+    return ma_terms, binding_vc_terms, gamma_keq_terms, messages
+
+
+def create_gamma_keq_reqn_data(mod):
+    string_formulas = get_str_formulas(mod)
+    string_formulas = replace_pow(string_formulas)
+    sympy_formulas = get_sympy_formulas(string_formulas)
+    sympy_terms = get_sympy_terms(sympy_formulas)
+    sympy_terms = filter_irreversible(sympy_terms)
+    gamma_keq, messages = get_gamma_keq_terms(mod, sympy_terms)
+    return gamma_keq, messages
+
+
+def get_gamma_keq_terms(mod, sympy_terms):
+    model_map = pysces.ModelMap(mod)  # model map to get substrates, products
+    # and parameters for each reaction
+
+    messages = {}
+    gamma_keq_terms = {}
+    for name, terms in sympy_terms.iteritems():
+        reaction_map = getattr(model_map, name)
+
+        substrates = [sympify(substrate) for substrate in
+                      reaction_map.hasSubstrates()]
+
+        products = [sympify(product) for product in reaction_map.hasProducts()]
+
+        if len(terms) == 2:  # condition for reversible reactions
+            # make sure negative term is second in term list
+            terms = sort_terms(terms)
+            # divide pos term by neg term and factorise
+            expressions = (-terms[0] / terms[1]).factor()
+            # get substrate, product and keq terms (and strategy)
+            st, pt, keq, _ = get_st_pt_keq(expressions, substrates,
+                                                 products)
+            if all([st, pt, keq]):
+                gamma_keq_terms[name] = pt / (keq*st)
+                messages[name] = 'successful generation of gamma/keq term'
+            else:
+                messages[name] = 'generation of gamma/keq term failed'
+
+    return gamma_keq_terms, messages
 
 
 def filter_irreversible(sympy_terms):
@@ -659,7 +702,7 @@ def filter_irreversible(sympy_terms):
     return new_sympy_terms
 
 
-def write_reqn_file(file_name, model_name, ma_terms, vc_binding_terms, messages):
+def write_reqn_file(file_name, model_name, ma_terms, vc_binding_terms, gamma_keq_terms, messages):
     already_written = []
     date = datetime.strftime(datetime.now(), '%H:%M:%S %d-%m-%Y')
     with open(file_name, 'w') as f:
@@ -674,11 +717,25 @@ def write_reqn_file(file_name, model_name, ma_terms, vc_binding_terms, messages)
             f.write('!T{%s}{ma} %s\n' % (reaction_name, ma_term))
             f.write('!T{%s}{bind_vc} %s\n' % (
                 reaction_name, vc_binding_terms[reaction_name]))
+            f.write('!G{%s}{gamma_keq} %s\n' % (reaction_name, gamma_keq_terms[reaction_name]))
             f.write('\n')
-
         for k, v in messages.iteritems():
             if k not in already_written:
                 f.write('# %s :%s\n' % (k, v))
+
+
+def term_to_file(file_name, term, message=None):
+    from ._thermokin import AdditionalRateTerm
+    assert type(term) is AdditionalRateTerm, 'Cannot save elasticity or other terms to reqn files.'
+    date = datetime.strftime(datetime.now(), '%H:%M:%S %d-%m-%Y')
+    with open(file_name,'a') as f:
+        f.write('\n# Additional term appended on %s\n' % date)
+        f.write('!G{%s}{%s} %s\n' % (term._parent._rname,
+                                     term._rname,
+                                     term.expression))
+
+
+
 
 
 # There functions are not used anymore
