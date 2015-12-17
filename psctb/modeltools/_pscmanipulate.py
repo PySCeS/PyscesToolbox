@@ -2,7 +2,7 @@ from os import path
 import cStringIO
 import string
 
-from pysces import model
+from pysces import model, PyscesModel
 
 from ._paths import get_model_name
 
@@ -31,7 +31,7 @@ def psc_to_str(name):
     """
     if name[-4:] != '.psc':
         name += '.psc'
-    F = file(path.join(pysces.PyscesModel.MODEL_DIR, name), 'r')
+    F = file(path.join(PyscesModel.MODEL_DIR, name), 'r')
     fstr = F.read()
     F.close()
     return fstr
