@@ -1,6 +1,6 @@
 __author__ = 'carl'
 
-from numpy import log, array, float, NaN, nanmin, nanmax, savetxt
+from numpy import log10, array, float, NaN, nanmin, nanmax, savetxt
 from os import path
 
 from pysces import ModelMap
@@ -8,14 +8,14 @@ from sympy import sympify, diff, Symbol
 
 from ._thermokin_file_tools import get_subs_dict, get_reqn_path, \
     get_all_terms, get_term_types_from_raw_data, create_reqn_data, \
-    write_reqn_file
+    write_reqn_file, create_gamma_keq_reqn_data
 from ..latextools import LatexExpr
 from ..modeltools import make_path, get_file_path
 from ..utils.misc import DotDict, formatter_factory, find_min, find_max
 from ..utils.misc import do_safe_state, get_value, silence_print
 from ..utils.plotting import Data2D
 
-__all__ = ['ThermoKin']
+# __all__ = ['ThermoKin','AdditionalRateTerm']
 
 
 def mult(lst):
@@ -96,32 +96,54 @@ class ThermoKin(object):
         else:
             self._path_to = get_reqn_path(self.mod)
 
-        self._do_auto_actions(mod, overwrite, warnings)
+        self._do_auto_actions(overwrite, warnings)
         self._raw_data, self._add_raw_data = get_all_terms(self._path_to)
+        self._do_gamma_keq(overwrite, warnings)
 
         term_types = get_term_types_from_raw_data(self._raw_data).union(
-            get_term_types_from_raw_data(self._add_raw_data))
+                get_term_types_from_raw_data(self._add_raw_data))
         self._ltxe.add_term_types(term_types)
 
         self._populate_object()
         self._populate_ec_results()
 
-    def _do_auto_actions(self, mod, overwrite, warnings):
+    def _do_gamma_keq(self, overwrite, warnings):
+        if overwrite:
+            return None
+        gamma_keq_todo = []
+        add_raw_data = self._add_raw_data
+        for reaction in self._raw_data.iterkeys():
+            if not add_raw_data.get(reaction) or not add_raw_data.get(reaction).get('gamma_keq'):
+                gamma_keq_todo.append(reaction)
+        if len(gamma_keq_todo) != 0:
+            reaction_printout = ', '.join(gamma_keq_todo[:-1]) + ' or ' + \
+                                gamma_keq_todo[-1]
+            print_f('%s does not contain Gamma/Keq terms for %s:' % (
+                    self._path_to, reaction_printout),warnings)
+            gamma_keq_data, messages = create_gamma_keq_reqn_data(self.mod)
+            for required in gamma_keq_todo:
+                print_f('{:10.10}: {}'.format(required, messages[required]),
+                        warnings)
+                if required not in add_raw_data:
+                    add_raw_data[required] = {}
+                add_raw_data[required]['gamma_keq'] = gamma_keq_data[required]
+
+    def _do_auto_actions(self, overwrite, warnings):
         condition_1 = path.exists(self._path_to) and overwrite
         condition_2 = not path.exists(self._path_to)
         if condition_1:
             print_f(
-                    'The file %s will be overwritten with automatically generated file.' % self._path_to,
-                    warnings)
+                'The file %s will be overwritten with automatically generated file.' % self._path_to,
+                warnings)
         elif condition_2:
             print_f('A new file will be created at "%s".' % self._path_to,
                     warnings)
         if condition_1 or condition_2:
-            ma_terms, vc_binding_terms, messages = create_reqn_data(mod)
+            ma_terms, vc_binding_terms, gamma_keq_terms, messages = create_reqn_data(self.mod)
             for k, v in messages.iteritems():
                 print_f('{:10.10}: {}'.format(k, v), warnings)
-            write_reqn_file(self._path_to, mod.ModelFile, ma_terms,
-                            vc_binding_terms, messages)
+            write_reqn_file(self._path_to, self.mod.ModelFile, ma_terms,
+                            vc_binding_terms, gamma_keq_terms, messages)
 
     def _populate_object(self):
         self.reaction_results = DotDict()
@@ -223,13 +245,13 @@ class RateEqn(object):
 
         if additional_terms:
             for term_name, expression in additional_terms.iteritems():
-                term = AdditionalTerm(parent=self,
-                                      mod=self.mod,
-                                      name='J_%s_%s' % (
-                                      self._rname, term_name),
-                                      rname=term_name,
-                                      expression=expression,
-                                      ltxe=self._ltxe)
+                term = AdditionalRateTerm(parent=self,
+                                          mod=self.mod,
+                                          name='J_%s_%s' % (
+                                              self._rname, term_name),
+                                          rname=term_name,
+                                          expression=expression,
+                                          ltxe=self._ltxe)
                 setattr(self, term_name, term)
                 self.terms[term_name] = term
 
@@ -293,14 +315,14 @@ class RateEqn(object):
     def _calc_value(self):
         subs_dict = get_subs_dict(self.expression, self.mod)
         for each in self.terms.itervalues():
-            if type(each) is not AdditionalTerm:
+            if type(each) is not AdditionalRateTerm:
                 each._calc_value(subs_dict)
         self._value = mult([each._value for each in self.terms.itervalues() if
-                            type(each) is not AdditionalTerm])
+                            type(each) is not AdditionalRateTerm])
 
     def _perscan(self, parameter, scan_range):
         non_additionals = [value for value in self.terms.values() if
-                           type(value) is not AdditionalTerm]
+                           type(value) is not AdditionalRateTerm]
         scan_res = [list() for _ in range(len(non_additionals) + 1)]
         scan_res[0] = scan_range
 
@@ -333,7 +355,7 @@ class RateEqn(object):
 
     def _evalscan(self, parameter, scan_range):
         mca_objects = [ec_term for ec_term in self.ec_results.values() if
-                       ec_term.expression != 0]
+                       ec_term.expression != 0 and not ec_term.name.endswith('gamma_keq')]
 
         scan_res = [list() for _ in range(len(mca_objects) + 1)]
         scan_res[0] = scan_range
@@ -362,12 +384,13 @@ class RateEqn(object):
         if scan_type is 'percentage':
             column_names = [parameter] + [term.name for term in
                                           self.terms.values()
-                                          if type(term) is not AdditionalTerm]
+                                          if
+                                          type(term) is not AdditionalRateTerm]
             y_label = 'Term Percentage Contribution'
             scan_res = self._perscan(parameter, scan_range)
             yscale = 'linear'
             data_array = array(scan_res, dtype=float).transpose()
-            ylim = [nanmin(data_array), find_max(data_array) * 1.1]
+            ylim = [nanmin(data_array[:,1:]), find_max(data_array[:,1:]) * 1.1]
         elif scan_type is 'value':
             column_names = [parameter] + [term.name for term in
                                           self.terms.values()] + [self.name]
@@ -379,7 +402,7 @@ class RateEqn(object):
                     find_max(data_array[:, 1:]) * 2]
         elif scan_type is 'elasticity':
             mca_objects = [ec_term for ec_term in self.ec_results.values() if
-                           ec_term.expression != 0]
+                           ec_term.expression != 0 and not ec_term.name.endswith('gamma_keq')]
             column_names = [parameter] + [obj.name for obj in mca_objects]
 
             y_label = 'Elasticity Coefficient'
@@ -502,7 +525,7 @@ class RateTerm(Term):
 
     @property
     def percentage(self):
-        per = (log(self.value) / log(self._parent.value)) * 100
+        per = (log10(self.value) / log10(self._parent.value)) * 100
         return per
 
     def _populate_ec_results(self):
@@ -517,8 +540,14 @@ class RateTerm(Term):
                                             self._ltxe)
 
 
-class AdditionalTerm(RateTerm):
+class AdditionalRateTerm(RateTerm):
     @property
     def percentage(self):
         return 0.0
 
+
+class AdditionalTerm(Term):
+    def __init__(self, parent, mod, name, expression, ltxe):
+        super(AdditionalTerm, self).__init__(parent, mod, name, expression,
+                                             ltxe)
+        self._parent = None
