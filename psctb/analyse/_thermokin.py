@@ -12,10 +12,11 @@ from ._thermokin_file_tools import get_subs_dict, get_reqn_path, \
 from ..latextools import LatexExpr
 from ..modeltools import make_path, get_file_path
 from ..utils.misc import DotDict, formatter_factory, find_min, find_max
-from ..utils.misc import do_safe_state, get_value, silence_print
+from ..utils.misc import do_safe_state, get_value, silence_print, print_f
 from ..utils.plotting import Data2D
 
-# __all__ = ['ThermoKin','AdditionalRateTerm']
+
+__all__ = ['ThermoKin']
 
 
 def mult(lst):
@@ -68,11 +69,6 @@ def get_repr_latex(obj):
 def silent_state(mod):
     mod.doMca()
     mod.doState()
-
-
-def print_f(message, status):
-    if status:
-        print message
 
 
 class ThermoKin(object):
