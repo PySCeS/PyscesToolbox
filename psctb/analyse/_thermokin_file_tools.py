@@ -735,7 +735,7 @@ def term_to_file(file_name, expression, parent_name=None, term_name=None ):
         f.write('# Additional term appended on %s\n' % date)
         if 'undefined' in (term_name,parent_name):
             print 'Warning: writing partially defined term to %s. Please inspect file for further details.' % file_name
-            f.write('# The term below is partially defined - see documentation for instructions\n')
+            f.write('# The term below is partially defined - fix term manually by defining reaction and term names\n')
         f.write('!G{%s}{%s} %s\n' % (parent_name,
                                      term_name,
                                      expression))

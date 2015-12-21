@@ -739,7 +739,7 @@ def generic_term_operation(self, other, operator, parent=None, name=None,
                                sympify(other),
                                self._ltxe,
                                str(other))
-        
+
     # TODO this type check is a hack - no idea how to check specifically for sympy expressions
     elif 'sympy' in str(type(other)):
         other = AdditionalTerm(get_parent(self),
