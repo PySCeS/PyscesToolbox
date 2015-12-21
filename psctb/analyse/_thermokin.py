@@ -8,13 +8,13 @@ from sympy import sympify, diff, Symbol
 
 from ._thermokin_file_tools import get_subs_dict, get_reqn_path, \
     get_all_terms, get_term_types_from_raw_data, create_reqn_data, \
-    write_reqn_file, create_gamma_keq_reqn_data
+    write_reqn_file, create_gamma_keq_reqn_data, term_to_file
 from ..latextools import LatexExpr
 from ..modeltools import make_path, get_file_path
 from ..utils.misc import DotDict, formatter_factory, find_min, find_max
-from ..utils.misc import do_safe_state, get_value, silence_print, print_f
+from ..utils.misc import do_safe_state, get_value, silence_print, print_f, \
+    is_number
 from ..utils.plotting import Data2D
-
 
 __all__ = ['ThermoKin']
 
@@ -269,9 +269,10 @@ class RateEqn(object):
         expression_symbols = self._unfac_expression.atoms(Symbol)
         for each in expression_symbols:
             each = sympify(each)
-            ec = diff(self.expression, each) * (each / self.expression)
+            ec = diff(self._unfac_expression, each) * (each / self._unfac_expression)
             ec_name = 'ec%s_%s' % (self._rname, each)
-            self.ec_results[ec_name] = Term(self, self.mod, ec_name, self._rname, ec,
+            self.ec_results[ec_name] = Term(self, self.mod, ec_name,
+                                            self._rname, ec,
                                             self._ltxe)
         for each in self.terms.itervalues():
             self.ec_results.update(each.ec_results)
@@ -282,7 +283,7 @@ class RateEqn(object):
     @property
     def _str_expression(self):
         if not self._str_expression_:
-            self._str_expression_ = str(self.expression)
+            self._str_expression_ = str(self._unfac_expression)
         return self._str_expression_
 
     @property
@@ -311,7 +312,7 @@ class RateEqn(object):
         return self._latex_expression
 
     def _calc_value(self):
-        subs_dict = get_subs_dict(self.expression, self.mod)
+        subs_dict = get_subs_dict(self._unfac_expression, self.mod)
         for each in self.terms.itervalues():
             if type(each) is not AdditionalRateTerm:
                 each._calc_value(subs_dict)
@@ -379,8 +380,7 @@ class RateEqn(object):
             'All Fluxes/Reactions/Species': ['Term Rates']}
         additional_cats = {
             'Term Rates': [term.name for term in self.terms.values()]}
-        category_manifest = {'Flux Rates':True, 'Term Rates':True}
-
+        category_manifest = {'Flux Rates': True, 'Term Rates': True}
 
         if scan_type == 'percentage':
             column_names = [parameter] + [term.name for term in
@@ -417,10 +417,12 @@ class RateEqn(object):
             additional_cat_classes = {
                 'All Coefficients': ['Term Elasticities']}
             additional_cats = {
-                'Term Elasticities': [ec_term.name for ec_term in mca_objects if
+                'Term Elasticities': [ec_term.name for ec_term in mca_objects
+                                      if
                                       ec_term.name.startswith('p')]}
 
-            category_manifest = {pec: True for pec in additional_cats['Term Elasticities']}
+            category_manifest = {pec: True for pec in
+                                 additional_cats['Term Elasticities']}
             category_manifest['Elasticity Coefficients'] = True
             category_manifest['Term Elasticities'] = True
 
@@ -460,7 +462,8 @@ class RateEqn(object):
                       category_manifest=category_manifest)
 
         if scan_type == 'elasticity':
-            ec_names = [ec_term.name for ec_term in mca_objects if ec_term.name.startswith('ec')]
+            ec_names = [ec_term.name for ec_term in mca_objects if
+                        ec_term.name.startswith('ec')]
             for line in data._lines:
                 for ec_name in ec_names:
                     condition1 = line.name != ec_name
@@ -477,6 +480,48 @@ class RateEqn(object):
         # data.plot = plot
 
         return data
+
+    def __add__(self, other):
+        return generic_term_operation(self, other, '+')
+
+    def __mul__(self, other):
+        return generic_term_operation(self, other, '*')
+
+    def __sub__(self, other):
+        return generic_term_operation(self, other, '-')
+
+    def __div__(self, other):
+        return generic_term_operation(self, other, '/')
+
+    def __radd__(self, other):
+        return generic_term_operation(self, other, '+')
+
+    def __rmul__(self, other):
+        return generic_term_operation(self, other, '*')
+
+    def __rsub__(self, other):
+        return generic_term_operation(self, other, 'rsub')
+
+    def __rdiv__(self, other):
+        return generic_term_operation(self, other, 'rdiv')
+
+    def __neg__(self):
+        return AdditionalTerm(self,
+                              self.mod,
+                              '-' + self.name,
+                              '-' + self._rname,
+                              (-self._unfac_expression),
+                              self._ltxe,
+                              '-' + self.name)
+
+    def __pow__(self, power, modulo=None):
+        return AdditionalTerm(self,
+                              self.mod,
+                              self.name+'**'+str(power),
+                              self._rname+'**'+str(power),
+                              self._unfac_expression**power,
+                              self._ltxe,
+                              self.name+'**'+str(power))
 
 
 class Term(object):
@@ -501,7 +546,7 @@ class Term(object):
     @property
     def _str_expression(self):
         if not self._str_expression_:
-            self._str_expression_ = str(self.expression)
+            self._str_expression_ = str(self._unfac_expression)
         return self._str_expression_
 
     @property
@@ -531,24 +576,61 @@ class Term(object):
 
     def _calc_value(self, subs_dict=None):
         if not subs_dict:
-            subs_dict = get_subs_dict(self.expression, self.mod)
+            subs_dict = get_subs_dict(self._unfac_expression, self.mod)
         self._value = get_value(self._str_expression, subs_dict)
+
+    def __add__(self, other):
+        return generic_term_operation(self, other, '+')
+
+    def __mul__(self, other):
+        return generic_term_operation(self, other, '*')
+
+    def __sub__(self, other):
+        return generic_term_operation(self, other, '-')
+
+    def __div__(self, other):
+        return generic_term_operation(self, other, '/')
+
+    def __radd__(self, other):
+        return generic_term_operation(self, other, '+')
+
+    def __rmul__(self, other):
+        return generic_term_operation(self, other, '*')
+
+    def __rsub__(self, other):
+        return generic_term_operation(self, other, 'rsub')
+
+    def __rdiv__(self, other):
+        return generic_term_operation(self, other, 'rdiv')
+
+    def __neg__(self):
+        return AdditionalTerm(self._parent,
+                              self.mod,
+                              '-' + self.name,
+                              '-' + self._rname,
+                              (-self._unfac_expression),
+                              self._ltxe,
+                              '-' + self.name)
+
+    def __pow__(self, power, modulo=None):
+        return AdditionalTerm(self._parent,
+                              self.mod,
+                              self.name+'**'+str(power),
+                              self._rname+'**'+str(power),
+                              self._unfac_expression**power,
+                              self._ltxe,
+                              self.name+'**'+str(power))
 
 
 class RateTerm(Term):
     def __init__(self, parent, mod, name, rname, expression, ltxe):
-        super(RateTerm, self).__init__(parent, mod, name, rname, expression, ltxe)
+        super(RateTerm, self).__init__(parent, mod, name, rname, expression,
+                                       ltxe)
         self.ec_results = DotDict()
         self.ec_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                    formatter_factory())
         self._populate_ec_results()
         self._percentage = None
-
-    @property
-    def expression(self):
-        if not self._expression:
-            self._expression = self._unfac_expression
-        return self._expression
 
     @property
     def percentage(self):
@@ -562,7 +644,7 @@ class RateTerm(Term):
             each = sympify(each)
             ec_name = 'ec%s_%s' % (self._parent._rname, each)
             pec_name = 'p%s_%s' % (ec_name, self._rname)
-            ec = diff(self.expression, each) * (each / self.expression)
+            ec = diff(self._unfac_expression, each) * (each / self._unfac_expression)
             self.ec_results[pec_name] = Term(self._parent,
                                              self.mod,
                                              pec_name,
@@ -576,9 +658,123 @@ class AdditionalRateTerm(RateTerm):
     def percentage(self):
         return 0.0
 
+    def append_to_file(self, file_name, term_name=None, parent=None):
+        if not parent:
+            parent = self._parent._rname
+        if not term_name:
+            term_name = self._rname
+        term_to_file(file_name, self._unfac_expression, parent, term_name)
+
 
 class AdditionalTerm(Term):
-    def __init__(self, parent, mod, name, rname, expression, ltxe):
-        super(AdditionalTerm, self).__init__(parent, mod, name, rname, expression,
+    def __init__(self, parent, mod, name, rname, expression, ltxe,
+                 creation_operation):
+        super(AdditionalTerm, self).__init__(parent, mod, name, rname,
+                                             expression,
                                              ltxe)
-        self._parent = None
+
+        self.creation_operation = creation_operation
+
+    def simplify_expression(self):
+        self._expression = self._unfac_expression.factor()
+        self._latex_expression = None
+
+    def get_elasticity(self, var_par, term_name=None):
+        if not term_name:
+            term_name = self.name
+
+        var_par = sympify(var_par)
+        ec = diff(self._unfac_expression, var_par) * (var_par / self._unfac_expression)
+        ec_name = 'ec_%s_%s' % (term_name, var_par)
+        ec_term = Term(self, self.mod, ec_name, ec_name, ec, self._ltxe)
+        ec_term._latex_name = '\\varepsilon^{%s}_{%s}' % (
+        term_name.replace('_', ''),
+        str(var_par).replace('_', ''))
+        return ec_term
+
+    def append_to_file(self, file_name, term_name=None, parent=None):
+        if not parent and self._parent:
+            parent = self._parent._rname
+        if not term_name and self.name != 'new_term':
+            term_name = self.name
+        term_to_file(file_name, self._unfac_expression, parent, term_name)
+
+    @property
+    def expression(self):
+        if not self._expression:
+            self._expression = self._unfac_expression
+        return self._expression
+
+
+
+def generic_term_operation(self, other, operator, parent=None, name=None,
+                           rname=None):
+
+    def get_parent(self):
+        if type(self) is RateEqn:
+            parent = self
+        else:
+            parent = self._parent
+        return parent
+
+    if operator == 'rsub':
+        self = -self
+        operator = '+'
+
+    if operator == 'rdiv':
+        self = AdditionalTerm(get_parent(self),
+                              self.mod,
+                              self.name,
+                              self._rname,
+                              (1 / self._unfac_expression),
+                              self._ltxe,
+                              '1/' + self.name)
+        operator = '*'
+
+    if is_number(other):
+        other = AdditionalTerm(get_parent(self),
+                               self.mod,
+                               str(other),
+                               str(other),
+                               sympify(other),
+                               self._ltxe,
+                               str(other))
+        
+    # TODO this type check is a hack - no idea how to check specifically for sympy expressions
+    elif 'sympy' in str(type(other)):
+        other = AdditionalTerm(get_parent(self),
+                               self.mod,
+                               str(other),
+                               str(other),
+                               other,
+                               self._ltxe,
+                               str(other))
+
+    mod = self.mod
+    operated_on = []
+    for term in (self, other):
+        if type(term) is AdditionalTerm:
+            operated_on.append(term.creation_operation)
+        else:
+            operated_on.append(term.name)
+
+    if not name:
+        name = 'new_term'
+    if not rname:
+        rname = 'new_term'
+
+    if not parent:
+        if hasattr(self, '_parent') and hasattr(other, '_parent'):
+            parent = self._parent
+        elif type(self) is RateEqn and type(other) is not RateEqn:
+            parent = self
+        elif type(other) is RateEqn and type(self) is not RateEqn:
+            parent = other
+
+    creation_operation = sympify(
+        '%s %s %s' % (operated_on[0], operator, operated_on[1]))
+    expression = sympify('(%s) %s (%s)' % (
+    self._str_expression, operator, other._str_expression))
+    ltxe = self._ltxe
+    return AdditionalTerm(parent, mod, name, rname, expression, ltxe,
+                          creation_operation)
