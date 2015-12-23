@@ -173,11 +173,18 @@ class CCoef(CCBase):
 
         for parvalue in scan_range:
             state_valid = do_safe_state(self.mod, parameter, parvalue,type='mca')
+            cc_abs_value = 0
             for i, cp in enumerate(self.control_patterns.values()):
                 if state_valid:
-                    scan_res[i + 1].append(cp.percentage)
+                    cp_abs = abs(cp.value)
+                    scan_res[i + 1].append(cp_abs)
+                    cc_abs_value += cp_abs
                 else:
                     scan_res[i + 1].append(NaN)
+
+            for i, cp in enumerate(self.control_patterns.values()):
+                if state_valid:
+                    scan_res[i + 1][-1] = (scan_res[i + 1][-1]/cc_abs_value) * 100
 
         return scan_res
 
@@ -189,13 +196,16 @@ class CCoef(CCBase):
 
         for parvalue in scan_range:
             state_valid = do_safe_state(self.mod, parameter, parvalue,type='mca')
+            cc_value = 0
             for i, cp in enumerate(self.control_patterns.values()):
                 if state_valid:
-                    scan_res[i + 1].append(cp.value)
+                    cp_value = cp.value
+                    scan_res[i + 1].append(cp_value)
+                    cc_value += cp_value
                 else:
                     scan_res[i + 1].append(NaN)
             if state_valid:
-                scan_res[i + 2].append(self.value)
+                scan_res[i + 2].append(cc_value)
             else:
                 scan_res[i + 2].append(NaN)
 
