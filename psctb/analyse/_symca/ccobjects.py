@@ -299,7 +299,7 @@ class CCoef(CCBase):
         cps = DotDict()
         cps._make_repr('v.name', 'v.value', formatter_factory())
         for i, pattern in enumerate(patterns):
-            name = 'CP' + str(1 + i)
+            name = 'CP{:3}'.format(i + 1).replace(' ','0')
             cp = CPattern(self.mod,
                           name,
                           pattern,
