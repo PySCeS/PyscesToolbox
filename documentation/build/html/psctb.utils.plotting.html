@@ -73,9 +73,61 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basic_usage.html">Basic Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="basic_usage.html#syntax">Syntax</a></li>
-<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#saving-and-default-directories">Saving and default directories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#saving-and-default-directories">Saving and Default Directories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#plotting-and-displaying-results">Plotting and Displaying Results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#data2d">Data2D</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#features">Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#usage-example">Usage example</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#scanfig">ScanFig</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#id1">Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#id2">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#tables">Tables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#id3">Usage Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#graphic-representation-of-metabolic-networks">Graphic Representation of Metabolic Networks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#id4">Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#id5">Usage Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RateChar.html">RateChar</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RateChar.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RateChar.html#usage-and-feature-walkthrough">Usage and Feature Walkthrough</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="RateChar.html#workflow">Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RateChar.html#object-instantiation">1. Object Instantiation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RateChar.html#parameter-scan">2 Parameter Scan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RateChar.html#accessing-results">3. Accessing Results</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="RateChar.html#parameter-scan-results">3.1 Parameter Scan Results</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RateChar.html#metabolic-control-analysis-results">3.2 Metabolic Control Analysis Results</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="RateChar.html#plotting-results">4. Plotting Results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RateChar.html#saving">6 Saving</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="RateChar.html#saving-loading-sessions">6.1 Saving/Loading Sessions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RateChar.html#saving-results">6.2 Saving Results</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="included_files.html">Included Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="included_files.html#example-model">Example Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="included_files.html#layout-file">Layout File</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="included_files.html#example-notebooks">Example Notebooks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
           
@@ -410,7 +462,7 @@ False for invisible).</p>
 
 <dl class="class">
 <dt id="psctb.utils.plotting._plotting.Data2D">
-<em class="property">class </em><code class="descclassname">psctb.utils.plotting._plotting.</code><code class="descname">Data2D</code><span class="sig-paren">(</span><em>mod</em>, <em>column_names</em>, <em>data_array</em>, <em>ltxe=None</em>, <em>analysis_method=None</em>, <em>ax_properties=None</em>, <em>file_name=None</em>, <em>additional_cat_classes=None</em>, <em>additional_cats=None</em>, <em>num_of_groups=None</em>, <em>working_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.utils.plotting._plotting.Data2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">psctb.utils.plotting._plotting.</code><code class="descname">Data2D</code><span class="sig-paren">(</span><em>mod</em>, <em>column_names</em>, <em>data_array</em>, <em>ltxe=None</em>, <em>analysis_method=None</em>, <em>ax_properties=None</em>, <em>file_name=None</em>, <em>additional_cat_classes=None</em>, <em>additional_cats=None</em>, <em>num_of_groups=None</em>, <em>working_dir=None</em>, <em>category_manifest=None</em>, <em>axvline=True</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.utils.plotting._plotting.Data2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>An object that wraps results from a PySCeS parameter scan.</p>
 <p>Results from parameter scan of timecourse are used to initialise this

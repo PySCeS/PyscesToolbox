@@ -13,7 +13,9 @@ Contents:
 
    introduction
    basic_usage
+   RateChar
    included_files
+   references
 
 .. :py:class:`.Symca`
 
