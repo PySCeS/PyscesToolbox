@@ -724,15 +724,21 @@ def write_reqn_file(file_name, model_name, ma_terms, vc_binding_terms, gamma_keq
                 f.write('# %s :%s\n' % (k, v))
 
 
-def term_to_file(file_name, term, message=None):
-    from ._thermokin import AdditionalRateTerm
-    assert type(term) is AdditionalRateTerm, 'Cannot save elasticity or other terms to reqn files.'
+def term_to_file(file_name, expression, parent_name=None, term_name=None ):
     date = datetime.strftime(datetime.now(), '%H:%M:%S %d-%m-%Y')
+    if not parent_name:
+        parent_name = 'undefined'
+    if not term_name:
+        term_name = 'undefined'
     with open(file_name,'a') as f:
-        f.write('\n# Additional term appended on %s\n' % date)
-        f.write('!G{%s}{%s} %s\n' % (term._parent._rname,
-                                     term._rname,
-                                     term.expression))
+        f.write('\n')
+        f.write('# Additional term appended on %s\n' % date)
+        if 'undefined' in (term_name,parent_name):
+            print 'Warning: writing partially defined term to %s. Please inspect file for further details.' % file_name
+            f.write('# The term below is partially defined - fix term manually by defining reaction and term names\n')
+        f.write('!G{%s}{%s} %s\n' % (parent_name,
+                                     term_name,
+                                     expression))
 
 
 

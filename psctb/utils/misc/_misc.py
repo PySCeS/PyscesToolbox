@@ -3,7 +3,7 @@ from os import path, devnull
 
 
 from numpy.ma import log10
-from numpy import array, errstate, nanmin, nanmax, nonzero, float64, bool_
+from numpy import array, errstate, nanmin, nanmax, nonzero, float64, bool_, string_
 from pysces.PyscesModel import PysMod
 from IPython.display import HTML
 from sympy import sympify
@@ -127,14 +127,18 @@ def is_number(suspected_number):
     # We make the assumption that most numbers can be converted to ints.
     # - 21/10/2015 False assumption - strings representing that look like ints
     # can be converted to ints
-    # new assumtion - only numbers can add another number
+    # new assumption - only numbers can add another number
     # previous assumption is false - booleans are treated as numbers
+    # false many other objects implement addition of numbers
+    # original way was fine, we just need to exclude bools and strings.
+    # this will not work for invalid types that implement an `__int__` method.
+    # but for my cases it should not be a problem.
     number = False
     the_type = type(suspected_number)
-    if the_type is not bool and the_type is not bool_:
+    if the_type not in (bool, str, bool_, string_):
         try:
-            #int(suspected_number)
-            suspected_number + 1
+            int(suspected_number)
+            #suspected_number + 1
             number = True
         except Exception:
             pass

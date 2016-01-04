@@ -355,7 +355,7 @@ class Data2D(object):
         ('Control Coefficients', cc_list(self.mod)),
         ('Response Coefficients', rc_list(self.mod)),
         ('Partial Response Coefficients', prc_list(self.mod)),
-        ('Control Patterns', ['CP' + str(n)
+        ('Control Patterns', ['CP{:3}'.format(n).replace(' ','0')
                               for n in range(1, len(self._column_names))])])
 
         additional_cats = self._additional_cats
