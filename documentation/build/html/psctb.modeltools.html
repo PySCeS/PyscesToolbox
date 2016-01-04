@@ -73,9 +73,61 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basic_usage.html">Basic Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="basic_usage.html#syntax">Syntax</a></li>
-<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#saving-and-default-directories">Saving and default directories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#saving-and-default-directories">Saving and Default Directories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#plotting-and-displaying-results">Plotting and Displaying Results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#data2d">Data2D</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#features">Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#usage-example">Usage example</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#scanfig">ScanFig</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#id1">Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#id2">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#tables">Tables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="basic_usage.html#id3">Usage Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html#graphic-representation-of-metabolic-networks">Graphic Representation of Metabolic Networks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#id4">Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="basic_usage.html#id5">Usage Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RateChar.html">RateChar</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RateChar.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RateChar.html#usage-and-feature-walkthrough">Usage and Feature Walkthrough</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="RateChar.html#workflow">Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RateChar.html#object-instantiation">1. Object Instantiation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RateChar.html#parameter-scan">2 Parameter Scan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RateChar.html#accessing-results">3. Accessing Results</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="RateChar.html#parameter-scan-results">3.1 Parameter Scan Results</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RateChar.html#metabolic-control-analysis-results">3.2 Metabolic Control Analysis Results</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="RateChar.html#plotting-results">4. Plotting Results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RateChar.html#saving">6 Saving</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="RateChar.html#saving-loading-sessions">6.1 Saving/Loading Sessions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RateChar.html#saving-results">6.2 Saving Results</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="included_files.html">Included Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="included_files.html#example-model">Example Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="included_files.html#layout-file">Layout File</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="included_files.html#example-notebooks">Example Notebooks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
           
@@ -435,6 +487,44 @@ If None it defaults to original_model_name_fix.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="psctb.modeltools._pscmanipulate.fix_metabolite_ss">
+<code class="descclassname">psctb.modeltools._pscmanipulate.</code><code class="descname">fix_metabolite_ss</code><span class="sig-paren">(</span><em>mod</em>, <em>fix</em>, <em>model_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#psctb.modeltools._pscmanipulate.fix_metabolite_ss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fix a metabolite at its steady state in a model and return a new
+model with the fixed metabolite.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mod</strong> : PysMod</p>
+<blockquote>
+<div><p>The original model.</p>
+</div></blockquote>
+<p><strong>fix</strong> : str</p>
+<blockquote>
+<div><p>The metabolite to fix.</p>
+</div></blockquote>
+<p><strong>model_name</strong> : str, optional (Default</p>
+<blockquote>
+<div><p>The file name to use when saving the model (in psc/orca).
+If None it defaults to original_model_name_fix.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">PysMod</p>
+<blockquote class="last">
+<div><p>A new model instance with an additional fixed species.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#psctb.modeltools._pscmanipulate.fix_metabolite" title="psctb.modeltools._pscmanipulate.fix_metabolite"><code class="xref py py-obj docutils literal"><span class="pre">fix_metabolite</span></code></a></p>
+</div>
 </dd></dl>
 
 </div>

@@ -8,10 +8,10 @@ a streamline framework for using these tools together.
 
 Currently, PySCeSToolbox includes three main analysis tools:
 
-#. SymCa for performing symbolic control analysis (cite)
-#. RateChar for performing generalised supply demand analysis (cite)
+#. SymCa for performing symbolic control analysis `[1] <references.html>`__.
+#. RateChar for performing generalised supply demand analysis `[2,3] <references.html>`__.
 #. ThermoKin for distinguishing between the thermodynamic and kinetic
-   contributions towards reaction rates and enzyme elasticities (cite)
+   contributions towards reaction rates and enzyme elasticities  `[4,5] <references.html>`__.
 
 In addition to these tools PySCeSToolbox provides functionality for displaying
 interactive plots, tables of results, and typeset mathematical expressions and
@@ -24,3 +24,5 @@ core features are completely compatible with traditional python scripting.
 We recommend that users unfamiliar with PySCeS refer to it's
 `documentation <http://pysces.sourceforge.net/docs/userguide.html>`_
 before continuing here.
+
+
