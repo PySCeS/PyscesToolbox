@@ -687,7 +687,7 @@ class ScanFig(object):
         else:
             self.fig.show()
 
-    def save(self, file_name=None, dpi=None, fmt=None):
+    def save(self, file_name=None, dpi=None, fmt=None, include_legend=True):
         """
         Saves the figure in it's current configuration.
 
@@ -714,12 +714,19 @@ class ScanFig(object):
                                              fmt=fmt,
                                              file_name=file_name)
         fmt = modeltools.get_fmt(file_name)
-
-        self.fig.savefig(file_name,
-                         format=fmt,
-                         dpi=dpi,
-                         bbox_extra_artists=(self.ax.get_legend(),),
-                         bbox_inches='tight')
+        if include_legend:
+            self.fig.savefig(file_name,
+                             format=fmt,
+                             dpi=dpi,
+                             bbox_extra_artists=(self.ax.get_legend(),),
+                             bbox_inches='tight')
+        else:
+            leg = self.ax.legend_
+            self.ax.legend_ = None
+            self.fig.savefig(file_name,
+                             format=fmt,
+                             dpi=dpi,)
+            self.ax.legend_ = leg
 
     @property
     def _widgets(self):
