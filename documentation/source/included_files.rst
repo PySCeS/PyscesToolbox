@@ -4,11 +4,24 @@ Included Files
 Here are the files that are used in the examples as well as the interactive
 notebook versions of the documentation
 
-Example Model
--------------
+Models
+------
 
-Below is the text of the ``example_model.psc``. The model can be downloaded
-:download:`here <included_files/example_model.psc>`.
+The models used in this documentation are included below (together with their
+layout files). These files must be downloaded to the ``psc`` directory to be
+used in the example notebooks unless otherwise specified.
+
+example_model.psc
+^^^^^^^^^^^^^^^^^
+
+.. image:: included_files_files/example_model.png
+
+
+
+:download:`model <included_files/example_model.psc>`
+:download:`layout file <included_files/example_model_layout.dict>`
+
+The text of ``example_model.psc`` is included below:
 
 .. code:: python
 
@@ -64,13 +77,13 @@ Below is the text of the ``example_model.psc``. The model can be downloaded
     Km3_X3 = 1.0
     # -----------------------------------------------------------------------------
 
-Layout File
-~~~~~~~~~~~
+lin5_hill.psc
+^^^^^^^^^^^^^
 
-The layout file for the ``example_model`` can be found
-:download:`here <included_files/example_model_layout.dict>`. Copy this file to
-your ``psc`` folder to for use in the ``basic_usage`` example notebook.
+.. image:: included_files_files/lin5_hill.png
 
+:download:`model <included_files/lin5_hill.psc>`
+:download:`layout file <included_files/lin5_hill_layout.dict>`
 
 Example Notebooks
 -----------------
