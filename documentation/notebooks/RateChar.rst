@@ -56,19 +56,24 @@ steps:
           is performed may also be specified. Details of how to access these
           options will be discussed below.
 
-1. Object Instantiation
-~~~~~~~~~~~~~~~~~~~~~~~
+Object Instantiation
+~~~~~~~~~~~~~~~~~~~~
 
 Like most tools provided in PySCeSToolbox, instantiation of a
 ``RateChar`` object requires a pysces model object (``PysMod``) as an
 argument. A ``RateChar`` session will typically be initiated as follows
-(here we will use the included ``lin5_hill.psc`` model):
+(here we will use the included
+`lin5\_hill.psc <included_files.html#lin5-hill-psc>`__ model):
+
+``In [1]:``
 
 .. code:: python
 
     mod = pysces.model('lin5_hill')
     rc = psctb.RateChar(mod)
 
+
+``Out[1]:``
 
 .. parsed-literal::
 
@@ -85,6 +90,8 @@ argument. A ``RateChar`` session will typically be initiated as follows
 
 Default parameter scan settings relating to a specific ``RateChar``
 session can also be specified during instantiation:
+
+``In [2]:``
 
 .. code:: python
 
@@ -105,8 +112,8 @@ session can also be specified during instantiation:
 The settings specified with these optional arguments take effect when
 the corresponding arugments are not specified during a parameter scan.
 
-2 Parameter Scan
-~~~~~~~~~~~~~~~~
+Parameter Scan
+~~~~~~~~~~~~~~
 
 After object instantiation, parameter scans may be performed for any of
 the variable species using the ``do_ratechar`` method. By default
@@ -114,6 +121,8 @@ the variable species using the ``do_ratechar`` method. By default
 metabolites using the settings specified during instantiation. For
 saving/loading see `Saving/Loading
 Sessions <RateChar.html#example-model>`__"Session Saving" below
+
+``In [3]:``
 
 .. code:: python
 
@@ -140,28 +149,32 @@ customise any parameter scan:
    (0:Hybrd,1:NLEQ,2:FINTSLV). *(default: 0)*.
 
 .. note:: For details on different solvers see the `PySCeS
-          documentation <http://pysces.sourceforge.net/docs/userguide_doc.html#steady-state-analysis>`__):
+          documentation <http://pysces.sourceforge.net/docs/userguide_doc.html#steady-state-analysis>`__:
 
 For example in a scenario where we only wanted to perform parameter
 scans of 200 points for the metabolites ``A`` and ``C`` starting at a
 value of 0.02 and ending at a value 110 times their respective
 steady-state values the method would be called as follows:
 
+``In [4]:``
+
 .. code:: python
 
     rc.do_ratechar(fixed=['A','C'], scan_min=0.02, max_concrange_factor=110, scan_points=200)
 
-3. Accessing Results
-~~~~~~~~~~~~~~~~~~~~
+Accessing Results
+~~~~~~~~~~~~~~~~~
 
-3.1 Parameter Scan Results
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Parameter Scan Results
+^^^^^^^^^^^^^^^^^^^^^^
 
 Parameter scan results for any particular species are saved as an
 attribute of the ``RateChar`` object under the name of that species.
 These ``RateCharData`` objects are similar to ``Data2D`` objects with
 parameter scan results being accessible through a ``scan_results``
 DotDict:
+
+``In [5]:``
 
 .. code:: python
 
@@ -170,6 +183,8 @@ DotDict:
 
 
 
+
+``Out[5]:``
 
 .. parsed-literal::
 
@@ -209,13 +224,15 @@ DotDict:
 .. note:: The ``DotDict`` data structure is essentially a dictionary
           with additional functionality for displaying results in table form (when
           appropriate) and for accessing data using dot notation in addition the
-          normal dictionary bracket notation).
+          normal dictionary bracket notation.
 
 In the above dictionary-like structure each field can represent
 different types of data, the most simple of which is a single value,
 e.g., ``scan_min`` and ``fixed``, or a 1-dimensional numpy ndarray which
 represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 ``total_supply``):
+
+``In [6]:``
 
 .. code:: python
 
@@ -227,11 +244,15 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 
 
+``Out[6]:``
+
 .. parsed-literal::
 
     0.020000000000000004
 
 
+
+``In [7]:``
 
 .. code:: python
 
@@ -241,11 +262,15 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 
 
+``Out[7]:``
+
 .. parsed-literal::
 
     'C'
 
 
+
+``In [8]:``
 
 .. code:: python
 
@@ -256,6 +281,8 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 
 
+
+``Out[8]:``
 
 .. parsed-literal::
 
@@ -269,6 +296,8 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 
 
+``In [9]:``
+
 .. code:: python
 
     # J_R3 values for scan_range
@@ -276,6 +305,8 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 
 
+
+``Out[9]:``
 
 .. parsed-literal::
 
@@ -287,6 +318,8 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 
 
+``In [10]:``
+
 .. code:: python
 
     # total_supply values for scan_range
@@ -297,6 +330,8 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 
 
+
+``Out[10]:``
 
 .. parsed-literal::
 
@@ -317,6 +352,8 @@ coefficient lines, and 2-dimensional array that collects coefficient
 line data for each coefficient type into single arrays (under
 ``ec_data``, ``prc_names``, etc.).
 
+``In [11]:``
+
 .. code:: python
 
     # Metabolic Control Analysis coefficient line data
@@ -327,11 +364,15 @@ line data for each coefficient type into single arrays (under
 
 
 
+``Out[11]:``
+
 .. parsed-literal::
 
     ['ecR4_C', 'ecR3_C']
 
 
+
+``In [12]:``
 
 .. code:: python
 
@@ -342,12 +383,16 @@ line data for each coefficient type into single arrays (under
 
 
 
+``Out[12]:``
+
 .. parsed-literal::
 
     array([[  2.17310179,  28.94552932],
            [  2.24511684,   3.12298399]])
 
 
+
+``In [13]:``
 
 .. code:: python
 
@@ -358,12 +403,16 @@ line data for each coefficient type into single arrays (under
 
 
 
+``Out[13]:``
+
 .. parsed-literal::
 
     array([[  0.73730798,   8.98706435],
            [  6.6171364 ,  10.0585042 ]])
 
 
+
+``In [14]:``
 
 .. code:: python
 
@@ -374,6 +423,8 @@ line data for each coefficient type into single arrays (under
 
 
 
+``Out[14]:``
+
 .. parsed-literal::
 
     array([[  0.73730798,   8.98706435,   2.17310179,  28.94552932],
@@ -381,8 +432,8 @@ line data for each coefficient type into single arrays (under
 
 
 
-3.2 Metabolic Control Analysis Results
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Metabolic Control Analysis Results
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The in addition to being able to access the data that will be used to
 draw rate characteristic plots, the user also has access to the values
@@ -391,6 +442,8 @@ of any particular species via the ``mca_results`` field. This field
 represents a ``DotDict`` dictionary-like object (like ``scan_results``),
 however as each key maps to exactly one result, the data can be
 displayed as a table (see `Basic Usage <basic_usage.html#tables>`__):
+
+``In [15]:``
 
 .. code:: python
 
@@ -444,6 +497,8 @@ displayed as a table (see `Basic Usage <basic_usage.html#tables>`__):
 
 Naturally, coefficients can also be accessed individually:
 
+``In [16]:``
+
 .. code:: python
 
     # Control coefficient ccJR3_R1 value
@@ -452,14 +507,16 @@ Naturally, coefficients can also be accessed individually:
 
 
 
+``Out[16]:``
+
 .. parsed-literal::
 
     0.99999663219399015
 
 
 
-4. Plotting Results
-~~~~~~~~~~~~~~~~~~~
+Plotting Results
+~~~~~~~~~~~~~~~~
 
 One of the strengths of generalised supply-demand analysis is that it
 provides an intuitive visual framework for inspecting results through
@@ -467,6 +524,8 @@ the used of rate characteristic plots. Naturally this is therefore the
 main focus of RateChar. Parameter scan results for any particular
 species can be visualised as a ``ScanFig`` object through the ``plot``
 method:
+
+``In [17]:``
 
 .. code:: python
 
@@ -481,6 +540,8 @@ coefficient lines together with the flux lines for ``J_R3``, for
 instance, we would click the ``J_R3`` and the
 ``Partial Response Coefficients`` buttons (in addition to those that are
 enabled by default).
+
+``In [18]:``
 
 .. code:: python
 
@@ -505,8 +566,10 @@ enabled by default).
 
 
 Modifying the status of individual lines is still supported, but has to
-take place via the ``toggle_line`` method. The line representing
-``prcJR3_C_R4`` can therefore be disabled as follows:
+take place via the ``toggle_line`` method. As an example ``prcJR3_C_R4``
+can be disabled as follows:
+
+``In [19]:``
 
 .. code:: python
 
@@ -522,15 +585,17 @@ take place via the ``toggle_line`` method. The line representing
           Default Directories <basic_usage.html#saving-and-default-directories>`__
           and `ScanFig <basic_usage.html#scanfig>`__ under Basic Usage.
 
-6 Saving
-~~~~~~~~
+Saving
+~~~~~~
 
-6.1 Saving/Loading Sessions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Saving/Loading Sessions
+^^^^^^^^^^^^^^^^^^^^^^^
 
 RateChar sessions can be saved for later use. This is esspecially useful
 when working with large data sets that take some time to generate. Data
 sets can be saved to any arbitrary location by supplying a path:
+
+``In [20]:``
 
 .. code:: python
 
@@ -542,6 +607,8 @@ When no path is supplied the dataset will be saved to the default
 directory. (Which should be
 "~/Pysces/lin5\_hill/ratechar/save\_data.npz" in this case.
 
+``In [21]:``
+
 .. code:: python
 
     rc.save_session() # to "~/Pysces/lin5_hill/ratechar/save_data.npz"
@@ -549,19 +616,23 @@ directory. (Which should be
 Similarly results may be loaded using the ``load_session`` method,
 either with or without a specified path:
 
+``In [22]:``
+
 .. code:: python
 
     rc.load_session(save_file)
     # OR
     rc.load_session() # from "~/Pysces/lin5_hill/ratechar/save_data.npz"
 
-6.2 Saving Results
-^^^^^^^^^^^^^^^^^^
+Saving Results
+^^^^^^^^^^^^^^
 
 Results may also be exported in csv format either to a specified
 location or to the default directory. Unlike saving of sessions results
 are spread over multiple files, so here an existing folder must be
 specified:
+
+``In [23]:``
 
 .. code:: python
 
@@ -574,6 +645,8 @@ A subdirectory will be created for each metabolite with the files
 ``flux_results_N`` and ``mca_summary_N`` (where ``N`` is a number
 starting at "0" which increments after each save operation to prevent
 overwriting files).
+
+``In [24]:``
 
 .. code:: python
 

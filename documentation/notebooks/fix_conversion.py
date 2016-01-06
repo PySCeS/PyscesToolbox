@@ -175,6 +175,22 @@ def count_slashes(a_string):
     return singles,doubles
 
 
+# In[1]:
+
+def add_in_out(lines):
+    counter = 0
+    new_lines = []
+    for line in lines:
+        if line.startswith('.. code::'):
+            counter += 1
+            line = '``In [%s]:``\n\n%s' % (counter,line)            
+        if line.startswith('.. parsed-literal::'):
+            line = '``Out[%s]:``\n\n%s' % (counter,line)
+        new_lines.append(line)
+    return new_lines
+        
+
+
 # In[96]:
 
 def sub_math(lines):
@@ -222,6 +238,8 @@ if __name__ == "__main__":
 
         for block_to_remove in to_remove_block_strings:
             lines = remove_empty_block(lines, block_to_remove)
+            
+        lines= add_in_out(lines)
 
         
         save_lines(lines, file_name)
