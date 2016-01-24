@@ -247,10 +247,19 @@ class Data2D(object):
             category_manifest = {}
         self._category_manifest = category_manifest
 
-        self._axvline = axvline
-
-
         self.mod = mod
+
+        if axvline:
+            scan_in = self.scan_results.scan_in
+            if scan_in.lower() != 'time':
+                try:
+                    self._vline_val = getattr(self.mod, scan_in)
+                except AttributeError:
+                    print 'Model does not have attribute "%s".' % scan_in
+                    self._vline_val = None
+            else:
+                self._vline_val = None
+
         if not ltxe:
             ltxe = LatexExpr(mod)
         self._ltxe = ltxe
@@ -470,14 +479,8 @@ class Data2D(object):
         for k,v in self._category_manifest.iteritems():
             scan_fig.toggle_category(k,v)
 
-        if self._axvline:
-            scan_in = self.scan_results.scan_in
-            if scan_in.lower() != 'time':
-                try:
-                    init_val = getattr(self.mod,scan_in)
-                    scan_fig.ax.axvline(init_val,ls=':',color='gray')
-                except:
-                    print_f('Model has attribute "%s' % scan_in)
+        if self._vline_val:
+            scan_fig.ax.axvline(self._vline_val, ls=':', color='gray')
 
         return scan_fig
 
