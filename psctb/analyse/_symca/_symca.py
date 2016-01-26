@@ -1,4 +1,4 @@
-import json
+import cPickle as pickle
 from sympy.matrices import Matrix
 from sympy import sympify
 import sys
@@ -240,7 +240,7 @@ class Symca(object):
     def save_session(self, file_name=None):
         file_name = get_file_path(working_dir=self._working_dir,
                                   internal_filename=self._internal_filename,
-                                  fmt='json',
+                                  fmt='pickle',
                                   file_name=file_name,
                                   write_suffix=False)
 
@@ -259,24 +259,24 @@ class Symca(object):
 
         to_save = main_cc_dict
         with open(file_name, 'w') as f:
-            json.dump(to_save, f)
+            pickle.dump(to_save, f)
 
     def load_session(self, file_name=None):
         file_name = get_file_path(working_dir=self._working_dir,
                                   internal_filename=self._internal_filename,
-                                  fmt='json',
+                                  fmt='pickle',
                                   file_name=file_name,
                                   write_suffix=False)
 
         with open(file_name, 'r') as f:
-            main_cc_dict = json.load(f)
+            main_cc_dict = pickle.load(f)
 
         cc_containers = {}
         for key, value in main_cc_dict.iteritems():
-            common_denom_exp = sympify(value.pop('common_denominator'))
+            common_denom_exp = value.pop('common_denominator')
             cc_container = SMCAtools.spawn_cc_objects(self.mod,
                                                       value.keys(),
-                                                      [sympify(exp) for exp in
+                                                      [exp for exp in
                                                        value.values()],
                                                       common_denom_exp,
                                                       self._ltxe)
