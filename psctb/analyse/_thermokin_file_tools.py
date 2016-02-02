@@ -613,7 +613,7 @@ def get_binding_vc_terms(sympy_formulas, ma_terms):
     """
     binding_terms = {}
     for name, ma_term in ma_terms.iteritems():
-        binding_terms[name] = (sympy_formulas[name] / ma_term).factor()
+        binding_terms[name] = (sympy_formulas[name] / ma_term).factor().factor()
     return binding_terms
 
 
