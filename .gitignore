@@ -11,3 +11,4 @@ reinstall.sh
 *.ipynb_checkpoints*
 doctemp.odt
 tk_test.py
+.venv
