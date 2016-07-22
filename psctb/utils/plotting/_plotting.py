@@ -23,8 +23,8 @@ from matplotlib import __version__ as mpl_version
 
 use_cycler = False
 
-from distutils.version import StrictVersion
-if StrictVersion(mpl_version) >= StrictVersion('1.5.0'):
+from distutils.version import LooseVersion
+if LooseVersion(mpl_version) >= LooseVersion('1.5.0'):
     from cycler import cycler
     use_cycler = True
 
