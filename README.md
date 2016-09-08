@@ -1,6 +1,6 @@
 [![Documentation Status](https://readthedocs.org/projects/pyscestoolbox/badge/?version=latest)](http://pyscestoolbox.readthedocs.org/en/latest/?badge=latest)
 
-#PyscesToolbox
+# PyscesToolbox
 
 This is a set of metabolic model analysis tools for PySCeS.
 
@@ -17,7 +17,7 @@ PyscesToolbox was designed to be used within the IPython notebook, but most of t
 This project is a work in progress and most features still require proper documentation. Partial documentation can be found at [http://pyscestoolbox.readthedocs.org](http://pyscestoolbox.readthedocs.org).
 
 
-##IMPORTANT NOTICE
+## IMPORTANT NOTICE
 
 Because this project is still in its infancy, future changes might break older scripts. These types of changes will be kept to a minimum and will be documented here.
 
@@ -25,7 +25,7 @@ Major changes were made on 11/11/2015 that might break scripts coded before this
 
 
 
-##Requirements
+## Requirements
 
 - Git (Windows users see [https://msysgit.github.io/](https://msysgit.github.io/))
 - A Python 2.7 installation
@@ -60,17 +60,11 @@ We recommend the WinPython_2.7 32bit distribution ([http://winpython.sourceforge
 
 Any existing notebooks should be placed in the ``notebooks`` subdirectory within your WinPython installation.
 
-##Installation
+## Installation
 
 PyscesToolbox can be installed from github using pip by using the following two commands in the terminal (for Linux) or in the WinPython Command Prompt (for Windows):
 
 For the pre-11/11/2015 version:
-
-```bash
-pip install git+https://github.com/exe0cdc/ipython-d3networkx.git
-pip install git+https://github.com/PySCeS/PyscesToolbox.git@f63b5ab660f103105750159885608a5f48de1551
-```
-
 
 For the latest version:
 
@@ -79,7 +73,12 @@ pip install git+https://github.com/exe0cdc/ipython-d3networkx.git
 pip install git+https://github.com/PySCeS/PyscesToolbox.git
 ```
 
-##Basic usage
+```bash
+pip install git+https://github.com/exe0cdc/ipython-d3networkx.git
+pip install git+https://github.com/PySCeS/PyscesToolbox.git@f63b5ab660f103105750159885608a5f48de1551
+```
+
+## Basic usage
 
 To start a PySCeSToolbox session in a IPython notebook:
 
@@ -95,7 +94,7 @@ import psctb
 
 Model files must be placed in `~/Pysces/psc/` if using Linux or `C:\Pysces\psc\` for Windows.
 
-##Porting scripts to latest version
+## Porting scripts to latest version
 
 Method and variable names and the analysis objects they belong to that were changed on 11/11/2015 are documented in the tables below. To port any older script simply change the old name of any method/variable to the new name.
 
@@ -136,6 +135,3 @@ Method and variable names and the analysis objects they belong to that were chan
 |---------------|------------|
 |plot_data      |scan_results|
 |save_data      |save_results|
-
-
-
