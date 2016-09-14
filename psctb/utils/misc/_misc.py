@@ -3,7 +3,8 @@ from os import path, devnull
 
 
 from numpy.ma import log10
-from numpy import array, errstate, nanmin, nanmax, nonzero, float64, bool_, string_
+from numpy import array, errstate, nanmin, nanmax, nonzero, float64,\
+    bool_, string_
 from pysces.PyscesModel import PysMod
 from IPython.display import HTML
 from sympy import sympify
@@ -31,7 +32,137 @@ __all__ = ['cc_list',
            'get_value',
            'get_value_eval',
            'get_value_sympy',
-           'print_f']
+           'print_f',
+           'stringify',
+           'is_iterable',
+           'scanner_range_setup',
+           'is_linear']
+
+
+def stringify(symbol_or_list):
+    """
+    Returns a list of strings from a list of sympy.Symbol objects or
+    a string from a sympy.Symbol.
+
+    Parameters
+    ----------
+    symbol_or_list : sympy.Symbol or list of sympy.Symbol.
+
+    Returns
+    -------
+    str or list of str
+        A str or list of str representation of the sympy.Symbol or
+        list of sympy.Symbol.
+
+    Examples
+    --------
+    >>> import sympy
+    >>> symbol_list = sympy.sympify(['a','c','d'])
+    >>> a = stringify(symbol_list[0])
+    >>> a
+    'a'
+    >>> type(a)
+    <type 'str>'
+    >>> str_list = stringify(symbol_list)
+    >>> str_list
+    ['a', 'b', 'c']
+    >>> type(str_list[0])
+    <type 'str>'
+
+    """
+    if is_iterable(symbol_or_list):
+        return [str(symbol) for symbol in symbol_or_list]
+    else:
+        return str(symbol_or_list)
+
+
+def is_iterable(obj):
+    """
+    Returns True if an object is iterable and False if it is not.
+
+    This function makes the assumtion that any iterable object can be
+    cast as an iterator using the build-in function `iter`. This might
+    not be the case, but works within the context of PySCeSToolbox.
+
+    Parameters
+    ----------
+    obj : object
+        Any object that might or might not be iterable.
+
+    Returns
+    -------
+    bool
+        A boolean indicating if `ob` is iterable.
+    """
+    try:
+        iter(obj)
+        return True
+    except TypeError:
+        return False
+
+
+def is_linear(scan_range):
+    """
+    For any 1-demensional data structure containing numbers return True
+    if the numbers follows a linear sequence.
+
+    Within the context of PySCeSToolbox this function will be called on
+    either a linear range or a log range. Thus, while not indicative
+    of log ranges, this is what a False return value indicates in this
+    software.
+
+    Parameters
+    ----------
+    scan_range : iterable
+        Any iterable object containing a range of numbers.
+
+    Returns
+    -------
+    bool
+        A boolean indicating if `scan_range` is a linear sequence of
+        numbers.
+    """
+
+    if scan_range[1] - scan_range[0] == scan_range[-1] - scan_range[-2]:
+        return True
+    else:
+        return False
+
+
+def scanner_range_setup(scan_range):
+    """
+    From a range of numbers, returns its start point, end point, number
+    of points and if it is a log range.
+
+    The assumption is made that only log or linear ranges are valid
+    inputs, thus lists of random numbers would likely be classified as
+    logarithmic.
+
+    Parameters
+    ----------
+    scan_range : iterable
+        Any iterable object containing a range of numbers. Most probably
+        numpy.ndarray.
+
+    Returns
+    -------
+    start : number
+        A number indicating the start point of the scan range.
+    end: number
+        A number indicating the end point of the scan range.
+    scan_points: number
+        A number indicating the number of scan point in the scan range
+    is_log_range: bool
+        A boolean indicating whether the scan range has a logarithmic
+        scale or not.
+    """
+    start = scan_range[0]
+    end = scan_range[-1]
+    scan_points = len(scan_range)
+    # based on input not linear == log
+    is_log_range = not is_linear(scan_range)
+    return start, end, scan_points, is_log_range
+
 
 def extract_model(obj):
     mod = obj
@@ -40,14 +171,15 @@ def extract_model(obj):
     except:
         pass
 
-    assert isinstance(mod,PysMod), "The object provided does not contain a " \
-                                   "valid Pysces model. Reinstantiate with a" \
-                                   " valid model."
+    assert isinstance(mod, PysMod), "The object provided does not contain a " \
+        "valid Pysces model. Reinstantiate with a" \
+        " valid model."
 
     the_type = str(type(obj))[:-2]
-    the_type = the_type[the_type.rindex('.')+1:]
+    the_type = the_type[the_type.rindex('.') + 1:]
 
     return mod, the_type
+
 
 def find_min(array_like):
     no_zeros = array_like[nonzero(array_like)]
@@ -78,18 +210,22 @@ def do_safe_state(mod, parameter, value, type='ss'):
     mod.SetLoud()
     return ret
 
+
 def get_value_eval(expression, subs_dict):
     for k, v in subs_dict.iteritems():
         subs_dict[k] = float64(v)
     ans = eval(expression, {}, subs_dict)
     return ans
 
+
 def get_value_sympy(expression, subs_dict):
-    expression = sympify(expression) # this is quite inefficient - but probably worth it
+    # this is quite inefficient - but probably worth it
+    expression = sympify(expression)
     for k, v in subs_dict.iteritems():
         subs_dict[k] = float64(v)
     ans = expression.subs(subs_dict)
     return ans
+
 
 def get_value(expression, subs_dict):
     try:
@@ -97,8 +233,9 @@ def get_value(expression, subs_dict):
     except:
         return get_value_sympy(expression, subs_dict)
 
+
 def split_coefficient(coefficient_name, mod):
-    coefficient_2_types = ['cc','ec','rc']
+    coefficient_2_types = ['cc', 'ec', 'rc']
     coefficient_3_types = ['prc']
     if coefficient_name[:2] in coefficient_2_types:
         coefficient_type = coefficient_name[:2]
@@ -533,11 +670,11 @@ def group_sort(old_list, num_of_groups):
     # that differ from each other. This is better than sorting lines before
     # sending the data tp data2d because otherwise button grouping will also be
     # affected by this sorting scheme.
-    group_size = len(old_list)/num_of_groups
-    first_group = range(0,len(old_list),num_of_groups)
+    group_size = len(old_list) / num_of_groups
+    first_group = range(0, len(old_list), num_of_groups)
     groups = first_group
-    for i in xrange(1,group_size-1):
-        groups = groups + [j+i for j in first_group]
+    for i in xrange(1, group_size - 1):
+        groups = groups + [j + i for j in first_group]
     new_list = [old_list[pos] for pos in groups]
 
     return new_list
@@ -762,7 +899,6 @@ class SimpleDirectoryStructure(object):
     def add_paths(self, list_of_fpaths):
         for fpath in list_of_fpaths:
             self.add_path(fpath)
-
 
     def __getitem__(self, key):
         return self._path_dict[key]
