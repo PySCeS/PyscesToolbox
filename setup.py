@@ -4,7 +4,7 @@ packages = find_packages()
 
 setup(
     name='PyscesToolbox',
-    version='0.8.0',
+    version='0.8.1',
     packages=packages,
     url='https://github.com/PySCeS/PyscesToolbox',
     license='',
@@ -18,5 +18,7 @@ setup(
                       'matplotlib',
                       'd3networkx_psctb',
                       'numpydoc'],
-     dependency_links=['git+https://github.com/exe0cdc/ipython-d3networkx.git#egg=d3networkx_psctb-0.1'],
+    dependency_links=['git+https://github.com/exe0cdc/ipython-d3networkx.git#egg=d3networkx_psctb-0.1'],
+    include_pakage_data=True,
+    package_data={'': ['default_config.ini']},
 )

@@ -306,14 +306,15 @@ class CCoef(CCBase):
                                          scan_range,
                                          par_scan,
                                          par_engine)
+                data_array = scan_res
             except AssertionError as ae:
                 print 'The parameter scan yielded the following error:'
                 print ae
                 print 'Switching over to slower scan method and replacing'
                 print 'invalid steady states with NaN values.'
                 scan_res = self._perscan_legacy(parameter, scan_range)
+                data_array = array(scan_res, dtype=np.float).transpose()
 
-            data_array = array(scan_res, dtype=np.float).transpose()
             ylim = [nanmin(data_array[:, 1:]), nanmax(data_array[:, 1:]) * 1.1]
         elif scan_type is 'value':
             column_names = column_names + [self.name]
@@ -324,16 +325,17 @@ class CCoef(CCBase):
                                          scan_range,
                                          par_scan,
                                          par_engine)
+                data_array = scan_res
             except AssertionError as ae:
                 print 'The parameter scan yielded the following error:'
                 print ae
                 print 'Switching over to slower scan method and replacing'
                 print 'invalid steady states with NaN values.'
                 scan_res = self._valscan_legacy(parameter, scan_range)
+                data_array = array(scan_res, dtype=np.float).transpose()
 
-            data_array = array(scan_res, dtype=np.float).transpose()
             ylim = [nanmin(data_array[:, 1:]), nanmax(data_array[:, 1:]) * 1.1]
-
+        # print data_array.shape
         if init_return:
             self.mod.SetQuiet()
             setattr(self.mod, parameter, init)
