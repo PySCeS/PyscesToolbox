@@ -12,3 +12,5 @@ reinstall.sh
 doctemp.odt
 tk_test.py
 .venv
+*.sublime-project
+*.sublime-workspace

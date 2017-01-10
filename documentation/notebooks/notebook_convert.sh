@@ -5,7 +5,7 @@
 #
 file_name_sans_extension=$1
 
-echo "IPython Notebook convesion:"
+echo "IPython Notebook conversion to rst:"
 ipython nbconvert $file_name_sans_extension.ipynb --to rst
 echo ""
 echo "Fixing conversion:"
@@ -14,3 +14,9 @@ echo ""
 echo "Copying files to source:"
 cp -v $file_name_sans_extension.rst ../source/
 cp -rv $file_name_sans_extension\_files/ ../source/
+echo ""
+echo "Cleaning example notebook"
+python clean_notebooks.py $file_name_sans_extension.ipynb
+echo "Copying example notebook to ~/example_notebooks:"
+clean=_clean
+cp -v $file_name_sans_extension$clean.ipynb ../../example_notebooks/$file_name_sans_extension.ipynb

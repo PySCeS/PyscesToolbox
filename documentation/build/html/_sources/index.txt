@@ -14,6 +14,7 @@ Contents:
    introduction
    basic_usage
    RateChar
+   Symca
    included_files
    references
 

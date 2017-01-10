@@ -131,18 +131,18 @@ parameter scan are saved to a object.
     # with name `mod`
     mod = pysces.model('example_model')
     mod.SetQuiet()
-    
+
     # Parameter scan setup and execution
     # Here we are changing the value of `Vf2` over logarithmic
     # scale from `log10(1)` (or 0) to log10(100) (or 2) for a
-    # 100 points. 
+    # 100 points.
     mod.scan_in = 'Vf2'
     mod.scan_out = ['J_R1','J_R2','J_R3']
     mod.Scan1(numpy.logspace(0,2,100))
-    
+
     # Instantiation of `Data2D` object with name `scan_data`
     column_names = [mod.scan_in] + mod.scan_out
-    
+
     scan_data = psctb.utils.plotting.Data2D(mod=mod,
                                             column_names=column_names,
                                             data_array=mod.scan_res)
@@ -154,17 +154,17 @@ parameter scan are saved to a object.
 
     Assuming extension is .psc
     Using model directory: /home/carl/Pysces/psc
-    /home/carl/Pysces/psc/example_model.psc loading ..... 
+    /home/carl/Pysces/psc/example_model.psc loading .....
     Parsing file: /home/carl/Pysces/psc/example_model.psc
-     
+
     Calculating L matrix . . . . . . .  done.
     Calculating K matrix . . . . . . .  done.
-     
-    
+
+
     Scanning ...
-    100 80 60 40 20 0 
+    100 80 60 40 20 0
     done.
-    
+
 
 
 Results that can be accessed via ``scan_results``:
@@ -424,7 +424,7 @@ Tables
 In PySCeSToolbox, results are frequently stored in an dictionary-like
 structure belonging to an analysis object. In most cases the dictionary
 will be named with ``_results`` appended to the type of results (e.g.
-Control coefficient results in ``SymCa`` are saved as ``cc_results``
+Control coefficient results in ``Symca`` are saved as ``cc_results``
 while the parameterised internal metabolite scan results of ``RateChar``
 are saved as ``scan_results``).
 
@@ -529,7 +529,7 @@ the data:
 
 .. code:: python
 
-    psctb.utils.misc.html_table(list_of_lists, 
+    psctb.utils.misc.html_table(list_of_lists,
                                 caption='Example',
                                 formatter=formatter,    # Previously constructed formatter
                                 first_row_headers=True) # The first row can be set as the header
@@ -557,14 +557,14 @@ Graphic Representation of Metabolic Networks
 PySCeSToolbox includes functionality for displaying interactive graph
 representations of metabolic networks through the ``ModelGraph`` tool.
 The main purpose of this feature is to allow for the visualisation of
-control patterns in ``SymCa``. Currently, this tool is fairly limited in
+control patterns in ``Symca``. Currently, this tool is fairly limited in
 terms of its capabilities and therefore does not represent a replacement
 for more fully featured tools such as (cell designer? Or ???). One such
 limitation is that no automatic layout capabilities are included, and
 nodes representing species and concentrations have to be laid out by
 hand. Nonetheless it is useful for quickly visualising the structure of
 pathway and, as previously mentioned, for visualising the importance of
-various control patterns in ``SymCa``.
+various control patterns in ``Symca``.
 
 Features
 ~~~~~~~~
@@ -614,7 +614,7 @@ disk during ``ModelGraph`` instantiation.
 
 .. code:: python
 
-    # This path leads to the provided layout file 
+    # This path leads to the provided layout file
     path_to_layout = path.expanduser('~/Pysces/psc/example_model_layout.dict')
     model_graph = psctb.ModelGraph(mod, pos_dic=path_to_layout)
     model_graph.show()
