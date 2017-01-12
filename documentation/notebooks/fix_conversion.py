@@ -81,6 +81,8 @@ def remove_empty_block(lines, block_string):
     for i, line in enumerate(lines):
         if line.startswith(block_string) and lines[i + 2] == '    \n':
             pass
+        elif line.startswith(block_string) and lines[i + 2] == '\n':
+            pass
         else:
             new_lines.append(line)
     return new_lines

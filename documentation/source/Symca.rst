@@ -1,11 +1,8 @@
 
-``In [1]:``
-
-.. code:: python
 
 
 
-``Out[1]:``
+``Out[0]:``
 
 .. parsed-literal::
 
@@ -34,7 +31,7 @@
     ***********************************************************************
 
 
-``Out[1]:``
+``Out[0]:``
 
 .. parsed-literal::
 
@@ -105,7 +102,7 @@ object (``PysMod``) as an argument. Using the included
 `lin4\_fb.psc <http://pyscestoolbox.readthedocs.io/en/latest/included_files.html>`__
 model a ``Symca`` session is instantiated as follows:
 
-``In [2]:``
+``In [1]:``
 
 .. code:: python
 
@@ -114,7 +111,7 @@ model a ``Symca`` session is instantiated as follows:
     sc = psctb.Symca(mod)
 
 
-``Out[2]:``
+``Out[1]:``
 
 .. parsed-literal::
 
@@ -154,14 +151,14 @@ saving the generated expressions for later loading (see `Saving/Loading
 Sessions <SymCA.html#saving-loading-sessions>`__ below). In the case of
 ``lin4_fb.psc`` expressions should be generated within a few seconds.
 
-``In [3]:``
+``In [2]:``
 
 .. code:: python
 
     sc.do_symca()
 
 
-``Out[3]:``
+``Out[2]:``
 
 .. parsed-literal::
 
@@ -188,7 +185,7 @@ object (see `basic\_usage#tables <basic_usage.html#tables>`__).
 Inspecting this ``cc_results`` object in a IPython/Jupyter notebook
 yields a table of control coefficient values:
 
-``In [4]:``
+``In [3]:``
 
 .. code:: python
 
@@ -275,7 +272,7 @@ yields a table of control coefficient values:
 Inspecting an individual control coefficient yields a symbolic
 expression together with a value:
 
-``In [5]:``
+``In [4]:``
 
 .. code:: python
 
@@ -297,7 +294,7 @@ control coefficient expression signified by :math:`\Sigma`.
 Various properties of this control coefficient can be accessed such as
 the: \* Expression (as a ``SymPy`` expression)
 
-``In [6]:``
+``In [5]:``
 
 .. code:: python
 
@@ -306,7 +303,7 @@ the: \* Expression (as a ``SymPy`` expression)
 
 
 
-``Out[6]:``
+``Out[5]:``
 
 .. parsed-literal::
 
@@ -316,7 +313,7 @@ the: \* Expression (as a ``SymPy`` expression)
 
 -  Numerator expression (as a ``SymPy`` expression)
 
-``In [7]:``
+``In [6]:``
 
 .. code:: python
 
@@ -325,7 +322,7 @@ the: \* Expression (as a ``SymPy`` expression)
 
 
 
-``Out[7]:``
+``Out[6]:``
 
 .. parsed-literal::
 
@@ -335,7 +332,7 @@ the: \* Expression (as a ``SymPy`` expression)
 
 -  Denominator expression (as a ``SymPy`` expression)
 
-``In [8]:``
+``In [7]:``
 
 .. code:: python
 
@@ -344,7 +341,7 @@ the: \* Expression (as a ``SymPy`` expression)
 
 
 
-``Out[8]:``
+``Out[7]:``
 
 .. parsed-literal::
 
@@ -354,7 +351,7 @@ the: \* Expression (as a ``SymPy`` expression)
 
 -  Value (as a ``float64``)
 
-``In [9]:``
+``In [8]:``
 
 .. code:: python
 
@@ -363,7 +360,7 @@ the: \* Expression (as a ``SymPy`` expression)
 
 
 
-``Out[9]:``
+``Out[8]:``
 
 .. parsed-literal::
 
@@ -378,7 +375,7 @@ Additional, less pertinent, attributes are ``abs_value``,
 The individual control coefficient numerator terms, otherwise known as
 control patterns, may also be accessed as follows:
 
-``In [10]:``
+``In [9]:``
 
 .. code:: python
 
@@ -393,7 +390,7 @@ control patterns, may also be accessed as follows:
 
 
 
-``In [11]:``
+``In [10]:``
 
 .. code:: python
 
@@ -419,7 +416,7 @@ Additionally control patterns have a ``percentage`` field which
 indicates the degree to which a particular control pattern contributes
 towards the overall control coefficient value:
 
-``In [12]:``
+``In [11]:``
 
 .. code:: python
 
@@ -428,7 +425,7 @@ towards the overall control coefficient value:
 
 
 
-``Out[12]:``
+``Out[11]:``
 
 .. parsed-literal::
 
@@ -436,7 +433,7 @@ towards the overall control coefficient value:
 
 
 
-``In [13]:``
+``In [12]:``
 
 .. code:: python
 
@@ -445,7 +442,7 @@ towards the overall control coefficient value:
 
 
 
-``Out[13]:``
+``Out[12]:``
 
 .. parsed-literal::
 
@@ -476,7 +473,7 @@ calculated for the model. Thus changing a parameter of ``lin4_hill``,
 such as the :math:`V_{f}` value of reaction 4, will lead to new control
 coefficient and control pattern values:
 
-``In [14]:``
+``In [13]:``
 
 .. code:: python
 
@@ -498,7 +495,7 @@ coefficient and control pattern values:
     (hybrd) The solution converged.
 
 
-``In [15]:``
+``In [14]:``
 
 .. code:: python
 
@@ -514,7 +511,7 @@ coefficient and control pattern values:
 
 
 
-``In [16]:``
+``In [15]:``
 
 .. code:: python
 
@@ -530,7 +527,7 @@ coefficient and control pattern values:
 
 
 
-``In [17]:``
+``In [16]:``
 
 .. code:: python
 
@@ -546,7 +543,7 @@ coefficient and control pattern values:
 
 
 
-``In [18]:``
+``In [17]:``
 
 .. code:: python
 
@@ -575,15 +572,12 @@ Usage <basic_usage.html##graphic-representation-of-metabolic-networks>`__,
 represented by control patterns on a scheme of a metabolic model. This
 functionality can be accessed via the ``highlight_patterns`` method:
 
-``In [19]:``
+``In [18]:``
 
 .. code:: python
 
     sc.cc_results.ccJR1_R4.highlight_patterns(height = 350)
 
-``In [20]:``
-
-.. code:: python
 
 
 
@@ -607,7 +601,7 @@ contribution (as discussed
 `above <SymCA.html#control-pattern-percentage-contribution>`__) towards
 the total control coefficient.
 
-``In [21]:``
+``In [19]:``
 
 .. code:: python
 
@@ -616,9 +610,6 @@ the total control coefficient.
     # is totally responsible for the observed control coefficient value.
     sc.cc_results.ccJR1_R4.highlight_patterns(height = 350)
 
-``In [22]:``
-
-.. code:: python
 
 
 
@@ -626,7 +617,7 @@ the total control coefficient.
 .. image:: Symca_files/Symca_40_0.png
 
 
-``In [23]:``
+``In [20]:``
 
 .. code:: python
 
@@ -635,9 +626,6 @@ the total control coefficient.
     # at all to the control coefficient value.
     sc.cc_results.ccJR1_R4.highlight_patterns(height = 350)
 
-``In [24]:``
-
-.. code:: python
 
 
 
@@ -688,7 +676,7 @@ method has the following arguments:
 Below we will perform a percentage scan of :math:`V_{f^4}` for 200
 points between 0.01 and 1000 in log space:
 
-``In [25]:``
+``In [21]:``
 
 .. code:: python
 
@@ -697,7 +685,7 @@ points between 0.01 and 1000 in log space:
                                                               scan_type='percentage')
 
 
-``Out[25]:``
+``Out[21]:``
 
 .. parsed-literal::
 
@@ -715,7 +703,7 @@ by calling the ``plot`` method of ``percentage_scan_data``. Furthermore,
 lines can be enabled/disabled using the ``toggle_category`` method of
 ``ScanFig`` or by clicking on the appropriate buttons:
 
-``In [26]:``
+``In [22]:``
 
 .. code:: python
 
@@ -736,9 +724,6 @@ lines can be enabled/disabled using the ``toggle_category`` method of
 
 
 
-``In [27]:``
-
-.. code:: python
 
 
 
@@ -750,7 +735,7 @@ A ``value`` plot can similarly be generated and displayed. In this case,
 however, an additional line indicating :math:`C^{J}_{4}` will also be
 present:
 
-``In [28]:``
+``In [23]:``
 
 .. code:: python
 
@@ -778,9 +763,6 @@ present:
 
 
 
-``In [29]:``
-
-.. code:: python
 
 
 
@@ -803,7 +785,7 @@ Thus for a variant of the ``lin4_fb`` model where the
 intermediate\ ``S3`` is fixed at its steady-state value the procedure is
 as follows:
 
-``In [30]:``
+``In [24]:``
 
 .. code:: python
 
@@ -817,7 +799,7 @@ as follows:
     sc_fixed_S3.do_symca() 
 
 
-``Out[30]:``
+``Out[24]:``
 
 .. parsed-literal::
 
@@ -861,7 +843,7 @@ For the ``mod_fixed_c`` model two additional results objects
    sensitivity of flux and concentrations within the supply block of
    ``S3`` towards reactions within the supply block.
 
-``In [31]:``
+``In [25]:``
 
 .. code:: python
 
@@ -926,7 +908,7 @@ For the ``mod_fixed_c`` model two additional results objects
    This results object is useful confirming that the results were
    generated as expected.
 
-``In [32]:``
+``In [26]:``
 
 .. code:: python
 
@@ -984,7 +966,7 @@ location is specified, a file named ``cc_summary_N`` is saved to the
 ``~/Pysces/$modelname/symca/`` directory, where ``N`` is a number
 starting at 0:
 
-``In [33]:``
+``In [27]:``
 
 .. code:: python
 
@@ -998,7 +980,7 @@ starting at 0:
 
 The contents of the saved data file is as follows:
 
-``In [34]:``
+``In [28]:``
 
 .. code:: python
 
@@ -1192,7 +1174,7 @@ loaded/saved by ``do_symca`` by using the ``auto_save_load`` argument
 which saves and loads using the default path. Models with internal fixed
 metabolites are handled automatically.
 
-``In [35]:``
+``In [29]:``
 
 .. code:: python
 
@@ -1207,7 +1189,7 @@ metabolites are handled automatically.
     new_sc.cc_results
 
 
-``Out[35]:``
+``Out[29]:``
 
 .. parsed-literal::
 

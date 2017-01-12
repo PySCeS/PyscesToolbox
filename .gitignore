@@ -14,3 +14,4 @@ tk_test.py
 .venv
 *.sublime-project
 *.sublime-workspace
+temp
