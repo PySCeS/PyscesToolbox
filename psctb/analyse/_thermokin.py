@@ -439,7 +439,7 @@ class RateEqn(object):
         else:
             x_label = parameter
 
-        # Assertions prevents unbound local variables therefore pycharm 
+        # Assertions prevents unbound local variables therefore pycharm
         # inspection can be disabled for the two statements below
 
         # noinspection PyUnboundLocalVariable

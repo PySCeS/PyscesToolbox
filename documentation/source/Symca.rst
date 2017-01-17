@@ -1,43 +1,6 @@
 
 
 
-
-``Out[0]:``
-
-.. parsed-literal::
-
-    Matplotlib "Tkagg" backend not set, defaulting to: "TkAgg"
-    Matplotlib interface loaded (pysces.plt.m)
-    Pitcon routines available
-    NLEQ2 routines available
-    You are using NumPy (1.11.1) with SciPy (0.18.0)
-    RateChar is available
-    Parallel scanner is available
-    
-    PySCeS environment
-    ******************
-    pysces.model_dir = /home/carl/Pysces/psc
-    pysces.output_dir = /home/carl/Pysces
-    
-    
-    ***********************************************************************
-    * Welcome to PySCeS (0.9.3) - Python Simulator for Cellular Systems   *
-    *                http://pysces.sourceforge.net                        *
-    * Copyright(C) B.G. Olivier, J.M. Rohwer, J.-H.S. Hofmeyr, 2004-2016  *
-    * Triple-J Group for Molecular Cell Physiology                        *
-    * Stellenbosch University, ZA and VU University Amsterdam, NL         *
-    * PySCeS is distributed under the PySCeS (BSD style) licence, see     *
-    * LICENCE.txt (supplied with this release) for details                *
-    ***********************************************************************
-
-
-``Out[0]:``
-
-.. parsed-literal::
-
-    :0: FutureWarning: IPython widgets are experimental and may change in the future.
-
-
 Symca
 =====
 
@@ -139,7 +102,7 @@ Additionally ``Symca`` has the following arguments:
    argument above *(default: ``False``)*.
 
 .. note:: For the case where an internal metabolite is fixed see `Fixed
-          internal metabolites <SymCA.html#fixed-internal-metabolites>`__ below.
+          internal metabolites <Symca.html#fixed-internal-metabolites>`__ below.
 
 Generating symbolic control coefficient expressions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -148,7 +111,7 @@ Control coefficient expressions can be generated as soon as a ``Symca``
 object has been instantiated using the ``do_symca`` method. This process
 can potentially take quite some time to complete, therefore we recommend
 saving the generated expressions for later loading (see `Saving/Loading
-Sessions <SymCA.html#saving-loading-sessions>`__ below). In the case of
+Sessions <Symca.html#saving-loading-sessions>`__ below). In the case of
 ``lin4_fb.psc`` expressions should be generated within a few seconds.
 
 ``In [2]:``
@@ -598,7 +561,7 @@ functionality can be accessed via the ``highlight_patterns`` method:
 Clicking either of the two buttons representing the control patterns
 highlights these patterns according according to their percentage
 contribution (as discussed
-`above <SymCA.html#control-pattern-percentage-contribution>`__) towards
+`above <Symca.html#control-pattern-percentage-contribution>`__) towards
 the total control coefficient.
 
 ``In [19]:``
@@ -640,7 +603,7 @@ Parameter scans can be performed in order to determine the effect of a
 parameter change on either the control coefficient and control pattern
 values or of the effect of a parameter change on the contribution of the
 control patterns towards the control coefficient (as discussed
-`above <SymCA.html#control-pattern-percentage-contribution>`__). The
+`above <Symca.html#control-pattern-percentage-contribution>`__). The
 procedure for both the "value" and "percentage" scans are very much the
 same and rely on the same principles as described under
 `basic\_usage#plotting-and-displaying-results <basic_usage.html#plotting-and-displaying-results>`__
