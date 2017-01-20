@@ -307,9 +307,9 @@ class CCoef(CCBase):
                                          par_scan,
                                          par_engine)
                 data_array = scan_res
-            except AssertionError as ae:
+            except Exception as exception:
                 print 'The parameter scan yielded the following error:'
-                print ae
+                print exception
                 print 'Switching over to slower scan method and replacing'
                 print 'invalid steady states with NaN values.'
                 scan_res = self._perscan_legacy(parameter, scan_range)
@@ -326,9 +326,9 @@ class CCoef(CCBase):
                                          par_scan,
                                          par_engine)
                 data_array = scan_res
-            except AssertionError as ae:
+            except Exception as exception:
                 print 'The parameter scan yielded the following error:'
-                print ae
+                print exception
                 print 'Switching over to slower scan method and replacing'
                 print 'invalid steady states with NaN values.'
                 scan_res = self._valscan_legacy(parameter, scan_range)
