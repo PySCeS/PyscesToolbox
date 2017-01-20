@@ -4,7 +4,7 @@ from os import path, devnull
 
 from numpy.ma import log10
 from numpy import array, errstate, nanmin, nanmax, nonzero, float64,\
-    bool_, string_
+    bool_, string_, ones
 from pysces.PyscesModel import PysMod
 from IPython.display import HTML
 from sympy import sympify
@@ -36,7 +36,45 @@ __all__ = ['cc_list',
            'stringify',
            'is_iterable',
            'scanner_range_setup',
-           'is_linear']
+           'is_linear',
+           'column_multiply', ]
+
+
+def column_multiply(arr):
+    """
+    For any 2d array returns a column vector with the product of the
+    columns of each row.
+
+    Parameters
+    ----------
+    arr : numpy.ndarray
+
+    Returns
+    -------
+    numpy.ndarray
+        A ndarray (column vector) with the products of columns of each
+        row of arr as values
+
+    Examples
+    --------
+    >>> arr = np.arrange(10).reshape(5,2)
+    >>> arr
+    array([[0, 1],
+           [2, 3],
+           [4, 5],
+           [6, 7],
+           [8, 9]])
+    >>> column_multiply(arr)
+    array([[  0.],
+           [  6.],
+           [ 20.],
+           [ 42.],
+           [ 72.]])
+    """
+    new_arr = ones((arr.shape[0], 1))
+    for col in xrange(arr.shape[1]):
+        new_arr = new_arr * arr[:, col].reshape(arr.shape[0], 1)
+    return new_arr
 
 
 def stringify(symbol_or_list):
@@ -215,20 +253,55 @@ def get_value_eval(expression, subs_dict):
     for k, v in subs_dict.iteritems():
         subs_dict[k] = float64(v)
     ans = eval(expression, {}, subs_dict)
+    # sometimes subs_dict is empty
+    if not len(subs_dict) == 0:
+        # if not, check that if the values of subs_dict are arrays,
+        # the answer and the subs_dict arrays are of equal length
+        # there is probably a faster solution, but this works fine by
+        # falling back to get_value_sympy
+        if is_iterable(subs_dict.values()[0]):
+            if len(ans) != len(subs_dict.values()[0]):
+                raise Exception
+    # print 'gve'
     return ans
 
 
 def get_value_sympy(expression, subs_dict):
     # this is quite inefficient - but probably worth it
+
     expression = sympify(expression)
-    for k, v in subs_dict.iteritems():
-        subs_dict[k] = float64(v)
-    ans = expression.subs(subs_dict)
+    # dont bother with anything if the subs_dict is empty. Just do the
+    # "substitution"
+    if len(subs_dict) == 0:
+        ans = expression.subs(subs_dict)
+    else:
+        first_value = subs_dict.values()[0]
+        if is_iterable(first_value):
+            ans = []
+            if not isinstance(first_value[0], float64):
+                for k, v in subs_dict.iteritems():
+                    subs_dict[k] = float64(v)
+
+            number_of_array_elements = len(first_value)
+            for i in range(number_of_array_elements):
+                temp_subsdict = {k: v[i] for k, v in subs_dict.iteritems()}
+                ans_val = expression.subs(temp_subsdict)
+                ans.append(ans_val)
+            ans = float64(array(ans))
+        else:
+            if not isinstance(first_value, float64):
+                for k, v in subs_dict.iteritems():
+                    subs_dict[k] = float64(v)
+            ans = expression.subs(subs_dict)
+    # print 'gvs'
     return ans
 
 
 def get_value(expression, subs_dict):
     try:
+        # reasons for excepting:
+        #    expression is just a single number
+        #    expression contains mathematical functions e.g. log, sin, cos
         return get_value_eval(expression, subs_dict)
     except:
         return get_value_sympy(expression, subs_dict)
@@ -275,7 +348,7 @@ def is_number(suspected_number):
     if the_type not in (bool, str, bool_, string_):
         try:
             int(suspected_number)
-            #suspected_number + 1
+            # suspected_number + 1
             number = True
         except Exception:
             pass
