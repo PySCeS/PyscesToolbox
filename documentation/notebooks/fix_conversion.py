@@ -1,7 +1,4 @@
-
-# coding: utf-8
-
-# In[21]:
+# This script should really be documented
 
 import codecs
 from os import listdir, path
@@ -200,7 +197,102 @@ def sub_math(lines):
     return new_lines
 
 
-# In[ ]:
+def find_tables(lines):
+    """
+    For a list of lines, splits lines into blocks (stored in lists
+    of lines within two lists) representing tables or non tables. Also
+    return if a file starts with a table or a non-table (mostly
+    non-tables, but functionality is included for robustness).
+    """
+    in_table = False
+    tables = []
+    non_tables = []
+    current_table = []
+    current_non_table = []
+    text_first = None
+    for i, line in enumerate(lines):
+        if line.startswith('+') and line.strip().endswith('+') and not in_table:
+            in_table = True
+            if len(current_non_table) != 0:
+                non_tables.append(current_non_table)
+                current_non_table = []
+            current_table.append(line)
+            if text_first is None:
+                text_first = False
+        elif in_table and (line.startswith('+') or line.startswith('|')):
+            current_table.append(line)
+        elif in_table:
+            in_table = False
+            tables.append(current_table)
+            current_table = []
+            current_non_table.append(line)
+        else:
+            if text_first is None:
+                text_first = True
+            current_non_table.append(line)
+    if len(current_non_table) != 0:
+        non_tables.append(current_non_table)
+    if len(current_table) != 0:
+        tables.append(current_table)
+    return tables, non_tables, text_first
+
+
+def weave_lists(tables, non_tables, text_first):
+    """
+    Takes a list of tables, non-tables and a boolean indicating which
+    should come first and returns a single list of lines.
+    """
+    new_list = []
+    total_blocks = len(tables) + len(non_tables)
+    for i in range(total_blocks):
+        if text_first:
+            new_list.extend(non_tables.pop(0))
+            text_first = False
+        else:
+            new_list.extend(tables.pop(0))
+            text_first = True
+    return new_list
+
+
+def fix_all_table_split(lines):
+    """
+    Uses find_tables, fix_table_splits and weave_lists to construct
+    a new list of all lines with tables with the correct formatting.
+    """
+    tables, non_tables, text_first = find_tables(lines)
+    new_tables = []
+    for table in tables:
+        new_tables.append(fix_table_splits(table))
+    return weave_lists(new_tables, non_tables, text_first)
+
+
+def fix_table_splits(table_lines):
+    """
+    Adds an escape "\" to lines where text has been split incorrectly
+    (prematurely).
+    """
+    new_table = []
+    for line in table_lines:
+        if line.startswith('+'):
+            new_line = ''
+            line_type = line[1]
+            for i, char in enumerate(line):
+                if char == '+' and line[i + 1] == line_type:
+                    char = '+' + line_type
+                new_line = new_line + char
+            new_table.append(new_line)
+        else:
+            new_line = ''
+            for i, char in enumerate(line):
+                if char == ' ' and line[i + 1] == '|':
+                    if line[i - 1] != ' ':
+                        char = '\ '
+                    else:
+                        char = '  '
+                new_line = new_line + char
+            new_table.append(new_line)
+    return new_table
+
 
 if __name__ == "__main__":
     to_remove_block_strings = ['.. code::', '.. parsed-literal::']
@@ -230,6 +322,7 @@ if __name__ == "__main__":
 
         lines = remove_specified_images(lines)
         lines = sub_math(lines)
+        lines = fix_all_table_split(lines)
         lines = convert_html_tables(lines)
 
         for block_to_remove in to_remove_block_strings:
