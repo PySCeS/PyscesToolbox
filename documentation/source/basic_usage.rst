@@ -20,56 +20,56 @@ the provided `example model <included_files.html#example-model-psc>`__
 (for input file syntax refer to the `PySCeS model descriptor language
 documentation <http://pysces.sourceforge.net/docs/inputfile_doc.html>`__):
 
-+--------------------+-----------------------+-----------+------------------------+
-| Description        | Syntax description    | PySCeS    | Rendered LaTeX example |
-|                    |                       | example   |                        |
-+====================+=======================+===========+========================+
-| Parameters         | As defined in model   | Keq2      | :math:`Keq2`           |
-|                    | file                  |           |                        |
-+--------------------+-----------------------+-----------+------------------------+
-| Species            | As defined in model   | S1        | :math:`S1`             |
-|                    | file                  |           |                        |
-+--------------------+-----------------------+-----------+------------------------+
-| Reactions          | As defined in model   | R1        | :math:`R1`             |
-|                    | file                  |           |                        |
-+--------------------+-----------------------+-----------+------------------------+
-| Steady state       | “\_ss” appended to    | S1\_ss    | :math:`S1_{ss}`        |
-| species            | model definition      |           |                        |
-+--------------------+-----------------------+-----------+------------------------+
-| Steady state       | “J\_” prepended to    | J\_R1     | :math:`J_{R1}`         |
-| reaction rates     | model definition      |           |                        |
-| (Flux)             |                       |           |                        |
-+--------------------+-----------------------+-----------+------------------------+
-| Control            | In the format         | ccJR1\_R2 | :math:`C^{JR1}_{R2}`   |
-| coefficients       | “ccJreaction\_reactio |           |                        |
-|                    | n”                    |           |                        |
-+--------------------+-----------------------+-----------+------------------------+
-| Elasticity         | In the format         | ecR1\_S1  | :math:`\varepsilon^{R1 |
-| coefficients       | “ecreaction\_modifier | or        | }_{S1}`                |
-|                    | ”                     | ecR2\_Vf1 | or                     |
-|                    |                       |           | :math:`\varepsilon^{R2 |
-|                    |                       |           | }_{Vf2}`               |
-+--------------------+-----------------------+-----------+------------------------+
-| Response           | In the format         | rcJR3\_Vf | :math:`R^{JR3}_{Vf3}`  |
-| coefficients       | “rcJreaction\_paramet | 3         |                        |
-|                    | er”                   |           |                        |
-+--------------------+-----------------------+-----------+------------------------+
-| Partial response   | In the format         | prcJR3\_X | :math:`^{R2}R^{JR3}_{X |
-| coefficients       | “prcJreaction\_parame | 2\_R2     | 2}`                    |
-|                    | ter\_reaction”        |           |                        |
-+--------------------+-----------------------+-----------+------------------------+
-| Control patterns   | CPn where n is an     | CP4       | :math:`CP4`            |
-|                    | number assigned to a  |           |                        |
-|                    | specific control      |           |                        |
-|                    | pattern               |           |                        |
-+--------------------+-----------------------+-----------+------------------------+
-| Flux contribution  | In the format         | J\_R1\_bi | :math:`J_{R1_{binding} |
-| by specific term   | "J\_reaction\_term"   | nding     | }`                     |
-+--------------------+-----------------------+-----------+------------------------+
-| Elasticity         | In the format         | pecR1\_S1 | :math:`\varepsilon^{R1 |
-| contribution by    | "pecreaction\_modifie | \_binding | _{binding}}_{S1}`      |
-| specific term      | r\_term"              |           |                        |
-+--------------------+-----------------------+-----------+------------------------+
++---------------------+------------------------+------------+-------------------------+
+| Description         | Syntax description     | PySCeS     | Rendered LaTeX example\ |
+|                     |                        | example    |                         |
++=====================+========================+============+=========================+
+| Parameters          | As defined in model    | Keq2       | :math:`Keq2`            |
+|                     | file                   |            |                         |
++---------------------+------------------------+------------+-------------------------+
+| Species             | As defined in model    | S1         | :math:`S1`              |
+|                     | file                   |            |                         |
++---------------------+------------------------+------------+-------------------------+
+| Reactions           | As defined in model    | R1         | :math:`R1`              |
+|                     | file                   |            |                         |
++---------------------+------------------------+------------+-------------------------+
+| Steady state        | “\_ss” appended to     | S1\_ss     | :math:`S1_{ss}`         |
+| species             | model definition       |            |                         |
++---------------------+------------------------+------------+-------------------------+
+| Steady state        | “J\_” prepended to     | J\_R1      | :math:`J_{R1}`          |
+| reaction rates      | model definition       |            |                         |
+| (Flux)              |                        |            |                         |
++---------------------+------------------------+------------+-------------------------+
+| Control             | In the format          | ccJR1\_R2\ | :math:`C^{JR1}_{R2}`    |
+| coefficients        | “ccJreaction\_reactio\ |            |                         |
+|                     | n”                     |            |                         |
++---------------------+------------------------+------------+-------------------------+
+| Elasticity          | In the format          | ecR1\_S1   | :math:`\varepsilon^{R1\ |
+| coefficients        | “ecreaction\_modifier\ | or         | }_{S1}`                 |
+|                     | ”                      | ecR2\_Vf1\ | or                      |
+|                     |                        |            | :math:`\varepsilon^{R2\ |
+|                     |                        |            | }_{Vf2}`                |
++---------------------+------------------------+------------+-------------------------+
+| Response            | In the format          | rcJR3\_Vf\ | :math:`R^{JR3}_{Vf3}`   |
+| coefficients        | “rcJreaction\_paramet\ | 3          |                         |
+|                     | er”                    |            |                         |
++---------------------+------------------------+------------+-------------------------+
+| Partial response    | In the format          | prcJR3\_X\ | :math:`^{R2}R^{JR3}_{X\ |
+| coefficients        | “prcJreaction\_parame\ | 2\_R2      | 2}`                     |
+|                     | ter\_reaction”         |            |                         |
++---------------------+------------------------+------------+-------------------------+
+| Control patterns    | CPn where n is an      | CP4        | :math:`CP4`             |
+|                     | number assigned to a   |            |                         |
+|                     | specific control       |            |                         |
+|                     | pattern                |            |                         |
++---------------------+------------------------+------------+-------------------------+
+| Flux contribution   | In the format          | J\_R1\_bi\ | :math:`J_{R1_{binding}\ |
+| by specific term    | "J\_reaction\_term"    | nding      | }`                      |
++---------------------+------------------------+------------+-------------------------+
+| Elasticity          | In the format          | pecR1\_S1\ | :math:`\varepsilon^{R1\ |
+| contribution by     | "pecreaction\_modifie\ | \_binding\ | _{binding}}_{S1}`       |
+| specific term       | r\_term"               |            |                         |
++---------------------+------------------------+------------+-------------------------+
 
 .. note:: Any underscores (\_) in model defined variables or parameters
           will be removed when rendering to LaTeX to ensure consistency.
