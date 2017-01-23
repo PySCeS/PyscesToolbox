@@ -27,6 +27,14 @@ psctb.analyse._thermokin module
     :undoc-members:
     :show-inheritance:
 
+psctb.analyse._thermokin_file_tools module
+------------------------------------------
+
+.. automodule:: psctb.analyse._thermokin_file_tools
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

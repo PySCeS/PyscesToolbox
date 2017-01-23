@@ -10,12 +10,41 @@ from IPython.html import widgets
 from pysces import ModelMap
 from pysces import output_dir as psc_out_dir
 import pysces
+import gzip
+import cPickle as pickle
 
 from ..misc import *
 from ...latextools import LatexExpr
 from ... import modeltools
 
+def save_data2d(data_2dobj, file_name):
+    """
+    Saves a Data2D object to a gzipped cPickle to a specified file name.
+    """
+    mod = data_2dobj.mod
+    data_2dobj.mod = data_2dobj.mod.ModelFile
+    with gzip.open(file_name, 'wb') as f:
+        pickle.dump(data_2dobj, f)
+    data_2dobj.mod = mod
 
+
+def load_data2d(file_name, mod=None, ltxe=None):
+    """
+    Loads a gzipped cPickle file containing a Data2D object. Optionally
+    a model can be provided (which is useful when loading data that
+    reference the same model. For the same reason a LatexExpr object
+    can be supplied.
+    """
+    with gzip.open(file_name, 'rb') as f:
+        data_2dobj = pickle.load(f)
+    if not mod:
+        data_2dobj.mod = pysces.model(data_2dobj.mod)
+    else:
+        data_2dobj.mod = mod
+    if ltxe:
+        del data_2dobj._ltxe
+        data_2dobj._ltxe = ltxe
+    return data_2dobj
 
 #matplotlib 1.5 breaks set_color_cycle functionality
 #now we need cycler
@@ -23,8 +52,8 @@ from matplotlib import __version__ as mpl_version
 
 use_cycler = False
 
-from distutils.version import StrictVersion
-if StrictVersion(mpl_version) >= StrictVersion('1.5.0'):
+from distutils.version import LooseVersion
+if LooseVersion(mpl_version) >= LooseVersion('1.5.0'):
     from cycler import cycler
     use_cycler = True
 
@@ -37,7 +66,9 @@ This whole module is fd in the a
 """
 __all__ = ['LineData',
            'ScanFig',
-           'Data2D']
+           'Data2D',
+           'load_data2d',
+           'save_data2d']
 
 
 def _add_legend_viewlim(ax, **kwargs):
@@ -247,10 +278,19 @@ class Data2D(object):
             category_manifest = {}
         self._category_manifest = category_manifest
 
-        self._axvline = axvline
-
-
         self.mod = mod
+
+        if axvline:
+            scan_in = self.scan_results.scan_in
+            if scan_in.lower() != 'time':
+                try:
+                    self._vline_val = getattr(self.mod, scan_in)
+                except AttributeError:
+                    print 'Model does not have attribute "%s".' % scan_in
+                    self._vline_val = None
+            else:
+                self._vline_val = None
+
         if not ltxe:
             ltxe = LatexExpr(mod)
         self._ltxe = ltxe
@@ -470,14 +510,8 @@ class Data2D(object):
         for k,v in self._category_manifest.iteritems():
             scan_fig.toggle_category(k,v)
 
-        if self._axvline:
-            scan_in = self.scan_results.scan_in
-            if scan_in.lower() != 'time':
-                try:
-                    init_val = getattr(self.mod,scan_in)
-                    scan_fig.ax.axvline(init_val,ls=':',color='gray')
-                except:
-                    print_f('Model has attribute "%s' % scan_in)
+        if self._vline_val:
+            scan_fig.ax.axvline(self._vline_val, ls=':', color='gray')
 
         return scan_fig
 

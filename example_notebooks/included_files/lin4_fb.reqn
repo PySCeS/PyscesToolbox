@@ -1,0 +1,23 @@
+# Automatically parsed and split rate equations for model: lin4_fb.psc
+# generated on: 14:01:23 23-01-2017
+
+# Note that this is a best effort attempt that is highly dependent
+# on the form of the rate equations as defined in the model file.
+# Check correctness before use.
+
+# R1 :successful separation of rate equation terms
+!T{R1}{ma} X0 - S1/Keq_1
+!T{R1}{bind_vc} 1.0*Vf_1*(S1/S1_05_1 + X0/X0_05_1)**(h_1 - 1.0)*(a_1*(S3/S3_05_1)**h_1 + 1)/(X0_05_1*(a_1*(S3/S3_05_1)**h_1*(S1/S1_05_1 + X0/X0_05_1)**h_1 + (S3/S3_05_1)**h_1 + (S1/S1_05_1 + X0/X0_05_1)**h_1 + 1))
+!G{R1}{gamma_keq} S1/(Keq_1*X0)
+
+# R2 :successful separation of rate equation terms
+!T{R2}{ma} S1 - S2/Keq_2
+!T{R2}{bind_vc} 1.0*S2_05_2*Vf_2/(S1*S2_05_2 + S1_05_2*S2 + S1_05_2*S2_05_2)
+!G{R2}{gamma_keq} S2/(Keq_2*S1)
+
+# R3 :successful separation of rate equation terms
+!T{R3}{ma} S2 - S3/Keq_3
+!T{R3}{bind_vc} 1.0*S3_05_3*Vf_3/(S2*S3_05_3 + S2_05_3*S3 + S2_05_3*S3_05_3)
+!G{R3}{gamma_keq} S3/(Keq_3*S2)
+
+# R4 :rate equation not included - irreversible or unknown form

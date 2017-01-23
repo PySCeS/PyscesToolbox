@@ -14,6 +14,8 @@ Contents:
    introduction
    basic_usage
    RateChar
+   Symca
+   Thermokin
    included_files
    references
 

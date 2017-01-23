@@ -23,8 +23,8 @@ class ModelGraph(object):
                     'stroke': "#FF6138",
                     'color': 'black',
                     'shape': 'circle',
-                    'dx': 15,
-                    'dy': 7,
+                    'dx': -12,
+                    'dy': -15,
                     'font_size': 20,
                     'fixed': True,
                     'r': 11,
@@ -35,8 +35,8 @@ class ModelGraph(object):
                      'stroke': "#00A388",
                      'color': 'black',
                      'shape': 'rect',
-                     'dx': 15,
-                     'dy': 7,
+                     'dx': -12,
+                     'dy': -15,
                      'font_size': 20,
                      'fixed': True,
                      'r': 8,
@@ -49,6 +49,8 @@ class ModelGraph(object):
                     6: "rgb(253,174,97)", 7: "rgb(244,109,67)",
                     8: "rgb(213,62,79)", 9: "rgb(158,1,66)",
                     10: "rgb(158,1,66)"}
+
+    DUMMY_SINK_NAMES = ['dummy','sink']
 
 
     def __init__(self, mod, pos_dic=None, analysis_method=None,
@@ -245,7 +247,7 @@ class ModelGraph(object):
                         {'strokewidth': '0px'})
 
     def remove_dummy_sinks(self):
-        for each in ['dummy', 'sink']:
+        for each in ModelGraph.DUMMY_SINK_NAMES:
             if each in self._eventful_graph.node:
                 del self._eventful_graph.node[each]
 
@@ -314,7 +316,7 @@ class ModelGraph(object):
 
     @property
     def width(self):
-        return self._force_directed_graph.height
+        return self._force_directed_graph.width
 
     @width.setter
     def width(self, value):

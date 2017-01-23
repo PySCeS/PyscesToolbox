@@ -1,12 +1,14 @@
 import numpy as np
 from numpy import array, nanmin, nanmax
 from sympy import Symbol
-from pysces import ModelMap
+from pysces import ModelMap, Scanner, ParScanner
 from numpy import NaN, abs
 
 from ...utils.model_graph import ModelGraph
 from ...utils.misc import silence_print, DotDict, formatter_factory, \
-    do_safe_state, find_min, find_max, get_value
+    do_safe_state, find_min, find_max, get_value, stringify, \
+    scanner_range_setup
+
 from ...utils.plotting import Data2D
 
 
@@ -21,7 +23,6 @@ def get_state(mod, do_state=False):
     ss = [getattr(mod, 'J_' + r) for r in mod.reactions] + \
         [getattr(mod, s + '_ss') for s in mod.species]
     return ss
-
 
 
 class CCBase(object):
@@ -166,13 +167,15 @@ class CCoef(CCBase):
             )
         return self._latex_name
 
-    def _perscan(self, parameter, scan_range):
+    def _perscan_legacy(self, parameter, scan_range):
 
-        scan_res = [list() for i in range(len(self.control_patterns.values()) + 1)]
+        scan_res = [list()
+                    for i in range(len(self.control_patterns.values()) + 1)]
         scan_res[0] = scan_range
 
         for parvalue in scan_range:
-            state_valid = do_safe_state(self.mod, parameter, parvalue,type='mca')
+            state_valid = do_safe_state(
+                self.mod, parameter, parvalue, type='mca')
             cc_abs_value = 0
             for i, cp in enumerate(self.control_patterns.values()):
                 if state_valid:
@@ -184,18 +187,22 @@ class CCoef(CCBase):
 
             for i, cp in enumerate(self.control_patterns.values()):
                 if state_valid:
-                    scan_res[i + 1][-1] = (scan_res[i + 1][-1]/cc_abs_value) * 100
+                    scan_res[i + 1][-1] = (scan_res[i + 1]
+                                           [-1] / cc_abs_value) * 100
 
         return scan_res
 
+    def _valscan_legacy(self, parameter, scan_range):
 
-    def _valscan(self, parameter, scan_range):
-
-        scan_res = [list() for i in range(len(self.control_patterns.values()) + 2)]
+        control_pattern_range = range(len(self.control_patterns.values()) + 2)
+        scan_res = [list() for i in control_pattern_range]
         scan_res[0] = scan_range
 
         for parvalue in scan_range:
-            state_valid = do_safe_state(self.mod, parameter, parvalue,type='mca')
+            state_valid = do_safe_state(self.mod,
+                                        parameter,
+                                        parvalue,
+                                        type='mca')
             cc_value = 0
             for i, cp in enumerate(self.control_patterns.values()):
                 if state_valid:
@@ -211,26 +218,124 @@ class CCoef(CCBase):
 
         return scan_res
 
-    def do_par_scan(self, parameter, scan_range, scan_type='percentage', init_return=True):
+    def _perscan(self,
+                 parameter,
+                 scan_range,
+                 par_scan=False,
+                 par_engine='multiproc'):
+
+        val_scan_res = self._valscan(parameter,
+                                     scan_range,
+                                     par_scan,
+                                     par_engine)
+
+        points = len(scan_range)
+        parameter = val_scan_res[:, 0].reshape(points, 1)
+        cp_abs_vals = np.abs(val_scan_res[:, 1:-1])
+        cp_abs_sum = np.sum(cp_abs_vals, 1).reshape(points, 1)
+        cp_abs_perc = (cp_abs_vals / cp_abs_sum) * 100
+        scan_res = np.hstack([parameter, cp_abs_perc])
+        return scan_res
+
+    def _valscan(self,
+                 parameter,
+                 scan_range,
+                 par_scan=False,
+                 par_engine='multiproc'):
+
+        needed_symbols = [parameter] + \
+            stringify(list(self.expression.atoms(Symbol)))
+
+        # This is experimental
+        if par_scan:
+            scanner = ParScanner(self.mod, par_engine)
+        else:
+            scanner = Scanner(self.mod)
+            scanner.quietRun = True
+
+        start, end, points, log = scanner_range_setup(scan_range)
+        scanner.addScanParameter(parameter,
+                                 start=start,
+                                 end=end,
+                                 points=points,
+                                 log=log)
+        scanner.addUserOutput(*needed_symbols)
+        scanner.Run()
+        subs_dict = {}
+        for i, symbol in enumerate(scanner.UserOutputList):
+            subs_dict[symbol] = scanner.UserOutputResults[:, i]
+
+        control_pattern_names = self.control_patterns.keys()
+        denom_expr = str(self.denominator)
+        cp_numerators = [self.control_patterns[cp_name].numerator for
+                         cp_name in control_pattern_names]
+        column_exprs = stringify(cp_numerators)
+
+        parameter = subs_dict[parameter].reshape(points, 1)
+
+        scan_res = []
+
+        denom_val = get_value(denom_expr, subs_dict)
+        for expr in column_exprs:
+            scan_res.append(get_value(expr, subs_dict) / denom_val)
+        scan_res = np.array(scan_res).transpose()
+        cc_vals = np.sum(scan_res, 1).reshape(points, 1)
+        scan_res = np.hstack([parameter, scan_res, cc_vals])
+        return scan_res
+
+    def do_par_scan(self,
+                    parameter,
+                    scan_range,
+                    scan_type='percentage',
+                    init_return=True,
+                    par_scan=False,
+                    par_engine='multiproc',
+                    force_legacy=False):
 
         assert scan_type in ['percentage', 'value']
         init = getattr(self.mod, parameter)
 
-        if scan_type is 'percentage':
-            column_names = [parameter] + \
-                [cp.name for cp in self.control_patterns.values()]
-            y_label = 'Control pattern percentage contribution'
-            scan_res = self._perscan(parameter,scan_range)
-            data_array = array(scan_res, dtype=np.float).transpose()
-            ylim = [nanmin(data_array[:,1:]), nanmax(data_array[:,1:]) * 1.1]
-        elif scan_type is 'value':
-            column_names = [
-                parameter] + [cp.name for cp in self.control_patterns.values()] + [self.name]
-            y_label = 'Control coefficient/pattern value'
-            scan_res = self._valscan(parameter,scan_range)
-            data_array = array(scan_res, dtype=np.float).transpose()
-            ylim = [nanmin(data_array[:,1:]), nanmax(data_array[:,1:]) * 1.1]
+        column_names = [parameter] + \
+                       [cp.name for cp in self.control_patterns.values()]
 
+        if scan_type is 'percentage':
+            y_label = 'Control pattern percentage contribution'
+            try:
+                assert not force_legacy, 'Legacy scan requested'
+                scan_res = self._perscan(parameter,
+                                         scan_range,
+                                         par_scan,
+                                         par_engine)
+                data_array = scan_res
+            except Exception as exception:
+                print 'The parameter scan yielded the following error:'
+                print exception
+                print 'Switching over to slower scan method and replacing'
+                print 'invalid steady states with NaN values.'
+                scan_res = self._perscan_legacy(parameter, scan_range)
+                data_array = array(scan_res, dtype=np.float).transpose()
+
+            ylim = [nanmin(data_array[:, 1:]), nanmax(data_array[:, 1:]) * 1.1]
+        elif scan_type is 'value':
+            column_names = column_names + [self.name]
+            y_label = 'Control coefficient/pattern value'
+            try:
+                assert not force_legacy, 'Legacy scan requested'
+                scan_res = self._valscan(parameter,
+                                         scan_range,
+                                         par_scan,
+                                         par_engine)
+                data_array = scan_res
+            except Exception as exception:
+                print 'The parameter scan yielded the following error:'
+                print exception
+                print 'Switching over to slower scan method and replacing'
+                print 'invalid steady states with NaN values.'
+                scan_res = self._valscan_legacy(parameter, scan_range)
+                data_array = array(scan_res, dtype=np.float).transpose()
+
+            ylim = [nanmin(data_array[:, 1:]), nanmax(data_array[:, 1:]) * 1.1]
+        # print data_array.shape
         if init_return:
             self.mod.SetQuiet()
             setattr(self.mod, parameter, init)
@@ -250,7 +355,7 @@ class CCoef(CCBase):
                          'xlim': [find_min(scan_range), find_max(scan_range)],
                          'ylim': ylim}
 
-        data = Data2D(mod = self.mod,
+        data = Data2D(mod=self.mod,
                       column_names=column_names,
                       data_array=data_array,
                       ltxe=self._ltxe,
@@ -259,13 +364,6 @@ class CCoef(CCBase):
                       file_name=self.name)
 
         return data
-
-
-    # def _recalculate_value(self):
-    #     """Recalculates the control coefficients and control pattern
-    #        values. calls _calc_value() for self and each control
-    #        pattern. Useful for when model parameters change"""
-    #     self._calc_value()
 
     def _calc_abs_value(self):
         """Calculates the absolute numeric value of the control coefficient from the
@@ -309,7 +407,7 @@ class CCoef(CCBase):
         cps = DotDict()
         cps._make_repr('v.name', 'v.value', formatter_factory())
         for i, pattern in enumerate(patterns):
-            name = 'CP{:3}'.format(i + 1).replace(' ','0')
+            name = 'CP{:3}'.format(i + 1).replace(' ', '0')
             cp = CPattern(self.mod,
                           name,
                           pattern,
@@ -319,7 +417,7 @@ class CCoef(CCBase):
             setattr(self, name, cp)
             cps[name] = cp
         self.control_patterns = cps
-        #assert self._check_control_patterns == True
+        # assert self._check_control_patterns == True
 
     def _check_control_patterns(self):
         """Checks that all control patterns are either positive or negative"""
@@ -332,9 +430,9 @@ class CCoef(CCBase):
             all_same = True
         return all_same
 
-    def highlight_patterns(self,width=None, height=None, show_dummy_sinks=False, show_external_modifier_links=False):
+    def highlight_patterns(self, width=None, height=None, show_dummy_sinks=False, show_external_modifier_links=False):
 
-        mg = ModelGraph(mod=self.mod,analysis_method=self._analysis_method)
+        mg = ModelGraph(mod=self.mod, analysis_method=self._analysis_method)
         if height:
             mg.height = height
         if width:

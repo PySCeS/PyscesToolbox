@@ -1,4 +1,4 @@
-import json
+import cPickle as pickle
 from sympy.matrices import Matrix
 from sympy import sympify
 import sys
@@ -31,6 +31,7 @@ class Symca(object):
     Returns
     ------
     """
+
     def __init__(self, mod, auto_load=False, internal_fixed=False):
         super(Symca, self).__init__()
 
@@ -240,7 +241,7 @@ class Symca(object):
     def save_session(self, file_name=None):
         file_name = get_file_path(working_dir=self._working_dir,
                                   internal_filename=self._internal_filename,
-                                  fmt='json',
+                                  fmt='pickle',
                                   file_name=file_name,
                                   write_suffix=False)
 
@@ -259,24 +260,24 @@ class Symca(object):
 
         to_save = main_cc_dict
         with open(file_name, 'w') as f:
-            json.dump(to_save, f)
+            pickle.dump(to_save, f)
 
     def load_session(self, file_name=None):
         file_name = get_file_path(working_dir=self._working_dir,
                                   internal_filename=self._internal_filename,
-                                  fmt='json',
+                                  fmt='pickle',
                                   file_name=file_name,
                                   write_suffix=False)
 
         with open(file_name, 'r') as f:
-            main_cc_dict = json.load(f)
+            main_cc_dict = pickle.load(f)
 
         cc_containers = {}
         for key, value in main_cc_dict.iteritems():
-            common_denom_exp = sympify(value.pop('common_denominator'))
+            common_denom_exp = value.pop('common_denominator')
             cc_container = SMCAtools.spawn_cc_objects(self.mod,
                                                       value.keys(),
-                                                      [sympify(exp) for exp in
+                                                      [exp for exp in
                                                        value.values()],
                                                       common_denom_exp,
                                                       self._ltxe)
@@ -286,9 +287,9 @@ class Symca(object):
 
     def save_results(self, file_name=None, separator=','):
         file_name = get_file_path(working_dir=self._working_dir,
-                                             internal_filename='cc_summary',
-                                             fmt='csv',
-                                             file_name=file_name, )
+                                  internal_filename='cc_summary',
+                                  fmt='csv',
+                                  file_name=file_name, )
 
         rows = []
         cc_counter = 0
@@ -297,19 +298,19 @@ class Symca(object):
 
         while True:
             try:
-                next_dict = getattr(self,'cc_results_%s' % cc_counter)
+                next_dict = getattr(self, 'cc_results_%s' % cc_counter)
                 cc_dicts.append(next_dict)
                 cc_counter += 1
             except:
                 break
 
-        sep = ('######################',0,'','')
+        sep = ('######################', 0, '', '')
         cc_counter = -1
         for cc_dict in cc_dicts:
             result_name = '# results from cc_results'
             if cc_counter >= 0:
                 result_name += '_%s' % cc_counter
-            head = (result_name,0,'','')
+            head = (result_name, 0, '', '')
             rows.append(head)
             for cc_name in sorted(cc_dict.keys()):
                 cc_obj = cc_dict[cc_name]
@@ -334,27 +335,25 @@ class Symca(object):
             cc_counter += 1
 
         str_fmt = 'S%s' % max_len
-        head = ['name','value','latex_name','latex_expression']
+        head = ['name', 'value', 'latex_name', 'latex_expression']
         X = array(rows,
-                     dtype=[(head[0],str_fmt),
-                            (head[1],'float'),
-                            (head[2],str_fmt),
-                            (head[3],str_fmt)])
-
+                  dtype=[(head[0], str_fmt),
+                         (head[1], 'float'),
+                         (head[2], str_fmt),
+                         (head[3], str_fmt)])
 
         try:
             savetxt(fname=file_name,
                     X=X,
                     header=','.join(head),
                     delimiter=separator,
-                    fmt=['%s','%.9f','%s','%s'],)
+                    fmt=['%s', '%.9f', '%s', '%s'],)
 
         except IOError as e:
             print e.strerror
 
-
-    def do_symca(self, internal_fixed=False, auto_save_load=False):
-        if not internal_fixed:
+    def do_symca(self, internal_fixed=None, auto_save_load=False):
+        if internal_fixed is None:
             internal_fixed = self.internal_fixed
 
         def do_symca_internals(self):
@@ -404,7 +403,7 @@ class Symca(object):
                 CC_block_counter = 0
                 for each_common_denom_expr, name_num in simpl_dic.iteritems():
                     name_num[1], \
-                    each_common_denom_expr = SMCAtools.fix_expressions(
+                        each_common_denom_expr = SMCAtools.fix_expressions(
                         name_num[1],
                         each_common_denom_expr,
                         self.lmatrix,
@@ -419,7 +418,8 @@ class Symca(object):
                                                                   self._ltxe, )
 
                     CC_dot_dict = SMCAtools.make_CC_dot_dict(simpl_cc_objects)
-                    setattr(self, 'cc_results_%s' % CC_block_counter, CC_dot_dict)
+                    setattr(self, 'cc_results_%s' %
+                            CC_block_counter, CC_dot_dict)
                     CC_block_counter += 1
 
             self.CC_i_num = CC_i_num
@@ -432,5 +432,3 @@ class Symca(object):
                 self.save_session()
         else:
             do_symca_internals(self)
-
-

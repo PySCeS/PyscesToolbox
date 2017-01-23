@@ -574,10 +574,9 @@ class SymcaToolBox(object):
         CC_dict[cc_container_name] = dict(zip(
             [cc.name for cc in cc_container.values() if
              cc.name is not 'common_denominator'],
-            [str(cc.numerator) for cc in cc_container.values() if
+            [cc.numerator for cc in cc_container.values() if
              cc.name is not 'common_denominator']))
-        CC_dict[cc_container_name]['common_denominator'] = str(
-            cc_container.common_denominator.expression)
+        CC_dict[cc_container_name]['common_denominator'] = cc_container.common_denominator.expression
         return CC_dict
 
 

@@ -63,13 +63,13 @@ Like most tools provided in PySCeSToolbox, instantiation of a
 ``RateChar`` object requires a pysces model object (``PysMod``) as an
 argument. A ``RateChar`` session will typically be initiated as follows
 (here we will use the included
-`lin5\_hill.psc <included_files.html#lin5-hill-psc>`__ model):
+`lin4\_fb.psc <included_files.html#lin4-fb-hill-psc>`__ model):
 
 ``In [1]:``
 
 .. code:: python
 
-    mod = pysces.model('lin5_hill')
+    mod = pysces.model('lin4_fb.psc')
     rc = psctb.RateChar(mod)
 
 
@@ -77,11 +77,10 @@ argument. A ``RateChar`` session will typically be initiated as follows
 
 .. parsed-literal::
 
-    Assuming extension is .psc
     Using model directory: /home/carl/Pysces/psc
-    /home/carl/Pysces/psc/lin5_hill.psc loading ..... 
-    Parsing file: /home/carl/Pysces/psc/lin5_hill.psc
-    Info: "P" has been initialised but does not occur in a rate equation
+    /home/carl/Pysces/psc/lin4_fb.psc loading ..... 
+    Parsing file: /home/carl/Pysces/psc/lin4_fb.psc
+    Info: "X4" has been initialised but does not occur in a rate equation
      
     Calculating L matrix . . . . . . .  done.
     Calculating K matrix . . . . . . .  done.
@@ -95,7 +94,10 @@ session can also be specified during instantiation:
 
 .. code:: python
 
-    rc = psctb.RateChar(mod,min_concrange_factor=100,max_concrange_factor=100,scan_points=255,auto_load=False)
+    rc = psctb.RateChar(mod,min_concrange_factor=100,
+                        max_concrange_factor=100,
+                        scan_points=255,
+                        auto_load=False)
 
 -  ``min_concrange_factor`` : The steady state division factor for
    calculating scan range minimums *(default: 100)*.
@@ -110,7 +112,7 @@ session can also be specified during instantiation:
    ``False``\ *)*.
 
 The settings specified with these optional arguments take effect when
-the corresponding arugments are not specified during a parameter scan.
+the corresponding arguments are not specified during a parameter scan.
 
 Parameter Scan
 ~~~~~~~~~~~~~~
@@ -120,9 +122,26 @@ the variable species using the ``do_ratechar`` method. By default
 ``do_ratechar`` will perform parameter scans for all variable
 metabolites using the settings specified during instantiation. For
 saving/loading see `Saving/Loading
-Sessions <RateChar.html#example-model>`__"Session Saving" below
+Sessions <RateChar.html#saving-loading-sessions>`__ below.
 
 ``In [3]:``
+
+.. code:: python
+
+    mod.species
+
+
+
+
+``Out[3]:``
+
+.. parsed-literal::
+
+    ('S1', 'S2', 'S3')
+
+
+
+``In [4]:``
 
 .. code:: python
 
@@ -152,15 +171,15 @@ customise any parameter scan:
           documentation <http://pysces.sourceforge.net/docs/userguide_doc.html#steady-state-analysis>`__:
 
 For example in a scenario where we only wanted to perform parameter
-scans of 200 points for the metabolites ``A`` and ``C`` starting at a
+scans of 200 points for the metabolites ``S1`` and ``S3`` starting at a
 value of 0.02 and ending at a value 110 times their respective
 steady-state values the method would be called as follows:
 
-``In [4]:``
+``In [5]:``
 
 .. code:: python
 
-    rc.do_ratechar(fixed=['A','C'], scan_min=0.02, max_concrange_factor=110, scan_points=200)
+    rc.do_ratechar(fixed=['S1','S3'], scan_min=0.02, max_concrange_factor=110, scan_points=200)
 
 Accessing Results
 ~~~~~~~~~~~~~~~~~
@@ -174,24 +193,24 @@ These ``RateCharData`` objects are similar to ``Data2D`` objects with
 parameter scan results being accessible through a ``scan_results``
 DotDict:
 
-``In [5]:``
+``In [6]:``
 
 .. code:: python
 
     # Each key represents a field through which results can be accessed
-    sorted(rc.C.scan_results.keys())
+    sorted(rc.S3.scan_results.keys())
 
 
 
 
-``Out[5]:``
+``Out[6]:``
 
 .. parsed-literal::
 
     ['J_R3',
      'J_R4',
-     'ecR3_C',
-     'ecR4_C',
+     'ecR3_S3',
+     'ecR4_S3',
      'ec_data',
      'ec_names',
      'fixed',
@@ -200,16 +219,16 @@ DotDict:
      'flux_max',
      'flux_min',
      'flux_names',
-     'prcJR3_C_R1',
-     'prcJR3_C_R3',
-     'prcJR3_C_R4',
-     'prcJR4_C_R1',
-     'prcJR4_C_R3',
-     'prcJR4_C_R4',
+     'prcJR3_S3_R1',
+     'prcJR3_S3_R3',
+     'prcJR3_S3_R4',
+     'prcJR4_S3_R1',
+     'prcJR4_S3_R3',
+     'prcJR4_S3_R4',
      'prc_data',
      'prc_names',
-     'rcJR3_C',
-     'rcJR4_C',
+     'rcJR3_S3',
+     'rcJR4_S3',
      'rc_data',
      'rc_names',
      'scan_max',
@@ -232,32 +251,14 @@ e.g., ``scan_min`` and ``fixed``, or a 1-dimensional numpy ndarray which
 represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 ``total_supply``):
 
-``In [6]:``
+``In [7]:``
 
 .. code:: python
 
     # Single value results
     
     # scan_min value
-    rc.C.scan_results.scan_min
-
-
-
-
-``Out[6]:``
-
-.. parsed-literal::
-
-    0.020000000000000004
-
-
-
-``In [7]:``
-
-.. code:: python
-
-    # fixed metabolite name
-    rc.C.scan_results.fixed
+    rc.S3.scan_results.scan_min
 
 
 
@@ -266,7 +267,7 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 .. parsed-literal::
 
-    'C'
+    0.020000000000000004
 
 
 
@@ -274,10 +275,8 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 .. code:: python
 
-    # 1-dimensional ndarray results (only every 10th value of 200 value arrays)
-    
-    # scan_range values
-    rc.C.scan_results.scan_range[::10]
+    # fixed metabolite name
+    rc.S3.scan_results.fixed
 
 
 
@@ -286,13 +285,7 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 .. parsed-literal::
 
-    array([  2.00000000e-02,   3.20835464e-02,   5.14676974e-02,
-             8.25633129e-02,   1.32446194e-01,   2.12467180e-01,
-             3.40835032e-01,   5.46759828e-01,   8.77099715e-01,
-             1.40702347e+00,   2.25711514e+00,   3.62081291e+00,
-             5.80842595e+00,   9.31774518e+00,   1.49473155e+01,
-             2.39781445e+01,   3.84651955e+01,   6.17049943e+01,
-             9.89857523e+01,   1.58790699e+02])
+    'S3'
 
 
 
@@ -300,8 +293,10 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 .. code:: python
 
-    # J_R3 values for scan_range
-    rc.C.scan_results.J_R3[::10]
+    # 1-dimensional ndarray results (only every 10th value of 200 value arrays)
+    
+    # scan_range values
+    rc.S3.scan_results.scan_range[::10]
 
 
 
@@ -310,11 +305,13 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 .. parsed-literal::
 
-    array([ 99.99723929,  99.99715896,  99.99680667,  99.9947619 ,
-            99.98168514,  99.89591472,  99.33285568,  95.76327602,
-            77.44198127,  34.87971881,   8.92798864,   3.09635547,
-             2.15014933,   2.00552661,   1.98342879,   1.9797328 ,
-             1.9785994 ,   1.97750519,   1.97585888,   1.9732336 ])
+    array([  2.00000000e-02,   3.42884038e-02,   5.87847316e-02,
+             1.00781731e-01,   1.72782234e-01,   2.96221349e-01,
+             5.07847861e-01,   8.70664626e-01,   1.49268501e+00,
+             2.55908932e+00,   4.38735439e+00,   7.52176893e+00,
+             1.28954725e+01,   2.21082584e+01,   3.79028445e+01,
+             6.49814018e+01,   1.11405427e+02,   1.90995713e+02,
+             3.27446907e+02,   5.61381587e+02])
 
 
 
@@ -322,11 +319,8 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 .. code:: python
 
-    # total_supply values for scan_range
-    rc.C.scan_results.total_supply[::10]
-    
-    # Note that J_R3 and total_supply are equal in this case, because C 
-    # only has a single supply reaction
+    # J_R3 values for scan_range
+    rc.S3.scan_results.J_R3[::10]
 
 
 
@@ -335,11 +329,36 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 .. parsed-literal::
 
-    array([ 99.99723929,  99.99715896,  99.99680667,  99.9947619 ,
-            99.98168514,  99.89591472,  99.33285568,  95.76327602,
-            77.44198127,  34.87971881,   8.92798864,   3.09635547,
-             2.15014933,   2.00552661,   1.98342879,   1.9797328 ,
-             1.9785994 ,   1.97750519,   1.97585888,   1.9732336 ])
+    array([ 199.95837618,  199.95793443,  199.95717575,  199.95586349,
+            199.95351373,  199.94862132,  199.93277067,  199.84116362,
+            199.13023486,  193.32039795,  154.71345957,   58.57037566,
+             12.34220931,    4.95993525,    4.0627301 ,    3.94870431,
+              3.91873852,    3.88648387,    3.83336626,    3.74248032])
+
+
+
+``In [11]:``
+
+.. code:: python
+
+    # total_supply values for scan_range
+    rc.S3.scan_results.total_supply[::10]
+    
+    # Note that J_R3 and total_supply are equal in this case, because S3 
+    # only has a single supply reaction
+
+
+
+
+``Out[11]:``
+
+.. parsed-literal::
+
+    array([ 199.95837618,  199.95793443,  199.95717575,  199.95586349,
+            199.95351373,  199.94862132,  199.93277067,  199.84116362,
+            199.13023486,  193.32039795,  154.71345957,   58.57037566,
+             12.34220931,    4.95993525,    4.0627301 ,    3.94870431,
+              3.91873852,    3.88648387,    3.83336626,    3.74248032])
 
 
 
@@ -352,33 +371,14 @@ coefficient lines, and 2-dimensional array that collects coefficient
 line data for each coefficient type into single arrays (under
 ``ec_data``, ``prc_names``, etc.).
 
-``In [11]:``
+``In [12]:``
 
 .. code:: python
 
     # Metabolic Control Analysis coefficient line data
     
-    # Names of elasticity coefficients related to the 'C' parameter scan
-    rc.C.scan_results.ec_names
-
-
-
-
-``Out[11]:``
-
-.. parsed-literal::
-
-    ['ecR4_C', 'ecR3_C']
-
-
-
-``In [12]:``
-
-.. code:: python
-
-    # The x, y coordinates for two points that will be used to plot a 
-    # visual representation of ecR3_C
-    rc.C.scan_results.ecR3_C
+    # Names of elasticity coefficients related to the 'S3' parameter scan
+    rc.S3.scan_results.ec_names
 
 
 
@@ -387,8 +387,7 @@ line data for each coefficient type into single arrays (under
 
 .. parsed-literal::
 
-    array([[  2.17310179,  28.94552932],
-           [  2.24511684,   3.12298399]])
+    ['ecR4_S3', 'ecR3_S3']
 
 
 
@@ -396,9 +395,9 @@ line data for each coefficient type into single arrays (under
 
 .. code:: python
 
-    # The x,y coordinates for two points that will be used to plot a 
-    # visual representation of ecR4_C
-    rc.C.scan_results.ecR4_C
+    # The x, y coordinates for two points that will be used to plot a 
+    # visual representation of ecR3_S3
+    rc.S3.scan_results.ecR3_S3
 
 
 
@@ -407,8 +406,8 @@ line data for each coefficient type into single arrays (under
 
 .. parsed-literal::
 
-    array([[  0.73730798,   8.98706435],
-           [  6.6171364 ,  10.0585042 ]])
+    array([[   7.74367648,  166.89714142],
+           [   8.87554125,   11.92812809]])
 
 
 
@@ -416,9 +415,9 @@ line data for each coefficient type into single arrays (under
 
 .. code:: python
 
-    # The ecR3_C and ecR4_C data collected into a single array 
-    # (horizontally stacked).
-    rc.C.scan_results.ec_data
+    # The x,y coordinates for two points that will be used to plot a 
+    # visual representation of ecR4_S3
+    rc.S3.scan_results.ecR4_S3
 
 
 
@@ -427,8 +426,28 @@ line data for each coefficient type into single arrays (under
 
 .. parsed-literal::
 
-    array([[  0.73730798,   8.98706435,   2.17310179,  28.94552932],
-           [  6.6171364 ,  10.0585042 ,   2.24511684,   3.12298399]])
+    array([[  2.77554202,  39.66048804],
+           [ 24.76248588,  50.19530973]])
+
+
+
+``In [15]:``
+
+.. code:: python
+
+    # The ecR3_S3 and ecR4_S3 data collected into a single array 
+    # (horizontally stacked).
+    rc.S3.scan_results.ec_data
+
+
+
+
+``Out[15]:``
+
+.. parsed-literal::
+
+    array([[   2.77554202,   39.66048804,    7.74367648,  166.89714142],
+           [  24.76248588,   50.19530973,    8.87554125,   11.92812809]])
 
 
 
@@ -443,75 +462,82 @@ represents a ``DotDict`` dictionary-like object (like ``scan_results``),
 however as each key maps to exactly one result, the data can be
 displayed as a table (see `Basic Usage <basic_usage.html#tables>`__):
 
-``In [15]:``
+``In [16]:``
 
 .. code:: python
 
     # Metabolic control analysis coefficient results 
-    rc.C.mca_results
+    rc.S3.mca_results
 
 
 
 
 
-+------------------------------------+-------------+
-| :math:`C^{JR3}_{R1}`               | 1.000       |
-+------------------------------------+-------------+
-| :math:`C^{JR3}_{R3}`               | 7.326e-07   |
-+------------------------------------+-------------+
-| :math:`C^{JR3}_{R4}`               | 0.000       |
-+------------------------------------+-------------+
-| :math:`C^{JR4}_{R1}`               | 0.000       |
-+------------------------------------+-------------+
-| :math:`C^{JR4}_{R3}`               | 0.000       |
-+------------------------------------+-------------+
-| :math:`C^{JR4}_{R4}`               | 0.918       |
-+------------------------------------+-------------+
-| :math:`\varepsilon^{R1}_{C}`       | -2.922      |
-+------------------------------------+-------------+
-| :math:`\varepsilon^{R3}_{C}`       | -68.297     |
-+------------------------------------+-------------+
-| :math:`\varepsilon^{R4}_{C}`       | 0.051       |
-+------------------------------------+-------------+
-| :math:`\,^{R1}R^{JR3}_{C}`         | -2.922      |
-+------------------------------------+-------------+
+.. raw:: html
 
-+----------------------------------+--------------+
-| :math:`\,^{R3}R^{JR3}_{C}`       | -5.004e-05   |
-+----------------------------------+--------------+
-| :math:`\,^{R4}R^{JR3}_{C}`       | 0.000        |
-+----------------------------------+--------------+
-| :math:`\,^{R1}R^{JR4}_{C}`       | -0.000       |
-+----------------------------------+--------------+
-| :math:`\,^{R3}R^{JR4}_{C}`       | -0.000       |
-+----------------------------------+--------------+
-| :math:`\,^{R4}R^{JR4}_{C}`       | 0.047        |
-+----------------------------------+--------------+
-| :math:`R^{JR3}_{C}`              | -2.922       |
-+----------------------------------+--------------+
-| :math:`R^{JR4}_{C}`              | 0.047        |
-+----------------------------------+--------------+
+   <div>
 
++-------------------------------------+-------------+
+| :math:`C^{JR3}_{R1}`                | 1.000       |
++-------------------------------------+-------------+
+| :math:`C^{JR3}_{R3}`                | 4.612e-05   |
++-------------------------------------+-------------+
+| :math:`C^{JR3}_{R4}`                | 0.000       |
++-------------------------------------+-------------+
+| :math:`C^{JR4}_{R1}`                | 0.000       |
++-------------------------------------+-------------+
+| :math:`C^{JR4}_{R3}`                | 0.000       |
++-------------------------------------+-------------+
+| :math:`C^{JR4}_{R4}`                | 1.000       |
++-------------------------------------+-------------+
+| :math:`\varepsilon^{R1}_{S3}`       | -2.888      |
++-------------------------------------+-------------+
+| :math:`\varepsilon^{R3}_{S3}`       | -19.340     |
++-------------------------------------+-------------+
+| :math:`\varepsilon^{R4}_{S3}`       | 0.108       |
++-------------------------------------+-------------+
+| :math:`\,^{R1}R^{JR3}_{S3}`         | -2.888      |
++-------------------------------------+-------------+
+
++-----------------------------------+--------------+
+| :math:`\,^{R3}R^{JR3}_{S3}`       | -8.921e-04   |
++-----------------------------------+--------------+
+| :math:`\,^{R4}R^{JR3}_{S3}`       | 0.000        |
++-----------------------------------+--------------+
+| :math:`\,^{R1}R^{JR4}_{S3}`       | -0.000       |
++-----------------------------------+--------------+
+| :math:`\,^{R3}R^{JR4}_{S3}`       | -0.000       |
++-----------------------------------+--------------+
+| :math:`\,^{R4}R^{JR4}_{S3}`       | 0.108        |
++-----------------------------------+--------------+
+| :math:`R^{JR3}_{S3}`              | -2.889       |
++-----------------------------------+--------------+
+| :math:`R^{JR4}_{S3}`              | 0.108        |
++-----------------------------------+--------------+
+
+.. raw:: html
+
+   </div>
 
 
 
 Naturally, coefficients can also be accessed individually:
 
-``In [16]:``
+``In [17]:``
 
 .. code:: python
 
     # Control coefficient ccJR3_R1 value
-    rc.C.mca_results.ccJR3_R1
+    rc.S3.mca_results.ccJR3_R1
 
 
 
 
-``Out[16]:``
+``Out[17]:``
 
 .. parsed-literal::
 
-    0.99999663219399015
+    0.99986784585886035
 
 
 
@@ -525,12 +551,12 @@ main focus of RateChar. Parameter scan results for any particular
 species can be visualised as a ``ScanFig`` object through the ``plot``
 method:
 
-``In [17]:``
+``In [18]:``
 
 .. code:: python
 
-    # Rate characteristic plot for 'C'.
-    C_rate_char_plot = rc.C.plot()
+    # Rate characteristic plot for 'S3'.
+    S3_rate_char_plot = rc.S3.plot()
 
 Plots generated by ``RateChar`` do not have widgets for each individual
 line; lines are enabled or disabled in batches according to the category
@@ -541,7 +567,7 @@ instance, we would click the ``J_R3`` and the
 ``Partial Response Coefficients`` buttons (in addition to those that are
 enabled by default).
 
-``In [18]:``
+``In [19]:``
 
 .. code:: python
 
@@ -549,10 +575,10 @@ enabled by default).
     
     # The two method calls below are equivalent to clicking the 'J_R3'
     # and 'Partial Response Coefficients' buttons:
-    # C_rate_char_plot.toggle_category('J_R3',True)
-    # C_rate_char_plot.toggle_category('Partial Response Coefficients',True)
+    # S3_rate_char_plot.toggle_category('J_R3',True)
+    # S3_rate_char_plot.toggle_category('Partial Response Coefficients',True)
     
-    C_rate_char_plot.interact()
+    S3_rate_char_plot.interact()
 
 
 
@@ -562,23 +588,23 @@ enabled by default).
 
 
 
-.. image:: RateChar_files/RateChar_32_0.png
+.. image:: RateChar_files/RateChar_33_0.png
 
 
 Modifying the status of individual lines is still supported, but has to
 take place via the ``toggle_line`` method. As an example ``prcJR3_C_R4``
 can be disabled as follows:
 
-``In [19]:``
+``In [20]:``
 
 .. code:: python
 
-    C_rate_char_plot.toggle_line('prcJR3_C_R4', False)
-    C_rate_char_plot.show()
+    S3_rate_char_plot.toggle_line('prcJR3_S3_R4', False)
+    S3_rate_char_plot.show()
 
 
 
-.. image:: RateChar_files/RateChar_34_0.png
+.. image:: RateChar_files/RateChar_35_0.png
 
 
 .. note:: For more details on saving see the sections `Saving and
@@ -591,11 +617,11 @@ Saving
 Saving/Loading Sessions
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-RateChar sessions can be saved for later use. This is esspecially useful
+RateChar sessions can be saved for later use. This is especially useful
 when working with large data sets that take some time to generate. Data
 sets can be saved to any arbitrary location by supplying a path:
 
-``In [20]:``
+``In [21]:``
 
 .. code:: python
 
@@ -604,25 +630,25 @@ sets can be saved to any arbitrary location by supplying a path:
     rc.save_session(file_name = save_file)
 
 When no path is supplied the dataset will be saved to the default
-directory. (Which should be
-"~/Pysces/lin5\_hill/ratechar/save\_data.npz" in this case.
-
-``In [21]:``
-
-.. code:: python
-
-    rc.save_session() # to "~/Pysces/lin5_hill/ratechar/save_data.npz"
-
-Similarly results may be loaded using the ``load_session`` method,
-either with or without a specified path:
+directory. (Which should be "~/Pysces/lin4\_fb/ratechar/save\_data.npz"
+in this case.
 
 ``In [22]:``
 
 .. code:: python
 
+    rc.save_session() # to "~/Pysces/lin4_fb/ratechar/save_data.npz"
+
+Similarly results may be loaded using the ``load_session`` method,
+either with or without a specified path:
+
+``In [23]:``
+
+.. code:: python
+
     rc.load_session(save_file)
     # OR
-    rc.load_session() # from "~/Pysces/lin5_hill/ratechar/save_data.npz"
+    rc.load_session() # from "~/Pysces/lin4_fb/ratechar/save_data.npz"
 
 Saving Results
 ^^^^^^^^^^^^^^
@@ -632,12 +658,12 @@ location or to the default directory. Unlike saving of sessions results
 are spread over multiple files, so here an existing folder must be
 specified:
 
-``In [23]:``
+``In [24]:``
 
 .. code:: python
 
     # This points to a subdirectory under the Pysces directory
-    save_folder = path.expanduser('~/Pysces/lin5_hill/')
+    save_folder = path.expanduser('~/Pysces/lin4_fb/')
     rc.save_results(save_folder)
 
 A subdirectory will be created for each metabolite with the files
@@ -646,12 +672,12 @@ A subdirectory will be created for each metabolite with the files
 starting at "0" which increments after each save operation to prevent
 overwriting files).
 
-``In [24]:``
+``In [25]:``
 
 .. code:: python
 
     # Otherwise results will be saved to the default directory 
-    rc.save_results(save_folder) # to sub folders in "~/Pysces/lin5_hill/ratechar/
+    rc.save_results(save_folder) # to sub folders in "~/Pysces/lin4_fb/ratechar/
 
 Alternatively the methods ``save_coefficient_results``,
 ``save_flux_results``, ``save_summary`` and ``save_all_results``
