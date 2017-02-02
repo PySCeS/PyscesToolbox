@@ -14,15 +14,18 @@ PyscesToolbox currently provides tools for:
 
 PyscesToolbox was designed to be used within the IPython notebook, but most of the core features should work in a normal Python script.
 
-This project is a work in progress and most features still require proper documentation. Partial documentation can be found at [http://pyscestoolbox.readthedocs.org](http://pyscestoolbox.readthedocs.org).
+Documentation can be found at [http://pyscestoolbox.readthedocs.org](http://pyscestoolbox.readthedocs.org). While all major tools have been documented, the documentation is still a work in progress.
 
 
 ## IMPORTANT NOTICE
 
 Because this project is still in its infancy, future changes might break older scripts. These types of changes will be kept to a minimum and will be documented here.
 
-Major changes were made on 11/11/2015 that might break scripts coded before this date. These changes are related to the naming of methods and fields. For scripts older than 11/11/2015 we recommend using an older version of PySCeSToolbox (noted under **Installation**). Manual porting of scripts is also possible with details of necessary changes outlined under **Porting scripts to latest version**.
+### Changes on 2017-02-02: Dropped IPython Notebook 3.x.x support
+As of 2017-02-02 IPython Notebook 3.x.x support has been dropped in favour of Jupyter 4.x.x. This should not affect the functioning of scripts (save for those based on versions before that of 2015-11-11). PySCeSToolbox will however require the Jupyter Notebook as of this date in order to use its interactive features.
 
+### Changes on 2015-11-11: API changes
+Major changes were made on 2015-11-11 that might break scripts coded before this date. These changes are related to the naming of methods and fields. For scripts older than 2015-11-11 we recommend using an older version of PySCeSToolbox (noted under **Installation**). Manual porting of scripts is also possible with details of necessary changes outlined under **Porting scripts to latest version**.
 
 
 ## Requirements
@@ -38,7 +41,7 @@ Major changes were made on 11/11/2015 that might break scripts coded before this
 
 We recommend running PySCeSToolbox on Linux due to the ease of installing the Python environment, however it is compatible with Windows (see below).
 
-Any versions of the SciPy stack components released in or after 2014 should work, the only hard requirement is an IPython version in the 3.x.x series as PyscesToolbox relies quite heavily on the features of the IPython notebook and its widget system.
+Any versions of the SciPy stack components released in or after 2014 should work, the only hard requirement is a Jupyter Notebook version in the 4.x.x series (for versions later than 2017-02-02) as PyscesToolbox relies quite heavily on the features of the Jupyter Notebook and its widget system for interactive work.
 
 Required packages should automatically download and install when using the commands specified under **Installation** below.
 
@@ -64,14 +67,14 @@ Any existing notebooks should be placed in the ``notebooks`` subdirectory within
 
 PyscesToolbox can be installed from github using pip by using the following two commands in the terminal (for Linux) or in the WinPython Command Prompt (for Windows):
 
-For the pre-11/11/2015 version:
-
 For the latest version:
 
 ```bash
 pip install git+https://github.com/exe0cdc/ipython-d3networkx.git
 pip install git+https://github.com/PySCeS/PyscesToolbox.git
 ```
+
+For the pre-2015-11-11 version:
 
 ```bash
 pip install git+https://github.com/exe0cdc/ipython-d3networkx.git
@@ -80,9 +83,9 @@ pip install git+https://github.com/PySCeS/PyscesToolbox.git@f63b5ab660f103105750
 
 ## Basic usage
 
-To start a PySCeSToolbox session in a IPython notebook:
+To start a PySCeSToolbox session in a Jupyter notebook:
 
- 1. Start up the IPython Notebook using the ``ipython notebook`` command in the terminal on Linux or by opening "IPython Notebook.exe" on Windows
+ 1. Start up the Jupyter Notebook using the ``jupyter notebook`` command in the terminal
  2. Create a new notebook by clicking the ``New`` button on the top right of the window and selecting ``Python 2``
  3. Run the following three commands in the first cell:
 
@@ -96,7 +99,7 @@ Model files must be placed in `~/Pysces/psc/` if using Linux or `C:\Pysces\psc\`
 
 ## Porting scripts to latest version
 
-Method and variable names and the analysis objects they belong to that were changed on 11/11/2015 are documented in the tables below. To port any older script simply change the old name of any method/variable to the new name.
+Method and variable names and the analysis objects they belong to that were changed on 2015-11-11 are documented in the tables below. To port any older script simply change the old name of any method/variable to the new name.
 
 **RateChar**
 
