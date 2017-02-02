@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from matplotlib import transforms
 from matplotlib import rcParams
 from numpy import linspace
-from IPython.html import widgets
+import ipywidgets as widgets
 from pysces import ModelMap
 from pysces import output_dir as psc_out_dir
 import pysces
@@ -673,8 +673,7 @@ class ScanFig(object):
 
         self._lines
 
-        if rcParams['backend'] == \
-                'module://IPython.kernel.zmq.pylab.backend_inline':
+        if 'backend_inline' in rcParams['backend']:
             plt.close()
         self._save_button_ = None
 
@@ -714,8 +713,7 @@ class ScanFig(object):
             loc=2,
             borderaxespad=0.)
 
-        if rcParams['backend'] == \
-                'module://IPython.kernel.zmq.pylab.backend_inline':
+        if 'backend_inline' in rcParams['backend']:
             clear_output(wait=True)
             display(self.fig)
         else:
@@ -1072,14 +1070,14 @@ class ScanFig(object):
         self.show()
         for k, v in self._widgets.iteritems():
             if len(v.children) > 0:
-                head = widgets.Latex(value=k)
+                head = widgets.Label(value=k)
                 display(head)
                 display(v)
                 v._css = [(None, 'flex-wrap', 'wrap'), ]
                 # v.remove_class('vbox')
                 # v.add_class('hbox')
                 # v.set_css({'flex-wrap': 'wrap'})
-        display(widgets.Latex(value='$~$'))
+        display(widgets.Label(value='$~$'))
         display(self._save_button)
         for boxes in self._widgets.itervalues():
             for button in boxes.children:
@@ -1105,13 +1103,13 @@ class ScanFig(object):
         self.show()
         for k, v in self._figure_widgets.iteritems():
             if len(v.children) > 0:
-                head = widgets.Latex(value=k)
+                head = widgets.Label(value=k)
                 display(head)
                 display(v)
                 # v.remove_class('vbox')
                 # v.add_class('hbox')
                 v._css = [(None, 'flex-wrap', 'wrap'), ]
-        display(widgets.Latex(value='$~$'))
+        display(widgets.Label(value='$~$'))
         display(self._save_button)
         # self._save_button.remove_class('vbox')
         # self._save_button.add_class('hbox')

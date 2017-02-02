@@ -4,7 +4,7 @@ from numpy import floor
 from sympy import Symbol
 
 from IPython.display import display
-from IPython.html import widgets
+import ipywidgets as widgets
 from pysces import ModelMap
 from d3networkx_psctb import ForceDirectedGraph
 from d3networkx_psctb import EventfulGraph
@@ -364,9 +364,9 @@ class ModelGraph(object):
                      show_external_modifier_links=False):
         colors = ModelGraph.RGB_RGB_RGB_
         symbols = cp.numerator.atoms(Symbol)
-        title = widgets.Latex(
+        title = widgets.Label(
             'Control Patterns for $' + cp.parent.latex_name + '$')
-        CP_repr = widgets.Latex('$~$')
+        CP_repr = widgets.Label('$~$')
         _, controlled, controller = split_coefficient(cp.parent.name, self.mod)
         species_names = [species.name for species in self._model_map.species]
 
@@ -409,8 +409,8 @@ class ModelGraph(object):
                      show_external_modifier_links=False):
 
         colors = ModelGraph.RGB_RGB_RGB_
-        title = widgets.Latex('Control Patterns for $' + cc.latex_name + '$')
-        CP_repr = widgets.Latex('$~$')
+        title = widgets.Label('Control Patterns for $' + cc.latex_name + '$')
+        CP_repr = widgets.Label('$~$')
         _, controlled, controller = split_coefficient(cc.name, self.mod)
         species_names = [species.name for species in self._model_map.species]
 
