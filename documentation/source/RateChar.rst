@@ -67,7 +67,7 @@ argument. A ``RateChar`` session will typically be initiated as follows
 
 ``In [1]:``
 
-.. code:: python
+.. code:: ipython2
 
     mod = pysces.model('lin4_fb.psc')
     rc = psctb.RateChar(mod)
@@ -92,7 +92,7 @@ session can also be specified during instantiation:
 
 ``In [2]:``
 
-.. code:: python
+.. code:: ipython2
 
     rc = psctb.RateChar(mod,min_concrange_factor=100,
                         max_concrange_factor=100,
@@ -126,7 +126,7 @@ Sessions <RateChar.html#saving-loading-sessions>`__ below.
 
 ``In [3]:``
 
-.. code:: python
+.. code:: ipython2
 
     mod.species
 
@@ -143,7 +143,7 @@ Sessions <RateChar.html#saving-loading-sessions>`__ below.
 
 ``In [4]:``
 
-.. code:: python
+.. code:: ipython2
 
     rc.do_ratechar()
 
@@ -177,7 +177,7 @@ steady-state values the method would be called as follows:
 
 ``In [5]:``
 
-.. code:: python
+.. code:: ipython2
 
     rc.do_ratechar(fixed=['S1','S3'], scan_min=0.02, max_concrange_factor=110, scan_points=200)
 
@@ -195,7 +195,7 @@ DotDict:
 
 ``In [6]:``
 
-.. code:: python
+.. code:: ipython2
 
     # Each key represents a field through which results can be accessed
     sorted(rc.S3.scan_results.keys())
@@ -253,7 +253,7 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 ``In [7]:``
 
-.. code:: python
+.. code:: ipython2
 
     # Single value results
     
@@ -273,7 +273,7 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 ``In [8]:``
 
-.. code:: python
+.. code:: ipython2
 
     # fixed metabolite name
     rc.S3.scan_results.fixed
@@ -291,7 +291,7 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 ``In [9]:``
 
-.. code:: python
+.. code:: ipython2
 
     # 1-dimensional ndarray results (only every 10th value of 200 value arrays)
     
@@ -317,7 +317,7 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 ``In [10]:``
 
-.. code:: python
+.. code:: ipython2
 
     # J_R3 values for scan_range
     rc.S3.scan_results.J_R3[::10]
@@ -339,7 +339,7 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 ``In [11]:``
 
-.. code:: python
+.. code:: ipython2
 
     # total_supply values for scan_range
     rc.S3.scan_results.total_supply[::10]
@@ -373,7 +373,7 @@ line data for each coefficient type into single arrays (under
 
 ``In [12]:``
 
-.. code:: python
+.. code:: ipython2
 
     # Metabolic Control Analysis coefficient line data
     
@@ -393,7 +393,7 @@ line data for each coefficient type into single arrays (under
 
 ``In [13]:``
 
-.. code:: python
+.. code:: ipython2
 
     # The x, y coordinates for two points that will be used to plot a 
     # visual representation of ecR3_S3
@@ -413,7 +413,7 @@ line data for each coefficient type into single arrays (under
 
 ``In [14]:``
 
-.. code:: python
+.. code:: ipython2
 
     # The x,y coordinates for two points that will be used to plot a 
     # visual representation of ecR4_S3
@@ -433,7 +433,7 @@ line data for each coefficient type into single arrays (under
 
 ``In [15]:``
 
-.. code:: python
+.. code:: ipython2
 
     # The ecR3_S3 and ecR4_S3 data collected into a single array 
     # (horizontally stacked).
@@ -464,7 +464,7 @@ displayed as a table (see `Basic Usage <basic_usage.html#tables>`__):
 
 ``In [16]:``
 
-.. code:: python
+.. code:: ipython2
 
     # Metabolic control analysis coefficient results 
     rc.S3.mca_results
@@ -525,7 +525,7 @@ Naturally, coefficients can also be accessed individually:
 
 ``In [17]:``
 
-.. code:: python
+.. code:: ipython2
 
     # Control coefficient ccJR3_R1 value
     rc.S3.mca_results.ccJR3_R1
@@ -553,7 +553,7 @@ method:
 
 ``In [18]:``
 
-.. code:: python
+.. code:: ipython2
 
     # Rate characteristic plot for 'S3'.
     S3_rate_char_plot = rc.S3.plot()
@@ -569,7 +569,7 @@ enabled by default).
 
 ``In [19]:``
 
-.. code:: python
+.. code:: ipython2
 
     # Display plot via `interact` and enable certain lines by clicking category buttons.
     
@@ -597,7 +597,7 @@ can be disabled as follows:
 
 ``In [20]:``
 
-.. code:: python
+.. code:: ipython2
 
     S3_rate_char_plot.toggle_line('prcJR3_S3_R4', False)
     S3_rate_char_plot.show()
@@ -623,7 +623,7 @@ sets can be saved to any arbitrary location by supplying a path:
 
 ``In [21]:``
 
-.. code:: python
+.. code:: ipython2
 
     # This points to a file under the Pysces directory 
     save_file = path.expanduser('~/Pysces/rc_doc_example.npz')
@@ -635,7 +635,7 @@ in this case.
 
 ``In [22]:``
 
-.. code:: python
+.. code:: ipython2
 
     rc.save_session() # to "~/Pysces/lin4_fb/ratechar/save_data.npz"
 
@@ -644,7 +644,7 @@ either with or without a specified path:
 
 ``In [23]:``
 
-.. code:: python
+.. code:: ipython2
 
     rc.load_session(save_file)
     # OR
@@ -660,7 +660,7 @@ specified:
 
 ``In [24]:``
 
-.. code:: python
+.. code:: ipython2
 
     # This points to a subdirectory under the Pysces directory
     save_folder = path.expanduser('~/Pysces/lin4_fb/')
@@ -674,7 +674,7 @@ overwriting files).
 
 ``In [25]:``
 
-.. code:: python
+.. code:: ipython2
 
     # Otherwise results will be saved to the default directory 
     rc.save_results(save_folder) # to sub folders in "~/Pysces/lin4_fb/ratechar/

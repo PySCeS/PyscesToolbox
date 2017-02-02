@@ -1,5 +1,5 @@
 #!/usr/bin/env  python
-from IPython import nbformat
+import nbformat
 from sys import argv
 from os import path
 

@@ -6,7 +6,7 @@
 file_name_sans_extension=$1
 
 echo "IPython Notebook conversion to rst:"
-ipython nbconvert $file_name_sans_extension.ipynb --to rst
+jupyter nbconvert $file_name_sans_extension.ipynb --to rst
 echo ""
 echo "Fixing conversion:"
 python fix_conversion.py $file_name_sans_extension.rst
