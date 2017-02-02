@@ -7,7 +7,7 @@
 reinstall.sh
 .idea
 *.old
-/documentation/build
+/documentation/build/
 *.ipynb_checkpoints*
 doctemp.odt
 tk_test.py
