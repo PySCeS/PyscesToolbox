@@ -37,7 +37,36 @@ __all__ = ['cc_list',
            'is_iterable',
            'scanner_range_setup',
            'is_linear',
-           'column_multiply', ]
+           'column_multiply',
+           'unix_to_windows_path', ]
+
+
+def unix_to_windows_path(path_to_convert, drive_letter='C'):
+    """
+    For a string representing a POSIX compatible path (usually
+    starting with either '~' or '/'), returns a string representing an
+    equivalent Windows compatible path together with a drive letter.
+
+    Parameters
+    ----------
+    path_to_convert : string
+        A string representing a POSIX path
+    drive_letter : string (Default : 'C')
+        A single character string representing the desired drive letter
+
+    Returns
+    -------
+    string
+        A string representing a Windows compatible path.
+    """
+    if path_to_convert.startswith('~'):
+        path_to_convert = path_to_convert[1:]
+    if path_to_convert.startswith('/'):
+        path_to_convert = path_to_convert[1:]
+    path_to_convert = '{}{}{}'.format(drive_letter,
+                                      ':\\',
+                                      path_to_convert).replace('/', '\\')
+    return path_to_convert
 
 
 def column_multiply(arr):
