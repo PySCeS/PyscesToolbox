@@ -8,6 +8,7 @@ from ...modeltools import make_path, get_file_path
 from ...latextools import LatexExpr
 from .symca_toolbox import SymcaToolBox as SMCAtools
 from numpy import savetxt, array
+from ...utils import ConfigReader
 
 
 all = ['Symca']
@@ -34,6 +35,8 @@ class Symca(object):
 
     def __init__(self, mod, auto_load=False, internal_fixed=False):
         super(Symca, self).__init__()
+        ConfigReader.get_config()
+
 
         self.mod, obj_type = extract_model(mod)
         self.mod.doMca()

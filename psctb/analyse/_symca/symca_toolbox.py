@@ -9,7 +9,7 @@ from sympy.matrices import Matrix, diag, NonSquareMatrixError
 from .ccobjects import CCBase, CCoef
 from ...utils.misc import DotDict
 from ...utils.misc import formatter_factory
-
+from ...utils import ConfigReader
 
 
 ## Everything in this file can be a function rather than a static method
@@ -291,8 +291,8 @@ class SymcaToolBox(object):
         function but uses maxima instead
         """
 
-        maxima_in_file = join(path_to,'in.txt')
-        maxima_out_file = join(path_to,'out.txt')
+        maxima_in_file = join(path_to,'in.txt').replace('\\','\\\\')
+        maxima_out_file = join(path_to,'out.txt').replace('\\','\\\\')
         if expression.is_Matrix:
             expr_mat = expression[:, :]
             # print expr_mat
@@ -317,7 +317,11 @@ class SymcaToolBox(object):
             with open(maxima_in_file, 'w') as f:
                 f.write(batch_string)
 
-            maxima_command = ['maxima', '--batch=' + maxima_in_file]
+            config = ConfigReader.get_config()
+            if config['platform'] == 'win32':
+                maxima_command = [config['maxima_path'], '--batch=' + maxima_in_file]
+            else:
+                maxima_command = ['maxima', '--batch=' + maxima_in_file]
 
             dn = open(devnull, 'w')
             subprocess.call(maxima_command, stdin=dn, stdout=dn, stderr=dn)
