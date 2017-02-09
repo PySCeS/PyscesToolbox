@@ -198,7 +198,17 @@ follows:
 
 .. code:: python
 
-    tk = psctb.ThermoKin(mod,path.expanduser('~/Pysces/psc/lin4_fb.reqn'))
+    # This path leads to the provided rate equation file file 
+    path_to_reqn = '~/Pysces/psc/lin4_fb.reqn'
+    
+    # Correct path depending on platform - necessary for platform independent scripts
+    if platform == 'win32':
+        path_to_reqn = psctb.utils.misc.unix_to_windows_path(path_to_reqn)
+    else:
+        path_to_reqn = path.expanduser(path_to_reqn)
+    
+    
+    tk = psctb.ThermoKin(mod,path_to_reqn)
 
 If the path specified does not exist, a new ``.reqn`` file will be
 generated there instead.
@@ -900,7 +910,17 @@ The contents of the saved data file is as follows:
     # the following code requires `pandas` to run
     import pandas as pd
     # load csv file at default path
-    saved_results = pd.read_csv(path.expanduser('~/Pysces/lin4_fb/thermokin/tk_summary_0.csv'))
+    results_path = '~/Pysces/lin4_fb/thermokin/tk_summary_0.csv'
+    
+    # Correct path depending on platform - necessary for platform independent scripts
+    if platform == 'win32':
+        results_path = psctb.utils.misc.unix_to_windows_path(results_path)
+    else:
+        results_path = path.expanduser(results_path)
+    
+    saved_results = pd.read_csv(results_path)
+    
+    
     # show first 20 lines
     saved_results.head(n=20) 
 

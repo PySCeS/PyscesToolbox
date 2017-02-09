@@ -539,13 +539,26 @@ functionality can be accessed via the ``highlight_patterns`` method:
 
 .. code:: python
 
-    sc.cc_results.ccJR1_R4.highlight_patterns(height = 350)
+    # This path leads to the provided layout file 
+    path_to_layout = '~/Pysces/psc/lin4_fb.dict'
+    
+    # Correct path depending on platform - necessary for platform independent scripts
+    if platform == 'win32':
+        path_to_layout = psctb.utils.misc.unix_to_windows_path(path_to_layout)
+    else:
+        path_to_layout = path.expanduser(path_to_layout)
+
+``In [19]:``
+
+.. code:: python
+
+    sc.cc_results.ccJR1_R4.highlight_patterns(height = 350, pos_dic=path_to_layout)
 
 
 
 
 
-.. image:: Symca_files/Symca_37_0.png
+.. image:: Symca_files/Symca_38_0.png
 
 
 ``highlight_patterns`` has the following optional arguments:
@@ -564,36 +577,36 @@ contribution (as discussed
 `above <Symca.html#control-pattern-percentage-contribution>`__) towards
 the total control coefficient.
 
-``In [19]:``
+``In [20]:``
 
 .. code:: python
 
     # clicking on CP002 shows that this control pattern representing 
     # the chain of effects passing through the feedback loop
     # is totally responsible for the observed control coefficient value.
-    sc.cc_results.ccJR1_R4.highlight_patterns(height = 350)
+    sc.cc_results.ccJR1_R4.highlight_patterns(height = 350, pos_dic=path_to_layout)
 
 
 
 
 
-.. image:: Symca_files/Symca_40_0.png
+.. image:: Symca_files/Symca_41_0.png
 
 
-``In [20]:``
+``In [21]:``
 
 .. code:: python
 
     # clicking on CP001 shows that this control pattern representing 
     # the chain of effects of the main pathway does not contribute
     # at all to the control coefficient value.
-    sc.cc_results.ccJR1_R4.highlight_patterns(height = 350)
+    sc.cc_results.ccJR1_R4.highlight_patterns(height = 350, pos_dic=path_to_layout)
 
 
 
 
 
-.. image:: Symca_files/Symca_42_0.png
+.. image:: Symca_files/Symca_43_0.png
 
 
 Parameter scans
@@ -639,7 +652,7 @@ method has the following arguments:
 Below we will perform a percentage scan of :math:`V_{f^4}` for 200
 points between 0.01 and 1000 in log space:
 
-``In [21]:``
+``In [22]:``
 
 .. code:: python
 
@@ -648,7 +661,7 @@ points between 0.01 and 1000 in log space:
                                                               scan_type='percentage')
 
 
-``Out[21]:``
+``Out[22]:``
 
 .. parsed-literal::
 
@@ -666,7 +679,7 @@ by calling the ``plot`` method of ``percentage_scan_data``. Furthermore,
 lines can be enabled/disabled using the ``toggle_category`` method of
 ``ScanFig`` or by clicking on the appropriate buttons:
 
-``In [22]:``
+``In [23]:``
 
 .. code:: python
 
@@ -691,14 +704,14 @@ lines can be enabled/disabled using the ``toggle_category`` method of
 
 
 
-.. image:: Symca_files/Symca_47_0.png
+.. image:: Symca_files/Symca_48_0.png
 
 
 A ``value`` plot can similarly be generated and displayed. In this case,
 however, an additional line indicating :math:`C^{J}_{4}` will also be
 present:
 
-``In [23]:``
+``In [24]:``
 
 .. code:: python
 
@@ -730,7 +743,7 @@ present:
 
 
 
-.. image:: Symca_files/Symca_50_0.png
+.. image:: Symca_files/Symca_51_0.png
 
 
 Fixed internal metabolites
@@ -748,7 +761,7 @@ Thus for a variant of the ``lin4_fb`` model where the
 intermediate\ ``S3`` is fixed at its steady-state value the procedure is
 as follows:
 
-``In [24]:``
+``In [25]:``
 
 .. code:: python
 
@@ -762,7 +775,7 @@ as follows:
     sc_fixed_S3.do_symca() 
 
 
-``Out[24]:``
+``Out[25]:``
 
 .. parsed-literal::
 
@@ -806,7 +819,7 @@ For the ``mod_fixed_c`` model two additional results objects
    sensitivity of flux and concentrations within the supply block of
    ``S3`` towards reactions within the supply block.
 
-``In [25]:``
+``In [26]:``
 
 .. code:: python
 
@@ -871,7 +884,7 @@ For the ``mod_fixed_c`` model two additional results objects
    This results object is useful confirming that the results were
    generated as expected.
 
-``In [26]:``
+``In [27]:``
 
 .. code:: python
 
@@ -929,7 +942,7 @@ location is specified, a file named ``cc_summary_N`` is saved to the
 ``~/Pysces/$modelname/symca/`` directory, where ``N`` is a number
 starting at 0:
 
-``In [27]:``
+``In [28]:``
 
 .. code:: python
 
@@ -943,14 +956,22 @@ starting at 0:
 
 The contents of the saved data file is as follows:
 
-``In [28]:``
+``In [29]:``
 
 .. code:: python
 
     # the following code requires `pandas` to run
     import pandas as pd
     # load csv file at default path
-    saved_results = pd.read_csv(path.expanduser('~/Pysces/lin4_fb/symca/cc_summary_0.csv'))
+    results_path = '~/Pysces/lin4_fb/symca/cc_summary_0.csv'
+    
+    # Correct path depending on platform - necessary for platform independent scripts
+    if platform == 'win32':
+        results_path = psctb.utils.misc.unix_to_windows_path(results_path)
+    else:
+        results_path = path.expanduser(results_path)
+    
+    saved_results = pd.read_csv(results_path)
     # show first 20 lines
     saved_results.head(n=20) 
 
@@ -1137,7 +1158,7 @@ loaded/saved by ``do_symca`` by using the ``auto_save_load`` argument
 which saves and loads using the default path. Models with internal fixed
 metabolites are handled automatically.
 
-``In [29]:``
+``In [30]:``
 
 .. code:: python
 
@@ -1152,7 +1173,7 @@ metabolites are handled automatically.
     new_sc.cc_results
 
 
-``Out[29]:``
+``Out[30]:``
 
 .. parsed-literal::
 

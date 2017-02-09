@@ -2,13 +2,13 @@ Included Files
 ==============
 
 Here are the files that are used in the examples as well as the interactive
-notebook versions of the documentation
+notebook versions of the documentation.
 
 Models
 ------
 
-The models used in this documentation are included below (together with their
-layout files). These files must be downloaded to the ``psc`` directory to be
+The models used in this documentation are included below (together other
+additional files). These files must be downloaded to the ``psc`` directory to be
 used in the example notebooks unless otherwise specified.
 
 example_model.psc

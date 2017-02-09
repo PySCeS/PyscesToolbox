@@ -430,9 +430,13 @@ class CCoef(CCBase):
             all_same = True
         return all_same
 
-    def highlight_patterns(self, width=None, height=None, show_dummy_sinks=False, show_external_modifier_links=False):
+    def highlight_patterns(self, width=None, height=None,
+                           show_dummy_sinks=False,
+                           show_external_modifier_links=False,
+                           pos_dic=None):
 
-        mg = ModelGraph(mod=self.mod, analysis_method=self._analysis_method)
+        mg = ModelGraph(mod=self.mod, pos_dic=pos_dic,
+                        analysis_method=self._analysis_method)
         if height:
             mg.height = height
         if width:

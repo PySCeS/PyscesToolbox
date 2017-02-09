@@ -300,7 +300,8 @@ if __name__ == "__main__":
     starts_with_to_remove = ['    %matplotlib inline']
     replacements = [('*#', '`'),
                     ('#*', '`_'),
-                    ('.ipynb#', '.html#')]
+                    ('.ipynb#', '.html#'),
+                    ('code:: ipython2', 'code:: python')]
 
     if len(sys.argv) == 1:
         file_names = get_rst_file_names()
