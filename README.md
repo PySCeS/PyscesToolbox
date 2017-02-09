@@ -21,8 +21,11 @@ Documentation can be found at [http://pyscestoolbox.readthedocs.org](http://pysc
 
 Because this project is still in its infancy, future changes might break older scripts. These types of changes will be kept to a minimum and will be documented here.
 
+### Changes on 2017-02-09: Full cross compatibility
+On 2017-02-09 Symca support via Maxima has been added to PySCeSToolbox on Windows. A configuration file located at `C:\Pysces\psctb_config.ini` can be used to specify the path to `maxima.bat`. By default, however, PySCeSToolbox should detect the path to `maxima.bat` automatically if it has been installed using the default options. This change should have no impact on any older scripts save for making them platform independent.
+
 ### Changes on 2017-02-02: Dropped IPython Notebook 3.x.x support
-As of 2017-02-02 IPython Notebook 3.x.x support has been dropped in favour of Jupyter 4.x.x. This should not affect the functioning of scripts (save for those based on versions before that of 2015-11-11). PySCeSToolbox will however require the Jupyter Notebook as of this date in order to use its interactive features.
+As of 2017-02-02 IPython Notebook 3.x.x support has been dropped in favour of Jupyter 4.x.x. This should not affect the functioning of scripts (save for those based on versions before that of 2015-11-11). PySCeSToolbox will however require the Jupyter Notebook as of this date in order to use its interactive features. Note that `ipywidgets` (an automatically installed requirement for the Jupyter notebook) needs you to run the command "`jupyter nbextension enable --py --sys-prefix widgetsnbextension`" before enabling widgets in the notebook.
 
 ### Changes on 2015-11-11: API changes
 Major changes were made on 2015-11-11 that might break scripts coded before this date. These changes are related to the naming of methods and fields. For scripts older than 2015-11-11 we recommend using an older version of PySCeSToolbox (noted under **Installation**). Manual porting of scripts is also possible with details of necessary changes outlined under **Porting scripts to latest version**.
@@ -45,7 +48,7 @@ Any versions of the SciPy stack components released in or after 2014 should work
 
 Required packages should automatically download and install when using the commands specified under **Installation** below.
 
-Maxima is only a requirement for SymCA. Currently this functionality is not supported on Windows, but will be included in the near future.
+Maxima is only a requirement for SymCA.
 
 **For readers of "Tracing regulatory routes in metabolism using generalised supply-demand analysis" published in BMC Systems Biology on 03/12/2015**:
 
