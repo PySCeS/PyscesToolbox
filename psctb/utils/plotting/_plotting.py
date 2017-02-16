@@ -765,8 +765,9 @@ class ScanFig(object):
         if not self._widgets_:
             widget_classes = OrderedDict()
             for k in self._category_classes.iterkeys():
-                widget_classes[k] = widgets.HBox()
-
+                box = widgets.HBox()
+                box.layout.display = 'flex-flow'
+                widget_classes[k] = box
             def oc(cat):
                 def on_change(name, value):
                     self.toggle_category(cat, value)
@@ -774,9 +775,13 @@ class ScanFig(object):
 
                 return on_change
 
+
+            width = self._find_button_width()
+
             for each in self._categories:
                 w = widgets.ToggleButton()
                 w.description = each
+                w.width = width
                 w.value = self.categories_status[each]
                 on_change = oc(each)
                 w.on_trait_change(on_change, 'value')
@@ -1113,3 +1118,12 @@ class ScanFig(object):
         display(self._save_button)
         # self._save_button.remove_class('vbox')
         # self._save_button.add_class('hbox')
+
+    def _find_button_width(self):
+        longest = sorted([len(each) for each in self._categories])[-1]
+        if longest > 14:
+            width_px = (longest - 14) * 5 + 145
+            width = str(width_px) + 'px'
+        else:
+            width = '145px'
+        return width
