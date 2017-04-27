@@ -515,7 +515,7 @@ class Data2D(object):
 
         return scan_fig
 
-    def save_results(self, file_name=None, separator=','):
+    def save_results(self, file_name=None, separator=',',fmt='%f'):
         """
         Saves data stores in current instance of ``Data2D`` as a comma
         separated file.
@@ -530,12 +530,8 @@ class Data2D(object):
         separator : str, Optional (Default : ',')
             The symbol which should be used to separate values in the output
             file.
-        folder : str, Optional (Default : None)
-            The folder under which the file should be saved. Only comes into
-            consideration if file_name is None. If None the file will be saved
-            under the the folder specified in the ``self._working_dir`` field,
-            which itself is determined by the ``analysis_method`` parameter of
-            __init__.
+        format : str, Optional (Default : '%f')
+            Format for the data.
         """
         file_name = modeltools.get_file_path(working_dir=self._working_dir,
                                              internal_filename=self._fname,
@@ -551,7 +547,8 @@ class Data2D(object):
                        names=None,
                        header=column_names,
                        fname=file_name,
-                       sep=separator)
+                       sep=separator,
+                       format=fmt)
         except IOError as e:
             print e.strerror
 
@@ -765,8 +762,9 @@ class ScanFig(object):
         if not self._widgets_:
             widget_classes = OrderedDict()
             for k in self._category_classes.iterkeys():
-                widget_classes[k] = widgets.HBox()
-
+                box = widgets.HBox()
+                box.layout.display = 'flex-flow'
+                widget_classes[k] = box
             def oc(cat):
                 def on_change(name, value):
                     self.toggle_category(cat, value)
@@ -774,9 +772,13 @@ class ScanFig(object):
 
                 return on_change
 
+
+            width = self._find_button_width()
+
             for each in self._categories:
                 w = widgets.ToggleButton()
                 w.description = each
+                w.width = width
                 w.value = self.categories_status[each]
                 on_change = oc(each)
                 w.on_trait_change(on_change, 'value')
@@ -1113,3 +1115,12 @@ class ScanFig(object):
         display(self._save_button)
         # self._save_button.remove_class('vbox')
         # self._save_button.add_class('hbox')
+
+    def _find_button_width(self):
+        longest = sorted([len(each) for each in self._categories])[-1]
+        if longest > 14:
+            width_px = (longest - 14) * 5 + 145
+            width = str(width_px) + 'px'
+        else:
+            width = '145px'
+        return width

@@ -206,7 +206,7 @@ class RateChar(object):
         numpy.savez(file_name, **to_save)
 
 
-    def save_results(self, folder=None, separator=',', ):
+    def save_results(self, folder=None, separator=',',format='%f'):
         base_folder = folder
         for species in self.mod.species:
             if folder:
@@ -424,7 +424,7 @@ class RateCharData(object):
 
         self._prc_summary = prcs
 
-    def save_summary(self, file_name=None, separator=','):
+    def save_summary(self, file_name=None, separator=',',fmt='%f'):
         file_name = modeltools.get_file_path(working_dir=self._working_dir,
                                              internal_filename='mca_summary',
                                              fmt='csv',
@@ -440,11 +440,12 @@ class RateCharData(object):
                        names=keys,
                        header=['Value'],
                        fname=file_name,
-                       sep=separator)
+                       sep=separator,
+                       format=fmt)
         except IOError as e:
             print e.strerror
 
-    def save_flux_results(self, file_name=None, separator=','):
+    def save_flux_results(self, file_name=None, separator=',',fmt='%f'):
         file_name = modeltools.get_file_path(working_dir=self._working_dir,
                                              internal_filename='flux_results',
                                              fmt='csv',
@@ -462,7 +463,8 @@ class RateCharData(object):
                        names=None,
                        header=column_names,
                        fname=file_name,
-                       sep=separator)
+                       sep=separator,
+                       format=fmt)
         except IOError as e:
             print e.strerror
 
@@ -470,7 +472,8 @@ class RateCharData(object):
                                  coefficient,
                                  file_name=None,
                                  separator=',',
-                                 folder=None):
+                                 folder=None,
+                                 fmt='%f'):
         assert_message = 'coefficient must be one of "ec", "rc" or "prc"'
 
         assert coefficient in ['rc', 'ec', 'prc'], assert_message
@@ -493,24 +496,25 @@ class RateCharData(object):
                        names=None,
                        header=new_names,
                        fname=file_name,
-                       sep=separator)
+                       sep=separator,
+                       format=fmt)
         except IOError as e:
             print e.strerror
 
     # TODO fix this method so that folder is a parameter only her
-    def save_all_results(self, folder=None, separator=','):
+    def save_all_results(self, folder=None, separator=',',fmt='%f'):
         if not folder:
             folder = self._working_dir
 
         file_name = modeltools.get_file_path(working_dir=folder,
                                              internal_filename='flux_results',
                                              fmt='csv')
-        self.save_flux_results(separator=separator, file_name=file_name)
+        self.save_flux_results(separator=separator, file_name=file_name,fmt=fmt)
 
         file_name = modeltools.get_file_path(working_dir=folder,
                                              internal_filename='mca_summary',
                                              fmt='csv')
-        self.save_summary(separator=separator, file_name=file_name)
+        self.save_summary(separator=separator, file_name=file_name, fmt=fmt)
         for each in ['ec', 'rc', 'prc']:
             base_name = each + '_results'
             file_name = modeltools.get_file_path(working_dir=folder,
@@ -518,7 +522,8 @@ class RateCharData(object):
                                                  fmt='csv')
             self.save_coefficient_results(coefficient=each,
                                           separator=separator,
-                                          file_name=file_name)
+                                          file_name=file_name,
+                                          fmt=fmt)
 
     def _min_max_setup(self):
         # Negative minimum linear values mean nothing
