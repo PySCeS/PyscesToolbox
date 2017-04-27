@@ -515,7 +515,7 @@ class Data2D(object):
 
         return scan_fig
 
-    def save_results(self, file_name=None, separator=','):
+    def save_results(self, file_name=None, separator=',',fmt='%f'):
         """
         Saves data stores in current instance of ``Data2D`` as a comma
         separated file.
@@ -530,12 +530,8 @@ class Data2D(object):
         separator : str, Optional (Default : ',')
             The symbol which should be used to separate values in the output
             file.
-        folder : str, Optional (Default : None)
-            The folder under which the file should be saved. Only comes into
-            consideration if file_name is None. If None the file will be saved
-            under the the folder specified in the ``self._working_dir`` field,
-            which itself is determined by the ``analysis_method`` parameter of
-            __init__.
+        format : str, Optional (Default : '%f')
+            Format for the data.
         """
         file_name = modeltools.get_file_path(working_dir=self._working_dir,
                                              internal_filename=self._fname,
@@ -551,7 +547,8 @@ class Data2D(object):
                        names=None,
                        header=column_names,
                        fname=file_name,
-                       sep=separator)
+                       sep=separator,
+                       format=fmt)
         except IOError as e:
             print e.strerror
 

@@ -288,7 +288,7 @@ class Symca(object):
         for key, value in cc_containers.iteritems():
             setattr(self, key, value)
 
-    def save_results(self, file_name=None, separator=','):
+    def save_results(self, file_name=None, separator=',',fmt='%.9f'):
         file_name = get_file_path(working_dir=self._working_dir,
                                   internal_filename='cc_summary',
                                   fmt='csv',
@@ -348,9 +348,9 @@ class Symca(object):
         try:
             savetxt(fname=file_name,
                     X=X,
-                    header=','.join(head),
+                    header=separator.join(head),
                     delimiter=separator,
-                    fmt=['%s', '%.9f', '%s', '%s'],)
+                    fmt=['%s', fmt, '%s', '%s'],)
 
         except IOError as e:
             print e.strerror

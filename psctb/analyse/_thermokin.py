@@ -166,7 +166,7 @@ class ThermoKin(object):
         for rate_eqn in self.reaction_results.itervalues():
             self.ec_results.update(rate_eqn.ec_results)
 
-    def save_results(self, file_name=None, separator=','):
+    def save_results(self, file_name=None, separator=',',fmt='%.9f'):
         file_name = get_file_path(working_dir=self._working_dir,
                                   internal_filename='tk_summary',
                                   fmt='csv',
@@ -208,9 +208,9 @@ class ThermoKin(object):
         try:
             savetxt(fname=file_name,
                     X=X,
-                    header=','.join(head),
+                    header=separator.join(head),
                     delimiter=separator,
-                    fmt=['%s', '%.9f', '%s', '%s'], )
+                    fmt=['%s', fmt, '%s', '%s'], )
 
         except IOError as e:
             print e.strerror
