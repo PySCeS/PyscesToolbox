@@ -4,7 +4,7 @@ packages = find_packages()
 
 setup(
     name='PyscesToolbox',
-    version='0.8.4.1',
+    version='0.8.4.2',
     packages=packages,
     url='https://github.com/PySCeS/PyscesToolbox',
     license='',

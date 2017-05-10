@@ -280,26 +280,33 @@ class Data2D(object):
 
         self.mod = mod
 
-        if axvline:
-            scan_in = self.scan_results.scan_in
-            if scan_in.lower() != 'time':
-                try:
-                    self._vline_val = getattr(self.mod, scan_in)
-                except AttributeError:
-                    print 'Model does not have attribute "%s".' % scan_in
-                    self._vline_val = None
+        scan_in = self.scan_results.scan_in
+
+        if not analysis_method:
+            if scan_in.lower() == 'time':
+                analysis_method = 'simulation'
+            elif hasattr(self.mod, scan_in):
+                analysis_method = 'parameter_scan'
             else:
-                self._vline_val = None
+                analysis_method = 'custom'
+        self._analysis_method = analysis_method
+
+        if scan_in.lower() != 'time':
+            try:
+                self.mod.doMcaRC()
+            except:
+                pass
+
+        if axvline:
+            self._vline_val = None
+            if scan_in.lower() != 'time' and hasattr(self.mod, scan_in):
+                self._vline_val = getattr(self.mod, scan_in)
 
         if not ltxe:
             ltxe = LatexExpr(mod)
         self._ltxe = ltxe
 
-        self.mod.doMcaRC()
-
-        if not analysis_method:
-            analysis_method = 'parameter_scan'
-        self._analysis_method = analysis_method
+        #TODO check if this is even needed
 
         self._fname_specified = False
 
