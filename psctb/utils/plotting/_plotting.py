@@ -68,7 +68,8 @@ __all__ = ['LineData',
            'ScanFig',
            'Data2D',
            'load_data2d',
-           'save_data2d']
+           'save_data2d',
+           'SimpleData2D']
 
 
 def _add_legend_viewlim(ax, **kwargs):
@@ -181,6 +182,106 @@ class LineData(object):
 
         self.properties.update({key, value})
         self._update_attach_properties()
+
+class SimpleData2D(object):
+    def __init__(self, column_names, data_array, mod=None):
+        super(SimpleData2D, self).__init__()
+        self.mod = mod
+        if self.mod:
+            self._ltxe = LatexExpr(mod)
+        else:
+            self._ltxe = None
+
+        self.scan_results = DotDict()
+        self.scan_results['scan_in'] = column_names[0]
+        self.scan_results['scan_out'] = column_names[1:]
+        self.scan_results['scan_range'] = data_array[:, 0]
+        self.scan_results['scan_results'] = data_array[:, 1:]
+        self.scan_results['scan_points'] = len(self.scan_results.scan_range)
+
+        self._column_names = column_names
+        self._scan_results = data_array
+        self._setup_lines()
+
+    def _setup_lines(self):
+        """
+        Sets up ``LineData`` objects that will be used to populate ``ScanFig``
+        objects created by the ``plot`` method of ``Data2D``. These objects
+        are stored in a list: ``self._lines``
+
+        ``ScanFig`` takes a list of ``LineData`` objects as an argument and
+        this method sets up that list. The ``self._column_categories``
+        dictionary is used here.
+        """
+        lines = []
+        for i, each in enumerate(self.scan_results.scan_out):
+            if self._ltxe:
+                label = self._ltxe.expression_to_latex(each)
+            else:
+                label = each
+
+            line = LineData(name=each,
+                            x_data=self.scan_results.scan_range,
+                            y_data=self.scan_results.scan_results[:, i],
+                            categories=[each],
+                            properties={'label': '$%s$' % (label),
+                                        'linewidth': 1.6})
+            lines.append(line)
+        self._lines = lines
+
+    def plot(self):
+        """
+        Creates a ``ScanFig`` object using the data stored in the current
+        instance of ``Data2D``
+
+        Returns
+        -------
+        ``ScanFig``
+            A `ScanFig`` object that is used to visualise results.
+        """
+        base_name = 'scan_fig'
+        scan_fig = ScanFig(self._lines,
+                           base_name=base_name,
+                           ax_properties={'xlabel':
+                                          self.scan_results.scan_in})
+        return scan_fig
+
+    def save_results(self, file_name=None, separator=',',fmt='%f'):
+        """
+        Saves data stores in current instance of ``Data2D`` as a comma
+        separated file.
+
+        Parameters
+        ----------
+        file_name : str, Optional (Default : None)
+            The file name, extension and path under which data should be saved.
+            If None the name will default to scan_data.csv and will be saved
+            either under the directory specified under the directory specified
+            in ``folder``.
+        separator : str, Optional (Default : ',')
+            The symbol which should be used to separate values in the output
+            file.
+        format : str, Optional (Default : '%f')
+            Format for the data.
+        """
+        file_name = modeltools.get_file_path(working_dir=None,
+                                             internal_filename='scan_fig',
+                                             fmt='csv',
+                                             fixed=self.scan_results.scan_in,
+                                             file_name=file_name)
+
+        scan_results = self._scan_results
+        column_names = self._column_names
+
+        try:
+            exportLAWH(scan_results,
+                       names=None,
+                       header=column_names,
+                       fname=file_name,
+                       sep=separator,
+                       format=fmt)
+        except IOError as e:
+            print e.strerror
 
 
 class Data2D(object):
@@ -374,11 +475,12 @@ class Data2D(object):
                            'Response Coefficients',
                            'Partial Response Coefficients',
                            'Control Patterns']),
-                         ('All Fluxes/Reactions/Species',
+                         ('All Fluxes/Reactions/Species/Parameters',
                           ['Flux Rates',
                            'Reaction Rates',
                            'Species Concentrations',
-                           'Steady-State Species Concentrations'])])
+                           'Steady-State Species Concentrations',
+                           'Parameters'])])
 
         additional_cat_classes = self._additional_cat_classes
         for k, v in additional_cat_classes.iteritems():
@@ -396,14 +498,15 @@ class Data2D(object):
         scan_types = OrderedDict([
         ('Flux Rates', ['J_' + reaction for reaction in self.mod.reactions]),
         ('Reaction Rates', [reaction for reaction in self.mod.reactions]),
-        ('Species Concentrations', self.mod.species),
+        ('Species Concentrations', self.mod.species + self.mod.fixed_species),
         ('Steady-State Species Concentrations',[sp + '_ss' for sp in self.mod.species]),
         ('Elasticity Coefficients', ec_list(self.mod)),
         ('Control Coefficients', cc_list(self.mod)),
         ('Response Coefficients', rc_list(self.mod)),
         ('Partial Response Coefficients', prc_list(self.mod)),
         ('Control Patterns', ['CP{:3}'.format(n).replace(' ','0')
-                              for n in range(1, len(self._column_names))])])
+                              for n in range(1, len(self._column_names))]),
+        ('Parameters', self.mod.parameters)])
 
         additional_cats = self._additional_cats
         if additional_cats:
