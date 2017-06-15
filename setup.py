@@ -1,4 +1,11 @@
 from setuptools import setup, find_packages
+try:
+  from jupyterpip import cmdclass
+except:
+  import pip
+  import importlib
+  pip.main(['install', 'jupyter-pip'])
+  cmdclass = importlib.import_module('jupyterpip').cmdclass
 
 packages = find_packages()
 
@@ -16,9 +23,12 @@ setup(
                       'sympy',
                       'pysces',
                       'matplotlib',
-                      'd3networkx_psctb',
-                      'numpydoc'],
-    dependency_links=['git+https://github.com/exe0cdc/ipython-d3networkx.git#egg=d3networkx_psctb-0.2'],
+                      'numpydoc',
+                      'jupyter-pip',
+                      'networkx',
+                      'jupyter',
+                      'ipywidgets'],
     include_pakage_data=True,
     package_data={'': ['default_config.ini']},
+    cmdclass=cmdclass('d3networkx_psctb'),
 )
