@@ -10,6 +10,7 @@ from .ccobjects import CCBase, CCoef
 from ...utils.misc import DotDict
 from ...utils.misc import formatter_factory
 from ...utils import ConfigReader
+from ...utils.misc import ec_list
 
 
 ## Everything in this file can be a function rather than a static method
@@ -149,6 +150,46 @@ class SymcaToolBox(object):
                 cond1 = getattr(mod, ec_name) != 0
 
                 if cond1:
+                    elas_row.append(ec_name)
+                else:
+                    elas_row.append(0)
+            elas.append(elas_row)
+
+        esmatrix = Matrix(elas)
+        return esmatrix
+
+    @staticmethod
+    def get_es_matrix_no_mca(mod, nmatrix, fluxes, species):
+        """
+        Gets the esmatrix.
+
+        Goes down the columns of the nmatrix (which holds the fluxes)
+        to get the rows of the esmatrix.
+
+        Nested loop goes down the rows of the nmatrix (which holds the species)
+        to get the columns of the esmatrix
+
+        so the format is
+
+        ecReationN0_M0 ecReationN0_M1 ecReationN0_M2
+        ecReationN1_M0 ecReationN1_M1 ecReationN1_M2
+        ecReationN2_M0 ecReationN2_M1 ecReationN2_M2
+        """
+        nmat = nmatrix
+
+        elas = []
+        modifiers = dict(mod.__modifiers__)
+        for col in range(nmat.cols):
+            current_reaction = fluxes[col]
+            elas_row = []
+            for row in range(nmat.rows):
+                current_species = species[row]
+                ec_name = 'ec' + \
+                          str(current_reaction)[2:] + '_' + str(
+                    current_species)
+                cond1 = nmat[row,col] != 0
+                cond2 = str(current_species) in modifiers[str(current_reaction)[2:]]
+                if cond1 or cond2:
                     elas_row.append(ec_name)
                 else:
                     elas_row.append(0)
@@ -584,6 +625,11 @@ class SymcaToolBox(object):
         return CC_dict
 
 
+    @staticmethod
+    def populate_with_fake_elasticities(mod):
+        ecs = ec_list(mod)
+        for ec in ecs:
+            setattr(mod,ec,1)
 
 
         # OLD SAVE FUNCTIONS> Not as good as new ones
