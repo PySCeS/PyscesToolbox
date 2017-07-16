@@ -38,7 +38,39 @@ __all__ = ['cc_list',
            'scanner_range_setup',
            'is_linear',
            'column_multiply',
-           'unix_to_windows_path', ]
+           'unix_to_windows_path',
+           'flux_list',
+           'ss_species_list',
+           'get_filename_from_caller']
+
+def get_filename_from_caller():
+    try:
+        caller = sys._getframe(1)
+    except ValueError:
+        globals = sys.__dict__
+        lineno = 1
+    else:
+        globals = caller.f_globals
+        lineno = caller.f_lineno
+    if '__name__' in globals:
+        module = globals['__name__']
+    else:
+        module = "<string>"
+    filename = globals.get('__file__')
+    if filename:
+        fnl = filename.lower()
+        if fnl.endswith((".pyc", ".pyo")):
+            filename = filename[:-1]
+    else:
+        if module == "__main__":
+            try:
+                filename = sys.argv[0]
+            except AttributeError:
+                # embedded interpreters don't have sys.argv, see bug #839151
+                filename = '__main__'
+        if not filename:
+            filename = module
+    return filename
 
 
 def unix_to_windows_path(path_to_convert, drive_letter='C'):
@@ -762,6 +794,20 @@ def prc_dict(mod):
                              back_reaction)
 
     return prcs
+
+
+def flux_list(mod):
+    fluxes = []
+    for reaction in mod.reactions:
+        fluxes.append('J_' + reaction)
+    return fluxes
+
+
+def ss_species_list(mod):
+    ss_species = []
+    for species in mod.species:
+        ss_species.append(species + '_ss')
+    return ss_species
 
 
 def group_sort(old_list, num_of_groups):

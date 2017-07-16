@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 3
 
    introduction
+   installation
    basic_usage
    RateChar
    Symca

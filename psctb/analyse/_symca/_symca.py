@@ -4,15 +4,16 @@ from sympy import sympify
 import sys
 
 from ...utils.misc import extract_model
+from ...utils.misc import get_filename_from_caller
 from ...modeltools import make_path, get_file_path
 from ...latextools import LatexExpr
 from .symca_toolbox import SymcaToolBox as SMCAtools
 from numpy import savetxt, array
 from ...utils import ConfigReader
+import warnings
 
 
 all = ['Symca']
-
 
 class Symca(object):
     """
@@ -33,13 +34,23 @@ class Symca(object):
     ------
     """
 
-    def __init__(self, mod, auto_load=False, internal_fixed=False):
+    def __init__(self, mod, auto_load=False, internal_fixed=False, ignore_steady_state=False, keep_zero_elasticities=True):
         super(Symca, self).__init__()
         ConfigReader.get_config()
 
-
+        self._ignore_steady_state = ignore_steady_state
+        self._keep_zero_ecs = keep_zero_elasticities
         self.mod, obj_type = extract_model(mod)
-        self.mod.doMca()
+        if not self._ignore_steady_state:
+            self.mod.doMca()
+        else:
+            warnings.warn_explicit("\nIgnoring steady-state solution: Steady-state variables set to 1. Note that parameter scan functionality is unavailable.",
+                                   Warning,
+                                   filename=get_filename_from_caller(),
+                                   lineno=36)
+            SMCAtools.populate_with_fake_elasticities(mod)
+            SMCAtools.populate_with_fake_fluxes(mod)
+            SMCAtools.populate_with_fake_ss_concentrations(mod)
 
         self._analysis_method = 'symca'
         self._internal_filename = 'object_data'
@@ -210,7 +221,11 @@ class Symca(object):
     @property
     def es_matrix(self):
         if not self._es_matrix:
-            self._es_matrix = SMCAtools.get_es_matrix(
+            if self._ignore_steady_state or self._keep_zero_ecs:
+                es_method = SMCAtools.get_es_matrix_no_mca
+            else:
+                es_method = SMCAtools.get_es_matrix
+            self._es_matrix = es_method(
                 self.mod,
                 self.nmatrix,
                 self.fluxes,
