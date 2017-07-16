@@ -4,18 +4,16 @@ from sympy import sympify
 import sys
 
 from ...utils.misc import extract_model
+from ...utils.misc import get_filename_from_caller
 from ...modeltools import make_path, get_file_path
 from ...latextools import LatexExpr
 from .symca_toolbox import SymcaToolBox as SMCAtools
 from numpy import savetxt, array
 from ...utils import ConfigReader
-from warnings import warn
+import warnings
 
 
 all = ['Symca']
-
-
-
 
 class Symca(object):
     """
@@ -46,9 +44,13 @@ class Symca(object):
         if not self._ignore_steady_state:
             self.mod.doMca()
         else:
-            warn("Ignoring steady-state solution: Elasticity coefficients set to 1. \
-                Note that parameter scan functionality is unavailable.")
+            warnings.warn_explicit("\nIgnoring steady-state solution: Steady-state variables set to 1. Note that parameter scan functionality is unavailable.",
+                                   Warning,
+                                   filename=get_filename_from_caller(),
+                                   lineno=36)
             SMCAtools.populate_with_fake_elasticities(mod)
+            SMCAtools.populate_with_fake_fluxes(mod)
+            SMCAtools.populate_with_fake_ss_concentrations(mod)
 
         self._analysis_method = 'symca'
         self._internal_filename = 'object_data'

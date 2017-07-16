@@ -10,7 +10,7 @@ from .ccobjects import CCBase, CCoef
 from ...utils.misc import DotDict
 from ...utils.misc import formatter_factory
 from ...utils import ConfigReader
-from ...utils.misc import ec_list
+from ...utils.misc import ec_list, flux_list, ss_species_list
 
 
 ## Everything in this file can be a function rather than a static method
@@ -626,10 +626,24 @@ class SymcaToolBox(object):
 
 
     @staticmethod
+    def generic_populate(mod, function, value = 1):
+        names = function(mod)
+        for name in names:
+            setattr(mod, name, value)
+
+    @staticmethod
     def populate_with_fake_elasticities(mod):
-        ecs = ec_list(mod)
-        for ec in ecs:
-            setattr(mod,ec,1)
+        SymcaToolBox.generic_populate(mod, ec_list)
+
+    @staticmethod
+    def populate_with_fake_fluxes(mod):
+        SymcaToolBox.generic_populate(mod, flux_list)
+
+    @staticmethod
+    def populate_with_fake_ss_concentrations(mod):
+        SymcaToolBox.generic_populate(mod, ss_species_list)
+
+
 
 
         # OLD SAVE FUNCTIONS> Not as good as new ones
