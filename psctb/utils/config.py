@@ -68,13 +68,14 @@ class ConfigReader:
                 if not maxima_path:
                     raise IOError(2,
                                   'Maxima not installed',
-                                  cls._config['maxima_path'])
+                                  'command not found')
                 cls._config['maxima_path'] = 'maxima'
         except IOError as e:
             solution = ('Please check that configuration file specifies '
                         'the correct path for Maxima and '
-                        'that Maxima is installed before attempting '
-                        'to generate new results with SymCa.')
+                        'that Maxima is installed correctly before '
+                        'attempting to generate new results with SymCA '
+                        '(see documentation for details).')
             ConfigChecker.warn_user(e, solution)
             cls._config['maxima_path'] = None
 
