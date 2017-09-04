@@ -1,7 +1,7 @@
 define(function(require) {
     var d3 = require('https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.1/d3.min.js');
     var utils = require('base/js/utils');
-    var widget = require('jupyter-js-widgets');
+    var widget = require('nbextensions/jupyter-js-widgets/extension');
     var bootstrap = require('bootstrap');
 
     // Define the D3ForceDirectedGraphView
