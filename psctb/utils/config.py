@@ -1,5 +1,5 @@
 from ConfigParser import ConfigParser
-from sys import platform
+from sys import platform, stdout
 from os import path, sep, listdir, access, X_OK, environ, pathsep
 # from pkg_resources import resource_stream, resource_filename
 from pysces import output_dir
@@ -80,6 +80,7 @@ class ConfigReader:
             cls._config['maxima_path'] = None
 
         cls._config['platform'] = platform
+        cls._config['stdout'] = stdout
 
     @staticmethod
     def _read_config(file_or_path):

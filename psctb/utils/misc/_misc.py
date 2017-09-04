@@ -8,6 +8,8 @@ from numpy import array, errstate, nanmin, nanmax, nonzero, float64,\
 from pysces.PyscesModel import PysMod
 from IPython.display import HTML
 from sympy import sympify
+from functools import wraps
+from ..config import ConfigReader
 
 __all__ = ['cc_list',
            'ec_list',
@@ -41,7 +43,106 @@ __all__ = ['cc_list',
            'unix_to_windows_path',
            'flux_list',
            'ss_species_list',
-           'get_filename_from_caller']
+           'get_filename_from_caller',
+           'memoize',
+           'is_reaction',
+           'is_species',
+           'is_parameter',
+           'is_variable',
+           'is_attr',
+           'is_mca_coef',
+           'is_ec',
+           'is_cc',
+           'is_rc',
+           'is_prc',]
+
+
+def memoize(function):
+    memo = {}
+    @wraps(function)
+    def wrapper(*args):
+        if args in memo:
+            return memo[args]
+        else:
+            return_val = function(*args)
+            memo[args] = return_val
+            return return_val
+    return wrapper
+
+@memoize
+def is_species(attr, model):
+    if attr.endswith('_ss'):
+        attr = attr[:-3]
+    if attr in model.species:
+        return True
+    else:
+        return False
+
+@memoize
+def is_reaction(attr, model):
+    if attr.endswith('J_'):
+        attr = attr[2:]
+    if attr in model.reactions:
+        return True
+    else:
+        return False
+
+@memoize
+def is_parameter(attr, model):
+    if attr in model.parameters:
+        return True
+    else:
+        return False
+
+@memoize
+def is_variable(attr, model):
+    if is_species(attr,model) or is_reaction(attr,model) or is_mca_coef(attr, model):
+        return True
+    else:
+        return False
+
+@memoize
+def is_attr(attr, model):
+    if is_variable(attr, model) or is_parameter(attr, model) or is_mca_coef(attr, model):
+        return True
+    else:
+        return False
+
+@memoize
+def is_cc(attr, model):
+    vals = split_coefficient(attr, model)
+    if vals is not None and vals[0] == 'cc':
+        return True
+    else:
+        return False
+
+@memoize
+def is_ec(attr, model):
+    vals = split_coefficient(attr, model)
+    if vals is not None and vals[0] == 'ec':
+        return True
+    else:
+        return False
+
+@memoize
+def is_prc(attr, model):
+    vals = split_coefficient(attr, model)
+    if vals is not None and vals[0] == 'prc':
+        return True
+    else:
+        return False
+
+@memoize
+def is_rc(attr, model):
+    vals = split_coefficient(attr, model)
+    if vals is not None and vals[0] == 'rc':
+        return True
+    else:
+        return False
+@memoize
+def is_mca_coef(attr, model):
+    mca_func_list = [is_rc, is_prc, is_ec, is_ec]
+    return any([func(attr, model) for func in mca_func_list])
 
 def get_filename_from_caller():
     try:
@@ -373,10 +474,16 @@ def split_coefficient(coefficient_name, mod):
     coefficient_3_types = ['prc']
     if coefficient_name[:2] in coefficient_2_types:
         coefficient_type = coefficient_name[:2]
-    if coefficient_name[:3] in coefficient_3_types:
+    elif coefficient_name[:3] in coefficient_3_types:
         coefficient_type = coefficient_name[:3]
-    members = eval(coefficient_type + '_dict(mod)["' + coefficient_name + '"]')
-    return tuple([coefficient_type] + list(members))
+    else:
+        return None
+    try:
+        members = eval(coefficient_type + '_dict(mod)["' + coefficient_name + '"]')
+        return_val = tuple([coefficient_type] + list(members))
+    except KeyError:
+        return_val = None
+    return return_val
 
 
 def is_number(suspected_number):
@@ -583,17 +690,24 @@ def silence_print(func):
     function
         A very quiet function
     """
-
+    @wraps(func)
     def wrapper(*args, **kwargs):
-        stdout = sys.stdout
-        sys.stdout = open(devnull, 'w')
-        returns = func(*args, **kwargs)
-        sys.stdout = stdout
-        return returns
-
+        # stdout = sys.stdout
+        try:
+            sys.stdout = open(devnull, 'w')
+            returns = func(*args, **kwargs)
+            fix_printing()
+            return returns
+        except KeyboardInterrupt, e:
+            fix_printing()
+            raise e
     return wrapper
 
+def fix_printing():
+    sys.stdout = ConfigReader.get_config()['stdout']
 
+
+@memoize
 def cc_list(mod):
     """
     Retuns a list of control coefficients of a model.
@@ -626,10 +740,9 @@ def cc_list(mod):
             cc = 'ccJ%s_%s' % (top_reaction, base_reaction)
             ccs.append(cc)
     ccs.sort()
-
     return ccs
 
-
+@memoize
 def cc_dict(mod):
     ccs = {}
     for base_reaction in mod.reactions:
@@ -639,10 +752,9 @@ def cc_dict(mod):
         for top_reaction in mod.reactions:
             cc = 'ccJ%s_%s' % (top_reaction, base_reaction)
             ccs[cc] = (top_reaction, base_reaction)
-
     return ccs
 
-
+@memoize
 def ec_list(mod):
     """
     Retuns a list of elasticity coefficients of a model.
@@ -677,7 +789,7 @@ def ec_list(mod):
     ecs.sort()
     return ecs
 
-
+@memoize
 def ec_dict(mod):
     ecs = {}
     for top_reaction in mod.reactions:
@@ -687,10 +799,9 @@ def ec_dict(mod):
         for base_param in mod.parameters:
             ec = 'ec%s_%s' % (top_reaction, base_param)
             ecs[ec] = (top_reaction, base_param)
-
     return ecs
 
-
+@memoize
 def rc_list(mod):
     """
     Retuns a list of response coefficients of a model.
@@ -725,7 +836,7 @@ def rc_list(mod):
     rcs.sort()
     return rcs
 
-
+@memoize
 def rc_dict(mod):
     rcs = {}
     for base_param in mod.parameters:
@@ -735,10 +846,9 @@ def rc_dict(mod):
         for top_reaction in mod.reactions:
             rc = 'rcJ%s_%s' % (top_reaction, base_param)
             rcs[rc] = (top_reaction, base_param)
-
     return rcs
 
-
+@memoize
 def prc_list(mod):
     """
     Retuns a list of partial response coefficients of a model.
@@ -777,7 +887,7 @@ def prc_list(mod):
     prcs.sort()
     return prcs
 
-
+@memoize
 def prc_dict(mod):
     prcs = {}
     for base_param in mod.parameters:
@@ -792,23 +902,21 @@ def prc_dict(mod):
                 prcs[prc] = (top_reaction,
                              base_param,
                              back_reaction)
-
     return prcs
 
-
+@memoize
 def flux_list(mod):
     fluxes = []
     for reaction in mod.reactions:
         fluxes.append('J_' + reaction)
     return fluxes
 
-
+@memoize
 def ss_species_list(mod):
     ss_species = []
     for species in mod.species:
         ss_species.append(species + '_ss')
     return ss_species
-
 
 def group_sort(old_list, num_of_groups):
     # Normally scan columns are sorted in a way that they are sorted together
@@ -826,7 +934,6 @@ def group_sort(old_list, num_of_groups):
     new_list = [old_list[pos] for pos in groups]
 
     return new_list
-
 
 def print_f(message, status):
     """
