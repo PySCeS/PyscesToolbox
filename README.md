@@ -48,10 +48,17 @@ The latest release of PySCeSToolbox can be installed from PyPi by running the fo
 pip install pyscestoolbox
 ```
 
+To enable widgets you may need to run the following commands:
+
+```bash
+jupyter nbextension enable --py --sys-prefix widgetsnbextension
+jupyter nbextension install --py --user d3networkx_psctb
+jupyter nbextension enable --py --user d3networkx_psctb
+```
+
 The latest development version can be installed from GitHub with:
 
 ```bash
-pip install git+https://github.com/exe0cdc/ipython-d3networkx.git
 pip install git+https://github.com/PySCeS/PySCeSToolbox.git
 ```
 
@@ -122,7 +129,8 @@ Method and variable names and the analysis objects they belong to that were chan
 |mca_data       |ec_results      |
 |reaction name* |J_reaction name |
 |par_scan       |do_par_scan     |
-*reaction name refers to the naming of a reaction as it is defined in the model file.*
+
+*reaction name refers to the naming of a reaction as it is defined in the model file.
 
 **Symca**
 
@@ -133,6 +141,7 @@ Method and variable names and the analysis objects they belong to that were chan
 |save           |save_session|
 |load           |load_session|
 |par_scan       |do_par_scan |
+
 *CCn refers to any of the additional result dictionaries that are created when an internal metabolite is fixed and the `internal_fixed` paramenter of `do_symca` is set to `True`
 
 **Data2D**

@@ -80,6 +80,27 @@ type in and execute the command:
 As previously mentioned, this will automatically download both PySCeSToolbox
 and any outstanding requirements.
 
+Enabling widgets
+~~~~~~~~~~~~~~~~
+
+If you are running the Jupyter notebook for the first time, or if you have not
+yet enabled the notebook widgets you may need to run the following command:
+
+.. code:: bash
+
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension
+
+We also recommend running the following two commands to enable the
+`ModelGraph <basic_usage.html#graphic-representation-of-metabolic-networks>`__
+functionality of PySCeSToolbox. Rerunning this command may be necessary when
+updating/reinstalling PySCeSToolbox.
+
+.. code:: bash
+
+    jupyter nbextension install --py --user d3networkx_psctb
+    jupyter nbextension enable --py --user d3networkx_psctb
+
+
 Mac OS X (MacOS)
 ----------------
 
@@ -158,9 +179,29 @@ As previously mentioned, this will automatically download both
 PySCeSToolbox and any outstanding requirements.
 
 .. note:: You may encounter an error during the installation of PySCeSToolbox
-          elating to the removal of temporary files on OS X or MacOS. This does
+          relating to the removal of temporary files on OS X or MacOS. This does
           not impact on the functioning of PySCeSToolbox at all, and we mean
-          to address this bug in the near future.
+          to address this bug in the future.
+
+Enabling widgets
+~~~~~~~~~~~~~~~~
+
+If you are running the Jupyter notebook for the first time, or if you have not
+yet enabled the notebook widgets you may need to run the following command:
+
+.. code:: bash
+
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension
+
+We also recommend running the following two commands to enable the
+`ModelGraph <basic_usage.html#graphic-representation-of-metabolic-networks>`__
+functionality of PySCeSToolbox. Rerunning this command may be necessary when
+updating/reinstalling PySCeSToolbox.
+
+.. code:: bash
+
+    jupyter nbextension install --py --user d3networkx_psctb
+    jupyter nbextension enable --py --user d3networkx_psctb
 
 Linux
 -----
@@ -214,3 +255,24 @@ type in and execute the command:
 .. code:: bash
 
     pip install pyscestoolbox
+
+
+Enabling widgets
+~~~~~~~~~~~~~~~~
+
+If you are running the Jupyter notebook for the first time, or if you have not
+yet enabled the notebook widgets you may need to run the following command:
+
+.. code:: bash
+
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension
+
+We also recommend running the following two commands to enable the
+`ModelGraph <basic_usage.html#graphic-representation-of-metabolic-networks>`__
+functionality of PySCeSToolbox. Rerunning this command may be necessary when
+updating/reinstalling PySCeSToolbox.
+
+.. code:: bash
+
+    jupyter nbextension install --py --user d3networkx_psctb
+    jupyter nbextension enable --py --user d3networkx_psctb
