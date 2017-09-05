@@ -48,10 +48,17 @@ The latest release of PySCeSToolbox can be installed from PyPi by running the fo
 pip install pyscestoolbox
 ```
 
+To enable widgets you may need to run the following commands:
+
+```bash
+jupyter nbextension enable --py --sys-prefix widgetsnbextension
+jupyter nbextension install --py --user d3networkx_psctb
+jupyter nbextension enable --py --user d3networkx_psctb
+```
+
 The latest development version can be installed from GitHub with:
 
 ```bash
-pip install git+https://github.com/exe0cdc/ipython-d3networkx.git
 pip install git+https://github.com/PySCeS/PySCeSToolbox.git
 ```
 

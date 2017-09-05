@@ -64,11 +64,19 @@ running the following commands in the terminal (or Windows equivalent):
 
     pip install pyscestoolbox
 
+To enable widgets you may need to run the following commands:
+
+.. code:: bash
+
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension
+    jupyter nbextension install --py --user d3networkx_psctb
+    jupyter nbextension enable --py --user d3networkx_psctb
+
+
 The latest development version can be installed from GitHub with:
 
 .. code:: bash
 
-    pip install git+https://github.com/exe0cdc/ipython-d3networkx.git
     pip install git+https://github.com/PySCeS/PySCeSToolbox.git
 
 For the pre-2015-11-11 version:

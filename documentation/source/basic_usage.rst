@@ -9,6 +9,24 @@ that are common to all the main analysis tools. While the main analysis
 tools will be briefly referenced here, later sections will cover them in
 full.
 
+Starting a PySCeSToolbox session
+--------------------------------
+
+To start a PySCeSToolbox session in a Jupyter notebook:
+
+1. Start up the Jupyter Notebook using the ``jupyter notebook`` command
+   in the terminal
+2. Create a new notebook by clicking the ``New`` button on the top right
+   of the window and selecting ``Python 2``
+3. Run the following three commands in the first cell:
+
+.. code:: python
+
+    %matplotlib inline
+    import pysces
+    import psctb
+
+
 Syntax
 ------
 
@@ -153,18 +171,18 @@ parameter scan are saved to a object.
     # with name `mod`
     mod = pysces.model('example_model')
     mod.SetQuiet()
-    
+
     # Parameter scan setup and execution
     # Here we are changing the value of `Vf2` over logarithmic
     # scale from `log10(1)` (or 0) to log10(100) (or 2) for a
-    # 100 points. 
+    # 100 points.
     mod.scan_in = 'Vf2'
     mod.scan_out = ['J_R1','J_R2','J_R3']
     mod.Scan1(numpy.logspace(0,2,100))
-    
+
     # Instantiation of `Data2D` object with name `scan_data`
     column_names = [mod.scan_in] + mod.scan_out
-    
+
     scan_data = psctb.utils.plotting.Data2D(mod=mod,
                                             column_names=column_names,
                                             data_array=mod.scan_res)
@@ -176,17 +194,17 @@ parameter scan are saved to a object.
 
     Assuming extension is .psc
     Using model directory: /home/carl/Pysces/psc
-    /home/carl/Pysces/psc/example_model.psc loading ..... 
+    /home/carl/Pysces/psc/example_model.psc loading .....
     Parsing file: /home/carl/Pysces/psc/example_model.psc
-     
+
     Calculating L matrix . . . . . . .  done.
     Calculating K matrix . . . . . . .  done.
-     
-    
+
+
     Scanning ...
-    100 80 60 40 20 0 
+    100 80 60 40 20 0
     done.
-    
+
 
 
 Results that can be accessed via ``scan_results``:
@@ -254,13 +272,13 @@ Or they can be saved to a specified location:
 
     # This path leads to the Pysces root folder
     data_file_name = '~/Pysces/example_mod_Vf2_scan.csv'
-    
+
     # Correct path depending on platform - necessary for platform independent scripts
     if platform == 'win32':
         data_file_name = psctb.utils.misc.unix_to_windows_path(data_file_name)
     else:
         data_file_name = path.expanduser(data_file_name)
-    
+
     scan_data.save_results(file_name=data_file_name)
 
 Finally, a ``ScanFig`` object can be created using the ``plot`` method:
@@ -331,7 +349,7 @@ enabled. Then we click the other buttons:
     # scan_figure.toggle_category('J_R1',True)
     # scan_figure.toggle_category('J_R2',True)
     # scan_figure.toggle_category('J_R3',True)
-    
+
     scan_figure.interact()
 
 
@@ -455,13 +473,13 @@ be specified:
 
     # This path leads to the Pysces root folder
     fig_file_name = '~/Pysces/example_mod_Vf2_scan.png'
-    
+
     # Correct path depending on platform - necessary for platform independent scripts
     if platform == 'win32':
         fig_file_name = psctb.utils.misc.unix_to_windows_path(fig_file_name)
     else:
         fig_file_name = path.expanduser(fig_file_name)
-        
+
     scan_figure.save(file_name=fig_file_name)
 
 Tables
@@ -574,7 +592,7 @@ the data:
 
 .. code:: python
 
-    psctb.utils.misc.html_table(list_of_lists, 
+    psctb.utils.misc.html_table(list_of_lists,
                                 caption='Example',
                                 formatter=formatter,    # Previously constructed formatter
                                 first_row_headers=True) # The first row can be set as the header
@@ -658,16 +676,16 @@ disk during ``ModelGraph`` instantiation.
 
 .. code:: python
 
-    # This path leads to the provided layout file 
+    # This path leads to the provided layout file
     path_to_layout = '~/Pysces/psc/example_model_layout.dict'
-    
+
     # Correct path depending on platform - necessary for platform independent scripts
     if platform == 'win32':
         path_to_layout = psctb.utils.misc.unix_to_windows_path(path_to_layout)
     else:
         path_to_layout = path.expanduser(path_to_layout)
-    
-    
+
+
     model_graph = psctb.ModelGraph(mod, pos_dic=path_to_layout)
     model_graph.show()
 
