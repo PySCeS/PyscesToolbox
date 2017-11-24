@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from pysces import Scanner, ParScanner
 from pysces import model as pysces_model
+from matplotlib import pyplot as plt
 
 from .misc import scanner_range_setup, DotDict, cc_dict, rc_dict, ec_dict, prc_dict, is_parameter, is_species, \
     is_mca_coef, silence_print
@@ -17,6 +18,49 @@ __all__ = ['compare_models',
            'ClosedOpenComparer']
 
 def compare_models(model_list, model_mapping = None, augment_mapping=True, comparison_type = 'ss'):
+    """
+    Returns a specified model comparer for a list of models.
+
+    The returned model comparer object considers the first model in
+    `model_list` as the "base model" to which the other models are
+    compared. Since models may have a different naming scheme for
+    reactions, species, etc. `model_mapping` allows the user to specify
+    the names of attributes of other models as they relate to the base
+    model's attribute names.
+
+    Parameters
+    ----------
+    model_list : list of PysMod
+        A list of PysMod (Pysces model) objects to be compared.
+    model_mapping : array, optional (Default : None)
+        An array that maps the names attributes of the base model to
+        others. Each column relates to a different model in `model_list`
+        in order. The first column contains the names of attributes of
+        the base model, whereas each other column contains the name as
+        it appears in the other models. Only species, reactions and
+        parameters are needed as other attributes (e.g. control
+        coefficients) are derived from these three categories. If None
+        is supplied, all attributes are assumed to be named in the
+        same way.
+    augment_mapping : boolean, optional (Default : True)
+        This parameter specifies if `model_mapping` should be used to
+        augment a model_mapping which assumes all attributes are named
+        in the same way. This is useful if only a few model attributes
+        differ in their naming. If set to false, `model_mapping` must
+        specify the relationships between all species, reaction and
+        parameter names.
+    comparison_type : str, optional (Default : "ss")
+        A string that specifies which type of comparison should be made.
+        Options are 'ss' for SteadyStateComparer, "parscan" for
+        ParameterScanComparer, 'sim' for SimulationComparer, and
+        'closed_open' for 'ClosedOpenComparer'.
+
+    Returns
+    -------
+    values: ModelComparer
+        A model comparer object instantiated with the arguments supplied
+        above.
+    """
     if comparison_type == 'ss':
         comparer = SteadyStateComparer
     elif comparison_type == 'parscan':
@@ -92,9 +136,9 @@ class ModelMapper(object):
     def make_map_dict_list(mapping_array):
         """
         For a model mapping array, returns a list of dictionaries where
-        the keys correspond to the fist column and the values correspond to 
+        the keys correspond to the fist column and the values correspond to
         each column (including the first). A 4 column array will thus produce
-        a list of dicts of len 4 with the first having the same keys 
+        a list of dicts of len 4 with the first having the same keys
         as values.
         """
         base_vals = mapping_array[:, 0]
@@ -107,7 +151,7 @@ class ModelMapper(object):
     @staticmethod
     def replace_with_clones(model_list):
         """
-        For a list of models potentially containing duplicate PySMod 
+        For a list of models potentially containing duplicate PySMod
         instantiations, returns a list of unique objects.
         """
         new_model_list = []
@@ -121,7 +165,7 @@ class ModelMapper(object):
     @staticmethod
     def generate_unique_model_names(model_list):
         """
-        Returns a list of unique model names for a list of models. 
+        Returns a list of unique model names for a list of models.
         """
         model_names = [path.split(model.ModelFile)[-1][:-4] \
                        for model in model_list]
@@ -137,8 +181,8 @@ class ModelMapper(object):
     @staticmethod
     def auto_map_models(model_list):
         """
-        For a list of models returns an array where each column maps contains 
-        the names of model attributes as they appear in each model. Missing 
+        For a list of models returns an array where each column maps contains
+        the names of model attributes as they appear in each model. Missing
         species, parameters, and reactions are replaced with None.
         """
         base_model = model_list[0]
@@ -159,8 +203,8 @@ class ModelMapper(object):
     @staticmethod
     def clone_model(model):
         """
-        Given a model this method returns a new instantiation of the same 
-        model. 
+        Given a model this method returns a new instantiation of the same
+        model.
 
         See also:
         replace_with_clones
@@ -173,8 +217,8 @@ class ModelMapper(object):
     @staticmethod
     def get_mca_dict_mapping(mca_dict, map_dict):
         """
-        Given an mca dictionary of the base model and a map dictionary of any 
-        comparison model, this returns a dictionary that maps the names of 
+        Given an mca dictionary of the base model and a map dictionary of any
+        comparison model, this returns a dictionary that maps the names of
         mca coefficients in the base model to those in the comparison.
 
         See also:
@@ -187,7 +231,7 @@ class ModelMapper(object):
     def get_equiv_coeff(coeff, mca_dict, map_dict):
         """
         Given an mca coefficient, an mca dictionary of the base model and a map
-        dictionary of any comparison model, this returns the name of the 
+        dictionary of any comparison model, this returns the name of the
         equivalent mca coefficient in the comparison model.
 
         See also:
@@ -386,7 +430,30 @@ class BaseModelComparer(object):
         self.raw_data = None
         self.comparison = None
 
+    @silence_print
     def do_compare(self, output_list=None, custom_init=None, uniform_init=True):
+        """
+        Performs the comparison of the models.
+
+        Results are stored in `self.raw_data` and `self.comparison`.
+
+        Parameters
+        ----------
+        output_list : list of str, optional (Default : None)
+            A list of model attributes to compare. Valid options are:
+            species, reactions, parameters, and mca coefficients.
+        custom_init : dict or list of dict, optional (Default : None)
+            A dictionary specifying the initial conditions of the models.
+            Keys specify model attributes (in str) and values are float
+            values of these attributes. A list of dictionaries can also
+            be supplied in order to give each model a different set of
+            initial conditions. The list follows the same order as
+            the `model_list` supplied during object instantiation.
+        uniform_init : boolean, optional (Default : True)
+            If set to True, the attributes of each model will be set to
+            that of the base model prior to comparison. `custom_inits`
+            are applied after making model attributes uniform.
+        """
         if output_list is None:
             output_list = self._get_default_outputs()
 
@@ -497,8 +564,42 @@ class SteadyStateComparer(BaseModelComparer):
 
 
 class ParameterScanComparer(BaseModelComparer):
+    @silence_print
     def do_compare(self, scan_in, scan_range, output_list=None, custom_init=None,
                    uniform_init=True, par_scan=False, par_engine='multiproc'):
+        """
+        Performs the comparison of the models.
+
+        Results are stored in `self.raw_data` and `self.comparison`.
+
+        Parameters
+        ----------
+        scan_in : str
+            A string that specifies the parameter to be varied
+        scan_range : array-like
+            An array that specifies the range of values over which
+            `scan_in` should be varied
+        output_list : list of str, optional (Default : None)
+            A list of model attributes to compare. Valid options are:
+            species, reactions, parameters, and mca coefficients.
+        custom_init : dict or list of dict, optional (Default : None)
+            A dictionary specifying the initial conditions of the models.
+            Keys specify model attributes (in str) and values are float
+            values of these attributes. A list of dictionaries can also
+            be supplied in order to give each model a different set of
+            initial conditions. The list follows the same order as
+            the `model_list` supplied during object instantiation.
+        uniform_init : boolean, optional (Default : True)
+            If set to True, the attributes of each model will be set to
+            that of the base model prior to comparison. `custom_inits`
+            are applied after making model attributes uniform.
+        par_scan : boolean, optional (Default : False)
+            If True the parameter scan will be executed using parallel
+            processing.
+        par_enging: str, optional (Default : 'multiproc')
+            The parallel engine to be used. Options are dictated by
+            PySCeS's ParScanner.
+        """
         if output_list is None:
             output_list = self._get_default_outputs()
         self._uniform_init(uniform_init)
@@ -533,6 +634,7 @@ class ParameterScanComparer(BaseModelComparer):
             complete_results = pd.DataFrame(data=raw_result,
                                             columns=current_col_labels)
             complete_results = complete_results.reindex(columns=main_column_labels)
+            complete_results = complete_results.set_index(scan_in)
             all_results[mmap.model_name] = complete_results
         self.raw_data = all_results
 
@@ -540,26 +642,105 @@ class ParameterScanComparer(BaseModelComparer):
     def _compare_raw_data(self):
         raw_data = self.raw_data
         reference_model_name = self.mmap_list[0].model_name
-        reference_matrix = raw_data[reference_model_name].as_matrix()
-        column_labels = raw_data[reference_model_name].columns
+        reference_matrix = raw_data[reference_model_name].reset_index().as_matrix()
+        column_labels = raw_data[reference_model_name].reset_index().columns
 
         all_results = DotDict()
         for mmap in self.mmap_list[1:]:
             current_model_name = mmap.model_name
             comparison_name = '{}_{}'.format(reference_model_name,
                                              current_model_name)
-            change_matrix = raw_data[current_model_name].as_matrix()
+            change_matrix = raw_data[current_model_name].reset_index().as_matrix()
 
             comparison_result = ResultsGenerator.percentage_change(reference_matrix[:,1:],change_matrix[:,1:])
             comparison_result = np.hstack([reference_matrix[:,0][:,np.newaxis],comparison_result])
-            all_results[comparison_name] = pd.DataFrame(data=comparison_result,
-                                                        columns=column_labels)
+            df = pd.DataFrame(data=comparison_result,
+                              columns=column_labels)
+            index = df.columns[0]
+            df = df.set_index(index)
+            all_results[comparison_name] = df
         self.comparison = all_results
 
 
+    def plot(self,cols=3, width=None, height=None):
+        """
+        Produces a simple plot that allows for the visual comparison of
+        results for each model.
+
+
+        Parameters
+        ----------
+        cols : int, optional (Default : 3)
+            The number of columns to use when plotting subplots.
+        width : float, optional (Default : 15.0)
+            The width of the figure in inches.
+        height : float, optional (Default : 5.0*number of subplot rows)
+            The height of the figure in inches. By default the height is
+            dynamic in will be adjusted based on the number of rows of
+            subplots where each row is assigned 5 inches.
+        Returns
+        -------
+        f: matplotlib figure
+            A matplotlib figure on which results are plotted.
+        axxarr: 2-dimensional numpy array of AxesSubplots
+            An array that contains the axes associate with the figure.
+        """
+        columns = self.raw_data.values()[0].columns
+        index = self.raw_data.values()[0].index
+
+        assert cols >= 2
+        rows = int(np.ceil(len(columns)/float(cols)))
+
+        if not height:
+            height = 5.*rows
+        if not width:
+            width = 15.
+
+        f, axarr = plt.subplots(rows,cols)
+        f.set_size_inches(w=width, h=height)
+
+        for i in xrange(cols*rows - len(columns)):
+            f.delaxes(axarr.flat[-1-i])
+
+        for column, ax in zip(columns,axarr.flat):
+            for k, v in self.raw_data.iteritems():
+                ax.plot(index, v[column], '-',label=k)
+            ax.set_xlabel(index.name)
+            ax.set_title(column)
+            ax.legend()
+        return f,axarr
+
+
 class SimulationComparer(ParameterScanComparer):
+    @silence_print
     def do_compare(self, time_range, output_list=None, custom_init=None,
                    uniform_init=True):
+        """
+        Performs the comparison of the models.
+
+        Results are stored in `self.raw_data` and `self.comparison`.
+
+        Parameters
+        ----------
+        time_range : array-like
+            An array that specifies the range of values over which
+            `Time` should be varied. It allows for starting points other
+            than zero.
+        output_list : list of str, optional (Default : None)
+            A list of model attributes to compare. Valid options are:
+            species, reactions, parameters, and mca coefficients.
+        custom_init : dict or list of dict, optional (Default : None)
+            A dictionary specifying the initial conditions of the models.
+            Keys specify model attributes (in str) and values are float
+            values of these attributes. A list of dictionaries can also
+            be supplied in order to give each model a different set of
+            initial conditions. The list follows the same order as
+            the `model_list` supplied during object instantiation.
+        uniform_init : boolean, optional (Default : True)
+            If set to True, the attributes of each model will be set to
+            that of the base model prior to comparison. `custom_inits`
+            are applied after making model attributes uniform.
+        """
         if output_list is None:
             output_list = self._get_default_outputs()
         self._uniform_init(uniform_init)
@@ -603,14 +784,43 @@ class SimulationComparer(ParameterScanComparer):
 
             complete_results = pd.DataFrame(data=new_raw_result,
                                             columns=current_col_labels)
+
             complete_results = complete_results.reindex(columns=main_column_labels)
+            complete_results = complete_results.set_index('Time')
             all_results[mmap.model_name] = complete_results
         self.raw_data = all_results
 
 
 class ClosedOpenComparer(SimulationComparer):
+    @silence_print
     def do_compare(self, time_range, output_list=None, custom_init=None,
                    uniform_init=True):
+        """
+        Performs the comparison of the models.
+
+        Results are stored in `self.raw_data` and `self.comparison`.
+
+        Parameters
+        ----------
+        time_range : array-like
+            An array that specifies the range of values over which
+            `Time` should be varied. It allows for starting points other
+            than zero.
+        output_list : list of str, optional (Default : None)
+            A list of model attributes to compare. Valid options are:
+            species, reactions, parameters, and mca coefficients.
+        custom_init : dict or list of dict, optional (Default : None)
+            A dictionary specifying the initial conditions of the models.
+            Keys specify model attributes (in str) and values are float
+            values of these attributes. A list of dictionaries can also
+            be supplied in order to give each model a different set of
+            initial conditions. The list follows the same order as
+            the `model_list` supplied during object instantiation.
+        uniform_init : boolean, optional (Default : True)
+            If set to True, the attributes of each model will be set to
+            that of the base model prior to comparison. `custom_inits`
+            are applied after making model attributes uniform.
+        """
         if output_list is None:
             output_list = self._get_default_outputs()
         self._uniform_init(uniform_init)
@@ -636,6 +846,7 @@ class ClosedOpenComparer(SimulationComparer):
                                                             sim_out=base_sim_out_list)
         base_complete_results = pd.DataFrame(data=simulation_results,
                                              columns=base_column_names)
+        base_complete_results = base_complete_results.set_index('Time')
         all_results[base_mmap.model_name] = base_complete_results
 
         for i, mmap in enumerate(self.mmap_list[1:]):
@@ -644,7 +855,7 @@ class ClosedOpenComparer(SimulationComparer):
             outputs = self._output_to_ss(output_partial)
             output_col_names = ['Time'] + scan_column_names + output_partial
 
-            time_col = base_complete_results['Time'].as_matrix()
+            time_col = base_complete_results.reset_index()['Time'].as_matrix()
             input_val_list = [base_complete_results[col_name].as_matrix() for col_name in scan_column_names]
             raw_results = []
             for input_vals in zip(*input_val_list):
@@ -658,6 +869,7 @@ class ClosedOpenComparer(SimulationComparer):
             complete_results = pd.DataFrame(data=raw_results,
                                             columns=output_col_names)
             complete_results = complete_results.reindex(columns=base_column_names)
+            complete_results = complete_results.set_index('Time')
             all_results[mmap.model_name] = complete_results
         self.raw_data = all_results
 
