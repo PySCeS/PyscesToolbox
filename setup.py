@@ -18,7 +18,7 @@ packages = find_packages()
 
 setup(
     name='PyscesToolbox',
-    version='0.8.9',
+    version='0.8.9post1',
     packages=packages,
     url='https://github.com/PySCeS/PyscesToolbox',
     download_url='http://github.com/PySCeS/PyscesToolbox/archive/0.8.9.tar.gz',
@@ -33,9 +33,10 @@ setup(
                       'pysces',
                       'matplotlib',
                       'numpydoc',
+                      'networkx==1.11',
+                      'ipywidgets==6.0.0',
+                      'widgetsnbextension==2.0.0',
                       'jupyter-pip',
-                      'networkx',
-                      'jupyter',
                       'pandas'
                       ],
     package_data={'d3networkx_psctb': ['widget.js'],},
