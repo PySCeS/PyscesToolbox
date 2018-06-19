@@ -21,7 +21,7 @@ packages = find_packages()
 
 setup(
     name='PyscesToolbox',
-    version='0.8.9post1',
+    version='0.8.9post2',
     packages=packages,
     url='https://github.com/PySCeS/PyscesToolbox',
     download_url='http://github.com/PySCeS/PyscesToolbox/archive/0.8.9.tar.gz',
