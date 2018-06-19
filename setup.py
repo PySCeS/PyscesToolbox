@@ -1,18 +1,21 @@
 from setuptools import setup, find_packages
 from os import path
 try:
-  from jupyterpip import cmdclass
+    from jupyterpip import cmdclass
 except:
-  import pip
-  import importlib
-  pip.main(['install', 'jupyter-pip'])
-  cmdclass = importlib.import_module('jupyterpip').cmdclass
+    try:
+        from pip import main as pip_main
+    except:
+        from pip._internal import main as pip_main
+    import importlib
+    pip_main(['install', 'jupyter-pip'])
+    cmdclass = importlib.import_module('jupyterpip').cmdclass
 
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the relevant file
 with open(path.join(here, 'README.rst')) as f:
-    long_description = f.read()
+        long_description = f.read()
 
 packages = find_packages()
 
@@ -37,14 +40,13 @@ setup(
                       'ipywidgets==6.0.0',
                       'widgetsnbextension==2.0.0',
                       'jupyter-pip',
-                      'pandas'
-                      ],
+                      'pandas'],
     package_data={'d3networkx_psctb': ['widget.js'],},
     keywords=['metabolism','metabolic control analysis','modelling'],
     classifiers=['Development Status :: 5 - Production/Stable',
-                 'Intended Audience :: Science/Research',
-                 'Topic :: Scientific/Engineering :: Bio-Informatics',
-                 'License :: OSI Approved :: BSD License',
-                 'Programming Language :: Python :: 2.7'],
+                             'Intended Audience :: Science/Research',
+                             'Topic :: Scientific/Engineering :: Bio-Informatics',
+                             'License :: OSI Approved :: BSD License',
+                             'Programming Language :: Python :: 2.7'],
     cmdclass=cmdclass('d3networkx_psctb'),
 )
