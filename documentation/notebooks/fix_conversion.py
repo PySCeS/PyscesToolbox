@@ -16,7 +16,7 @@ def get_rst_file_names():
             return True
         else:
             return False
-    return filter(ends_with_rst, listdir(path.curdir))
+    return list(filter(ends_with_rst, listdir(path.curdir)))
 
 
 # In[ ]:
@@ -308,7 +308,7 @@ if __name__ == "__main__":
     else:
         file_names = sys.argv[1:]
     for file_name in file_names:
-        print "Applying fixes for: ", file_name
+        print("Applying fixes for: ", file_name)
         lines = get_lines(file_name)
         fix_note_indentation(lines)
 

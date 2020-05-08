@@ -266,11 +266,11 @@ class LatexExpr(object):
                            long_frac_ratio=10,
                            mul_symbol=mul_symbol)
 
-        for k, v in self.prc_subs.iteritems():
+        for k, v in self.prc_subs.items():
             latex_expr = latex_expr.replace(k, v)
 
         if self._added_tk:
-            for k, v in self.tk_subs.iteritems():
+            for k, v in self.tk_subs.items():
                 latex_expr = latex_expr.replace(k, v)
 
         return latex_expr

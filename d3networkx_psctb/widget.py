@@ -32,11 +32,11 @@ class ForceDirectedGraph(widgets.DOMWidget):
 
         # Show the widget, then send the current state
         widgets.DOMWidget._ipython_display_(self, *pargs, **kwargs)
-        for (key, value) in self._eventful_graph.graph.items():
+        for (key, value) in list(self._eventful_graph.graph.items()):
             self.send({'dict': 'graph', 'action': 'add', 'key': key, 'value': value})
-        for (key, value) in self._eventful_graph.node.items():
+        for (key, value) in list(self._eventful_graph.node.items()):
             self.send({'dict': 'node', 'action': 'add', 'key': key, 'value': value})
-        for (key, value) in self._eventful_graph.adj.items():
+        for (key, value) in list(self._eventful_graph.adj.items()):
             self.send({'dict': 'adj', 'action': 'add', 'key': key, 'value': value})
 
     def _send_dict_changes(self, eventful_dict, dict_name):

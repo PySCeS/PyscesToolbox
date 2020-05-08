@@ -1,5 +1,5 @@
 from os import path
-import cStringIO
+import io
 import string
 
 from pysces import model, PyscesModel
@@ -52,7 +52,7 @@ def mod_to_str(mod):
         A string representation of the contents of a PySCeS model file.
 
     """
-    F = cStringIO.StringIO()
+    F = io.StringIO()
     mod.showModel(filename=F)
     fstr = F.getvalue()
     F.close()
@@ -79,10 +79,10 @@ def strip_fixed(fstr):
     psc_to_str
     mod_to_str
     """
-    Fi = cStringIO.StringIO()
+    Fi = io.StringIO()
     Fi.write(fstr)
     Fi.seek(0)
-    Fo = cStringIO.StringIO()
+    Fo = io.StringIO()
     Fhead = None
     for line in Fi:
         if line[:4] == "FIX:":

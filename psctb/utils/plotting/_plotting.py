@@ -11,7 +11,7 @@ from pysces import ModelMap
 from pysces import output_dir as psc_out_dir
 import pysces
 import gzip
-import cPickle as pickle
+import pickle as pickle
 
 from ..misc import *
 from ...latextools import LatexExpr
@@ -159,7 +159,7 @@ class LineData(object):
         namespace.
         """
         # TODO Figure out why the properties are (or need to be) attached in this way. It seems unnecessary
-        for k, v in self.properties.iteritems():
+        for k, v in self.properties.items():
             setattr(self, k, v)
 
     def add_property(self, key, value):
@@ -281,7 +281,7 @@ class SimpleData2D(object):
                        sep=separator,
                        format=fmt)
         except IOError as e:
-            print e.strerror
+            print(e.strerror)
 
 
 class Data2D(object):
@@ -483,7 +483,7 @@ class Data2D(object):
                            'Parameters'])])
 
         additional_cat_classes = self._additional_cat_classes
-        for k, v in additional_cat_classes.iteritems():
+        for k, v in additional_cat_classes.items():
             if k in category_classes:
                 lst = category_classes[k]
                 new_lst = list(set(lst + v))
@@ -510,7 +510,7 @@ class Data2D(object):
 
         additional_cats = self._additional_cats
         if additional_cats:
-            for k, v in additional_cats.iteritems():
+            for k, v in additional_cats.items():
                 if k in scan_types:
                     lst = scan_types[k]
                     new_lst = list(set(lst + v))
@@ -538,7 +538,7 @@ class Data2D(object):
         column_categories = {}
         for column in self.scan_results.scan_out:
             column_categories[column] = [column]
-            for k, v in scan_types.iteritems():
+            for k, v in scan_types.items():
                 if column in v:
                     column_categories[column].append(k)
                     break
@@ -617,7 +617,7 @@ class Data2D(object):
                                                  self.scan_results.scan_in, ),
                            base_name=base_name, )
 
-        for k,v in self._category_manifest.iteritems():
+        for k,v in self._category_manifest.items():
             scan_fig.toggle_category(k,v)
 
         if self._vline_val:
@@ -660,7 +660,7 @@ class Data2D(object):
                        sep=separator,
                        format=fmt)
         except IOError as e:
-            print e.strerror
+            print(e.strerror)
 
 
 class ScanFig(object):
@@ -756,8 +756,8 @@ class ScanFig(object):
 
         if category_classes:
             new_cat_classes = OrderedDict()
-            for k, v in category_classes.iteritems():
-                for each in self._categories.iterkeys():
+            for k, v in category_classes.items():
+                for each in self._categories.keys():
                     if each in v:
                         if not k in new_cat_classes:
                             new_cat_classes[k] = []
@@ -871,7 +871,7 @@ class ScanFig(object):
     def _widgets(self):
         if not self._widgets_:
             widget_classes = OrderedDict()
-            for k in self._category_classes.iterkeys():
+            for k in self._category_classes.keys():
                 box = widgets.HBox()
                 box.layout.display = 'flex-flow'
                 widget_classes[k] = box
@@ -892,12 +892,12 @@ class ScanFig(object):
                 w.value = self.categories_status[each]
                 on_change = oc(each)
                 w.on_trait_change(on_change, 'value')
-                for k, v in self._category_classes.iteritems():
+                for k, v in self._category_classes.items():
                     if each in v:
                         widget_classes[k].children += (w),
 
             # this is needed to sort widgets according to alphabetical order
-            for k, v in widget_classes.iteritems():
+            for k, v in widget_classes.items():
                 children_list = list(v.children)
                 names = [getattr(widg, 'description')
                          for widg in children_list]
@@ -1057,7 +1057,7 @@ class ScanFig(object):
 
     @property
     def category_names(self):
-        return self._categories.keys()
+        return list(self._categories.keys())
 
     @property
     def categories_status(self):
@@ -1092,7 +1092,7 @@ class ScanFig(object):
 
     @property
     def line_names(self):
-        lines = self._lines.keys()
+        lines = list(self._lines.keys())
         lines.sort()
         return lines
 
@@ -1144,7 +1144,7 @@ class ScanFig(object):
         # get the visibility status of the category eg. True/False
         self.categories_status[cat] = value
         # get all the other categories
-        other_cats = self._categories.keys()
+        other_cats = list(self._categories.keys())
         other_cats.pop(other_cats.index(cat))
         # self.categories is a dict with categories as keys
         # and list of lines that fall within a category
@@ -1180,7 +1180,7 @@ class ScanFig(object):
         adjust_figure
         """
         self.show()
-        for k, v in self._widgets.iteritems():
+        for k, v in self._widgets.items():
             if len(v.children) > 0:
                 head = widgets.Label(value=k)
                 display(head)
@@ -1191,7 +1191,7 @@ class ScanFig(object):
                 # v.set_css({'flex-wrap': 'wrap'})
         display(widgets.Label(value='$~$'))
         display(self._save_button)
-        for boxes in self._widgets.itervalues():
+        for boxes in self._widgets.values():
             for button in boxes.children:
                 button.value = self.categories_status[button.description]
                 # self._save_button.remove_class('vbox')
@@ -1213,7 +1213,7 @@ class ScanFig(object):
 
         """
         self.show()
-        for k, v in self._figure_widgets.iteritems():
+        for k, v in self._figure_widgets.items():
             if len(v.children) > 0:
                 head = widgets.Label(value=k)
                 display(head)

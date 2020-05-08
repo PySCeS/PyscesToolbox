@@ -9,7 +9,7 @@ def notebook_without_cells(notebooknode):
     Converts a NotebookNode object to a dict and removes the 'cells'
     key/attribute.
     """
-    nb_sans_cells = {k: v for k, v in notebooknode.iteritems()
+    nb_sans_cells = {k: v for k, v in notebooknode.items()
                      if k != 'cells'}
     return nb_sans_cells
 
@@ -98,9 +98,9 @@ if __name__ == "__main__":
             # combine preserved lines into single string
             new_source = combine_lines(new_lines)
             # construct a new cell
-            new_cell = {k: v for k, v in cell.iteritems() if k != u'source'}
+            new_cell = {k: v for k, v in cell.items() if k != 'source'}
             # add the cell source
-            new_cell[u'source'] = new_source
+            new_cell['source'] = new_source
             # convert cell to NotebookNode
             new_cell = nbformat.NotebookNode(new_cell)
             # add cell to the new notebook

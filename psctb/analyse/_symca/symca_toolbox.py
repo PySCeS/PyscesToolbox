@@ -92,8 +92,8 @@ class SymcaToolBox(object):
         with independent fluxes or otherwise equal fluxes)
         """
         new_fluxes = all_fluxes[:, :]
-        for row in xrange(kmatrix.rows - 1, -1, -1):
-            for row_above in xrange(row - 1, -1, -1):
+        for row in range(kmatrix.rows - 1, -1, -1):
+            for row_above in range(row - 1, -1, -1):
                 if kmatrix[row, :] == kmatrix[row_above, :]:
                     new_fluxes[row] = new_fluxes[row_above]
         return new_fluxes
@@ -337,7 +337,7 @@ class SymcaToolBox(object):
         if expression.is_Matrix:
             expr_mat = expression[:, :]
             # print expr_mat
-            print 'Simplifying matrix with ' + str(len(expr_mat)) + ' elements'
+            print('Simplifying matrix with ' + str(len(expr_mat)) + ' elements')
             for i, e in enumerate(expr_mat):
 
                 sys.stdout.write('*')
@@ -569,7 +569,7 @@ class SymcaToolBox(object):
             expr = each / common_denom_expr
             expr = SymcaToolBox.maxima_factor(expr, path_to)
             num, denom = fraction(expr)
-            if not simpl_dic.has_key(denom):
+            if denom not in simpl_dic:
                 simpl_dic[denom] = [[], []]
             simpl_dic[denom][0].append(cc_names[i])
             simpl_dic[denom][1].append(num)
@@ -589,7 +589,7 @@ class SymcaToolBox(object):
     @staticmethod
     def build_inner_dict(cc_object):
         deep_dict = {}
-        for key, value in cc_object.iteritems():
+        for key, value in cc_object.items():
             if key != 'common_denominator':
                 deepest_dict = {str(key): str(value.numerator)}
                 deep_dict.update(deepest_dict)
@@ -616,11 +616,11 @@ class SymcaToolBox(object):
     @staticmethod
     def make_inner_dict(cc_container, cc_container_name):
         CC_dict = {}
-        CC_dict[cc_container_name] = dict(zip(
-            [cc.name for cc in cc_container.values() if
+        CC_dict[cc_container_name] = dict(list(zip(
+            [cc.name for cc in list(cc_container.values()) if
              cc.name is not 'common_denominator'],
-            [cc.numerator for cc in cc_container.values() if
-             cc.name is not 'common_denominator']))
+            [cc.numerator for cc in list(cc_container.values()) if
+             cc.name is not 'common_denominator'])))
         CC_dict[cc_container_name]['common_denominator'] = cc_container.common_denominator.expression
         return CC_dict
 

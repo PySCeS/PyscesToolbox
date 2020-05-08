@@ -224,7 +224,7 @@ class RateChar(object):
         loaded_data = {}
         try:
             with numpy.load(file_name) as data_file:
-                for k, v in data_file.iteritems():
+                for k, v in data_file.items():
                     loaded_data[k] = v
         except IOError as e:
             raise e
@@ -316,9 +316,9 @@ class RateCharData(object):
 
     def _change_colour_order(self, order=None):
         if not order:
-            order = self._color_dict_.keys()
+            order = list(self._color_dict_.keys())
             shuffle(order)
-        self._color_dict_ = dict(zip(order, self._color_dict_.values()))
+        self._color_dict_ = dict(list(zip(order, list(self._color_dict_.values()))))
         self._make_all_line_data()
 
     def _make_all_line_data(self):
@@ -430,7 +430,7 @@ class RateCharData(object):
                                              fmt='csv',
                                              file_name=file_name, )
 
-        keys = self.mca_results.keys()
+        keys = list(self.mca_results.keys())
         keys.sort()
         values = numpy.array([self.mca_results[k]
                               for k in keys]).reshape(len(keys), 1)
@@ -443,7 +443,7 @@ class RateCharData(object):
                        sep=separator,
                        format=fmt)
         except IOError as e:
-            print e.strerror
+            print(e.strerror)
 
     def save_flux_results(self, file_name=None, separator=',',fmt='%f'):
         file_name = modeltools.get_file_path(working_dir=self._working_dir,
@@ -466,7 +466,7 @@ class RateCharData(object):
                        sep=separator,
                        format=fmt)
         except IOError as e:
-            print e.strerror
+            print(e.strerror)
 
     def save_coefficient_results(self,
                                  coefficient,
@@ -499,7 +499,7 @@ class RateCharData(object):
                        sep=separator,
                        format=fmt)
         except IOError as e:
-            print e.strerror
+            print(e.strerror)
 
     # TODO fix this method so that folder is a parameter only her
     def save_all_results(self, folder=None, separator=',',fmt='%f'):
@@ -714,12 +714,12 @@ class RateCharData(object):
 
             relavent_reactions.sort()
             color_dict = dict(
-                zip(['Total Supply'] +
+                list(zip(['Total Supply'] +
                     ['J_' + reaction for reaction in relavent_reactions] +
                     ['Total Demand'],
-                    color_list))
+                    color_list)))
             # just to darken the colors a bit
-            for k, v in color_dict.iteritems():
+            for k, v in color_dict.items():
                 color_dict[k] = [v[0], 1, v[2]]
 
             self._color_dict_ = color_dict
@@ -775,7 +775,7 @@ class RateCharData(object):
         ec_ld_dict = {}
 
         for ec_name in self.scan_results.ec_names:
-            for flux, flux_ld in self._flux_ld_dict.iteritems():
+            for flux, flux_ld in self._flux_ld_dict.items():
                 ec_reaction = flux[2:]
                 if 'ec' + ec_reaction + '_' + self.scan_results.fixed in ec_name:
                     flux_color = self._color_dict[flux]
@@ -800,7 +800,7 @@ class RateCharData(object):
         rc_ld_dict = {}
 
         for rc_name in self.scan_results.rc_names:
-            for flux, flux_ld in self._flux_ld_dict.iteritems():
+            for flux, flux_ld in self._flux_ld_dict.items():
                 rc_flux = 'J' + flux[2:]
                 if 'rc' + rc_flux + '_' in rc_name:
                     flux_color = self._color_dict[flux]
@@ -833,7 +833,7 @@ class RateCharData(object):
         prc_ld_dict = {}
 
         for prc_name in self.scan_results.prc_names:
-            for flux, flux_ld in self._flux_ld_dict.iteritems():
+            for flux, flux_ld in self._flux_ld_dict.items():
                 prc_flux = 'J' + flux[2:]
                 if 'prc' + prc_flux + '_' + self.scan_results.fixed in prc_name:
                     route_reaction = get_prc_route(prc_name,
@@ -902,7 +902,7 @@ class RateCharData(object):
                 'Response Coefficients',
                 'Partial Response Coefficients'])])
 
-        line_data_list = [v for v in self._line_data_dict.itervalues()]
+        line_data_list = [v for v in self._line_data_dict.values()]
 
         scan_fig = ScanFig(line_data_list,
                            ax_properties={'xlabel': '[%s]' %
@@ -956,7 +956,7 @@ class RateCharData(object):
             reaction = flux_reaction[2:]
             rc_names.append('rcJ%s_%s' % (reaction, self.scan_results.fixed))
 
-            rc_pos.append(range(strt, stp))
+            rc_pos.append(list(range(strt, stp)))
             strt += arl
             stp += arl
 
@@ -1013,7 +1013,7 @@ class RateCharData(object):
 
         ec_outs = all_outs[:, :ec_len]
         cc_outs = all_outs[:, ec_len:]
-        ec_positions = range(ec_len) * (len(prc_names)/ec_len)
+        ec_positions = list(range(ec_len)) * (len(prc_names)/ec_len)
 
 
         for i, prc_name in enumerate(prc_names):

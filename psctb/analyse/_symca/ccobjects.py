@@ -170,7 +170,7 @@ class CCoef(CCBase):
     def _perscan_legacy(self, parameter, scan_range):
 
         scan_res = [list()
-                    for i in range(len(self.control_patterns.values()) + 1)]
+                    for i in range(len(list(self.control_patterns.values())) + 1)]
         scan_res[0] = scan_range
 
         for parvalue in scan_range:
@@ -194,7 +194,7 @@ class CCoef(CCBase):
 
     def _valscan_legacy(self, parameter, scan_range):
 
-        control_pattern_range = range(len(self.control_patterns.values()) + 2)
+        control_pattern_range = list(range(len(list(self.control_patterns.values())) + 2))
         scan_res = [list() for i in control_pattern_range]
         scan_res[0] = scan_range
 
@@ -265,7 +265,7 @@ class CCoef(CCBase):
         for i, symbol in enumerate(scanner.UserOutputList):
             subs_dict[symbol] = scanner.UserOutputResults[:, i]
 
-        control_pattern_names = self.control_patterns.keys()
+        control_pattern_names = list(self.control_patterns.keys())
         denom_expr = str(self.denominator)
         cp_numerators = [self.control_patterns[cp_name].numerator for
                          cp_name in control_pattern_names]
@@ -296,7 +296,7 @@ class CCoef(CCBase):
         init = getattr(self.mod, parameter)
 
         column_names = [parameter] + \
-                       [cp.name for cp in self.control_patterns.values()]
+                       [cp.name for cp in list(self.control_patterns.values())]
 
         if scan_type is 'percentage':
             y_label = 'Control pattern percentage contribution'
@@ -308,10 +308,10 @@ class CCoef(CCBase):
                                          par_engine)
                 data_array = scan_res
             except Exception as exception:
-                print 'The parameter scan yielded the following error:'
-                print exception
-                print 'Switching over to slower scan method and replacing'
-                print 'invalid steady states with NaN values.'
+                print('The parameter scan yielded the following error:')
+                print(exception)
+                print('Switching over to slower scan method and replacing')
+                print('invalid steady states with NaN values.')
                 scan_res = self._perscan_legacy(parameter, scan_range)
                 data_array = array(scan_res, dtype=np.float).transpose()
 
@@ -327,10 +327,10 @@ class CCoef(CCBase):
                                          par_engine)
                 data_array = scan_res
             except Exception as exception:
-                print 'The parameter scan yielded the following error:'
-                print exception
-                print 'Switching over to slower scan method and replacing'
-                print 'invalid steady states with NaN values.'
+                print('The parameter scan yielded the following error:')
+                print(exception)
+                print('Switching over to slower scan method and replacing')
+                print('invalid steady states with NaN values.')
                 scan_res = self._valscan_legacy(parameter, scan_range)
                 data_array = array(scan_res, dtype=np.float).transpose()
 
@@ -375,10 +375,10 @@ class CCoef(CCBase):
         for key in keys:
             str_key = str(key)
             subsdict[str_key] = getattr(self.mod, str_key)
-        for pattern in self.control_patterns.values():
+        for pattern in list(self.control_patterns.values()):
             pattern._calc_value(subsdict)
         self._abs_value = sum(
-            [abs(pattern._value) for pattern in self.control_patterns.values()])
+            [abs(pattern._value) for pattern in list(self.control_patterns.values())])
 
     def _calc_value(self):
         """Calculates the numeric value of the control coefficient from the
@@ -390,10 +390,10 @@ class CCoef(CCBase):
         for key in keys:
             str_key = str(key)
             subsdict[str_key] = getattr(self.mod, str_key)
-        for pattern in self.control_patterns.values():
+        for pattern in list(self.control_patterns.values()):
             pattern._calc_value(subsdict)
         self._value = sum(
-            [pattern._value for pattern in self.control_patterns.values()])
+            [pattern._value for pattern in list(self.control_patterns.values())])
 
     def _set_control_patterns(self):
         """Divides control coefficient into control patterns and saves
@@ -422,8 +422,8 @@ class CCoef(CCBase):
     def _check_control_patterns(self):
         """Checks that all control patterns are either positive or negative"""
         all_same = False
-        poscomp = [i.value > 0 for i in self.control_patterns.values()]
-        negcomp = [i.value < 0 for i in self.control_patterns.values()]
+        poscomp = [i.value > 0 for i in list(self.control_patterns.values())]
+        negcomp = [i.value < 0 for i in list(self.control_patterns.values())]
         if all(poscomp):
             all_same = True
         elif all(negcomp):

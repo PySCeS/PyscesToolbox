@@ -260,7 +260,7 @@ class ModelGraph(object):
         if s_t:
             source, target = s_t
             dic_to_change = self._eventful_graph.adj[source][target]
-            for k, v in prop_dic.iteritems():
+            for k, v in prop_dic.items():
                 if only_overwrite and k in dic_to_change or not only_overwrite:
                     dic_to_change[k] = v
 
@@ -278,7 +278,7 @@ class ModelGraph(object):
             prop_dic = {}
         dic = self._eventful_graph.node.get(node_name)
         if dic:
-            for k, v in prop_dic.iteritems():
+            for k, v in prop_dic.items():
                 dic[k] = v
 
     def draw_all_links(self):
@@ -449,7 +449,7 @@ class ModelGraph(object):
             return click
 
         button_list = []
-        for k, v in cc.control_patterns.iteritems():
+        for k, v in cc.control_patterns.items():
             but = widgets.Button()
             but.description = k
             click = onclick_maker(v)

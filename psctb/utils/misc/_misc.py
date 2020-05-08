@@ -234,7 +234,7 @@ def column_multiply(arr):
            [ 72.]])
     """
     new_arr = ones((arr.shape[0], 1))
-    for col in xrange(arr.shape[1]):
+    for col in range(arr.shape[1]):
         new_arr = new_arr * arr[:, col].reshape(arr.shape[0], 1)
     return new_arr
 
@@ -412,7 +412,7 @@ def do_safe_state(mod, parameter, value, type='ss'):
 
 
 def get_value_eval(expression, subs_dict):
-    for k, v in subs_dict.iteritems():
+    for k, v in subs_dict.items():
         subs_dict[k] = float64(v)
     ans = eval(expression, {}, subs_dict)
     # sometimes subs_dict is empty
@@ -421,8 +421,8 @@ def get_value_eval(expression, subs_dict):
         # the answer and the subs_dict arrays are of equal length
         # there is probably a faster solution, but this works fine by
         # falling back to get_value_sympy
-        if is_iterable(subs_dict.values()[0]):
-            if len(ans) != len(subs_dict.values()[0]):
+        if is_iterable(list(subs_dict.values())[0]):
+            if len(ans) != len(list(subs_dict.values())[0]):
                 raise Exception
     # print 'gve'
     return ans
@@ -437,22 +437,22 @@ def get_value_sympy(expression, subs_dict):
     if len(subs_dict) == 0:
         ans = expression.subs(subs_dict)
     else:
-        first_value = subs_dict.values()[0]
+        first_value = list(subs_dict.values())[0]
         if is_iterable(first_value):
             ans = []
             if not isinstance(first_value[0], float64):
-                for k, v in subs_dict.iteritems():
+                for k, v in subs_dict.items():
                     subs_dict[k] = float64(v)
 
             number_of_array_elements = len(first_value)
             for i in range(number_of_array_elements):
-                temp_subsdict = {k: v[i] for k, v in subs_dict.iteritems()}
+                temp_subsdict = {k: v[i] for k, v in subs_dict.items()}
                 ans_val = expression.subs(temp_subsdict)
                 ans.append(ans_val)
             ans = float64(array(ans))
         else:
             if not isinstance(first_value, float64):
-                for k, v in subs_dict.iteritems():
+                for k, v in subs_dict.items():
                     subs_dict[k] = float64(v)
             ans = expression.subs(subs_dict)
     # print 'gvs'
@@ -698,7 +698,7 @@ def silence_print(func):
             returns = func(*args, **kwargs)
             fix_printing()
             return returns
-        except KeyboardInterrupt, e:
+        except KeyboardInterrupt as e:
             fix_printing()
             raise e
     return wrapper
@@ -927,9 +927,9 @@ def group_sort(old_list, num_of_groups):
     # sending the data tp data2d because otherwise button grouping will also be
     # affected by this sorting scheme.
     group_size = len(old_list) / num_of_groups
-    first_group = range(0, len(old_list), num_of_groups)
+    first_group = list(range(0, len(old_list), num_of_groups))
     groups = first_group
-    for i in xrange(1, group_size - 1):
+    for i in range(1, group_size - 1):
         groups = groups + [j + i for j in first_group]
     new_list = [old_list[pos] for pos in groups]
 
@@ -945,7 +945,7 @@ def print_f(message, status):
     status : bool
     """
     if status:
-        print message
+        print(message)
 
 
 class PseudoDotDict:
@@ -980,7 +980,7 @@ class PseudoDotDict:
         initialisation. Throws exception if any of the keys are
         reserved.
         """
-        for k, v in self._dict.iteritems():
+        for k, v in self._dict.items():
             if k in PseudoDotDict._reserved:
                 raise Exception('%s is a reserved key' % k)
             else:
@@ -1000,7 +1000,7 @@ class PseudoDotDict:
         return self._dict.__repr__()
 
     def update(self, dic):
-        for k, v in dic.iteritems():
+        for k, v in dic.items():
             self.__setitem__(k, v)
 
 
@@ -1049,14 +1049,14 @@ class DotDict(dict):
         initialisation. Throws exception if any of the keys are
         reserved.
         """
-        for k, v in self.iteritems():
+        for k, v in self.items():
             if k in DotDict._reserved:
                 raise Exception('%s is a reserved key' % k)
             else:
                 setattr(self, k, v)
 
     def update(self, dic):
-        for k, v in dic.iteritems():
+        for k, v in dic.items():
             self.__setitem__(k, v)
 
     def _make_repr(self, key, value, formatter=None):
@@ -1088,10 +1088,10 @@ class DotDict(dict):
             formatter = formatter_factory()
 
         def representation(the_self=self):
-            keys = self.keys()
+            keys = list(self.keys())
             keys.sort()
             values = [self[the_key] for the_key in keys]
-            items = zip(keys, values)
+            items = list(zip(keys, values))
             lst = []
             for k, v in items:
                 col1 = eval(key)

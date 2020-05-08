@@ -1,4 +1,4 @@
-import cPickle as pickle
+import pickle as pickle
 from sympy.matrices import Matrix
 from sympy import sympify
 import sys
@@ -86,7 +86,7 @@ class Symca(object):
             try:
                 self.load_session()
             except:
-                print 'Nothing to load_session: Run `do_symca` first'
+                print('Nothing to load_session: Run `do_symca` first')
 
     @property
     def nmatrix(self):
@@ -291,16 +291,16 @@ class Symca(object):
             main_cc_dict = pickle.load(f)
 
         cc_containers = {}
-        for key, value in main_cc_dict.iteritems():
+        for key, value in main_cc_dict.items():
             common_denom_exp = value.pop('common_denominator')
             cc_container = SMCAtools.spawn_cc_objects(self.mod,
-                                                      value.keys(),
+                                                      list(value.keys()),
                                                       [exp for exp in
-                                                       value.values()],
+                                                       list(value.values())],
                                                       common_denom_exp,
                                                       self._ltxe)
             cc_containers[key] = SMCAtools.make_CC_dot_dict(cc_container)
-        for key, value in cc_containers.iteritems():
+        for key, value in cc_containers.items():
             setattr(self, key, value)
 
     def save_results(self, file_name=None, separator=',',fmt='%.9f'):
@@ -343,7 +343,7 @@ class Symca(object):
                     max_len = expr_len
                 rows.append(row_1)
                 if not cc_obj.name == 'common_denominator':
-                    for cp in cc_obj.control_patterns.itervalues():
+                    for cp in cc_obj.control_patterns.values():
                         cols = (cp.name,
                                 cp.value,
                                 cp.latex_name,
@@ -368,7 +368,7 @@ class Symca(object):
                     fmt=['%s', fmt, '%s', '%s'],)
 
         except IOError as e:
-            print e.strerror
+            print(e.strerror)
 
     def do_symca(self, internal_fixed=None, auto_save_load=False):
         if internal_fixed is None:
@@ -419,7 +419,7 @@ class Symca(object):
                                                           self.path_to('temp'))
 
                 CC_block_counter = 0
-                for each_common_denom_expr, name_num in simpl_dic.iteritems():
+                for each_common_denom_expr, name_num in simpl_dic.items():
                     name_num[1], \
                         each_common_denom_expr = SMCAtools.fix_expressions(
                         name_num[1],
