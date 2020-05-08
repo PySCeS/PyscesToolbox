@@ -1,7 +1,3 @@
-from __future__ import division, print_function
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 from os import path
 import cStringIO
 import string
