@@ -201,7 +201,7 @@ class ThermoKin(object):
                     if len(cols[3]) > max_len:
                         max_len = len(cols[3])
 
-        str_fmt = 'S%s' % max_len
+        str_fmt = 'U%s' % max_len
         head = ['name', 'value', 'latex_name', 'latex_expression']
         X = array(values,
                   dtype=[(head[0], str_fmt),
