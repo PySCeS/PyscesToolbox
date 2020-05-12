@@ -1,3 +1,7 @@
+from __future__ import division, print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 import pickle as pickle
 from sympy.matrices import Matrix
 from sympy import sympify
@@ -277,7 +281,7 @@ class Symca(object):
                 break
 
         to_save = main_cc_dict
-        with open(file_name, 'w') as f:
+        with open(file_name, 'wb') as f:
             pickle.dump(to_save, f)
 
     def load_session(self, file_name=None):
@@ -287,7 +291,7 @@ class Symca(object):
                                   file_name=file_name,
                                   write_suffix=False)
 
-        with open(file_name, 'r') as f:
+        with open(file_name, 'rb') as f:
             main_cc_dict = pickle.load(f)
 
         cc_containers = {}
@@ -352,7 +356,7 @@ class Symca(object):
             rows.append(sep)
             cc_counter += 1
 
-        str_fmt = 'S%s' % max_len
+        str_fmt = 'U%s' % max_len
         head = ['name', 'value', 'latex_name', 'latex_expression']
         X = array(rows,
                   dtype=[(head[0], str_fmt),

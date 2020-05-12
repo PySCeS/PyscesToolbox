@@ -1,3 +1,7 @@
+from __future__ import division, print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 import sys
 from os import path, devnull
 
@@ -735,10 +739,10 @@ def cc_list(mod):
     for base_reaction in mod.reactions:
         for top_species in mod.species:
             cc = 'cc%s_%s' % (top_species, base_reaction)
-            ccs.append(cc)
+            ccs.append(str(cc))
         for top_reaction in mod.reactions:
             cc = 'ccJ%s_%s' % (top_reaction, base_reaction)
-            ccs.append(cc)
+            ccs.append(str(cc))
     ccs.sort()
     return ccs
 
@@ -748,10 +752,12 @@ def cc_dict(mod):
     for base_reaction in mod.reactions:
         for top_species in mod.species:
             cc = 'cc%s_%s' % (top_species, base_reaction)
-            ccs[cc] = (top_species, base_reaction)
+            cc = str(cc)
+            ccs[cc] = (str(top_species), str(base_reaction))
         for top_reaction in mod.reactions:
             cc = 'ccJ%s_%s' % (top_reaction, base_reaction)
-            ccs[cc] = (top_reaction, base_reaction)
+            cc = str(cc)
+            ccs[cc] = (str(top_reaction), str(base_reaction))
     return ccs
 
 @memoize
@@ -782,10 +788,10 @@ def ec_list(mod):
     for top_reaction in mod.reactions:
         for base_species in mod.species:
             ec = 'ec%s_%s' % (top_reaction, base_species)
-            ecs.append(ec)
+            ecs.append(str(ec))
         for base_param in mod.parameters:
             ec = 'ec%s_%s' % (top_reaction, base_param)
-            ecs.append(ec)
+            ecs.append(str(ec))
     ecs.sort()
     return ecs
 
@@ -795,10 +801,12 @@ def ec_dict(mod):
     for top_reaction in mod.reactions:
         for base_species in mod.species:
             ec = 'ec%s_%s' % (top_reaction, base_species)
-            ecs[ec] = (top_reaction, base_species)
+            ec = str(ec)
+            ecs[ec] = (str(top_reaction), str(base_species))
         for base_param in mod.parameters:
             ec = 'ec%s_%s' % (top_reaction, base_param)
-            ecs[ec] = (top_reaction, base_param)
+            ec = str(ec)
+            ecs[ec] = (str(top_reaction), str(base_param))
     return ecs
 
 @memoize
@@ -829,10 +837,10 @@ def rc_list(mod):
     for base_param in mod.parameters:
         for top_species in mod.species:
             rc = 'rc%s_%s' % (top_species, base_param)
-            rcs.append(rc)
+            rcs.append(str(rc))
         for top_reaction in mod.reactions:
             rc = 'rcJ%s_%s' % (top_reaction, base_param)
-            rcs.append(rc)
+            rcs.append(str(rc))
     rcs.sort()
     return rcs
 
@@ -842,10 +850,12 @@ def rc_dict(mod):
     for base_param in mod.parameters:
         for top_species in mod.species:
             rc = 'rc%s_%s' % (top_species, base_param)
-            rcs[rc] = (top_species, base_param)
+            rc = str(rc)
+            rcs[rc] = (str(top_species), str(base_param))
         for top_reaction in mod.reactions:
             rc = 'rcJ%s_%s' % (top_reaction, base_param)
-            rcs[rc] = (top_reaction, base_param)
+            rc = str(rc)
+            rcs[rc] = (str(top_reaction), str(base_param))
     return rcs
 
 @memoize
@@ -878,11 +888,13 @@ def prc_list(mod):
         for back_reaction in mod.reactions:
             for top_species in mod.species:
                 prc = 'prc%s_%s_%s' % (top_species, base_param, back_reaction)
+                prc = str(prc)
                 prcs.append(prc)
             for top_reaction in mod.reactions:
                 prc = 'prcJ%s_%s_%s' % (top_reaction,
                                         base_param,
                                         back_reaction)
+                prc = str(prc)
                 prcs.append(prc)
     prcs.sort()
     return prcs
@@ -894,28 +906,30 @@ def prc_dict(mod):
         for back_reaction in mod.reactions:
             for top_species in mod.species:
                 prc = 'prc%s_%s_%s' % (top_species, base_param, back_reaction)
-                prcs[prc] = (top_species, base_param, back_reaction)
+                prc = str(prc)
+                prcs[prc] = (str(top_species), str(base_param), str(back_reaction))
             for top_reaction in mod.reactions:
                 prc = 'prcJ%s_%s_%s' % (top_reaction,
                                         base_param,
                                         back_reaction)
-                prcs[prc] = (top_reaction,
-                             base_param,
-                             back_reaction)
+                prc = str(prc)
+                prcs[prc] = (str(top_reaction),
+                             str(base_param),
+                             str(back_reaction))
     return prcs
 
 @memoize
 def flux_list(mod):
     fluxes = []
     for reaction in mod.reactions:
-        fluxes.append('J_' + reaction)
+        fluxes.append(str('J_' + reaction))
     return fluxes
 
 @memoize
 def ss_species_list(mod):
     ss_species = []
     for species in mod.species:
-        ss_species.append(species + '_ss')
+        ss_species.append(str(species + '_ss'))
     return ss_species
 
 def group_sort(old_list, num_of_groups):

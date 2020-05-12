@@ -1,3 +1,7 @@
+#from __future__ import division, print_function
+#from __future__ import absolute_import
+#from __future__ import unicode_literals
+
 from configparser import ConfigParser
 from sys import platform, stdout
 from os import path, sep, listdir, access, X_OK, environ, pathsep

@@ -1,3 +1,7 @@
+from __future__ import division, print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 import numpy as np
 from numpy import array, nanmin, nanmax
 from sympy import Symbol
@@ -298,8 +302,9 @@ class CCoef(CCBase):
         column_names = [parameter] + \
                        [cp.name for cp in list(self.control_patterns.values())]
 
-        if scan_type is 'percentage':
+        if scan_type == 'percentage':
             y_label = 'Control pattern percentage contribution'
+            print('y_label:', y_label)
             try:
                 assert not force_legacy, 'Legacy scan requested'
                 scan_res = self._perscan(parameter,
@@ -316,9 +321,10 @@ class CCoef(CCBase):
                 data_array = array(scan_res, dtype=np.float).transpose()
 
             ylim = [nanmin(data_array[:, 1:]), nanmax(data_array[:, 1:]) * 1.1]
-        elif scan_type is 'value':
+        elif scan_type == 'value':
             column_names = column_names + [self.name]
             y_label = 'Control coefficient/pattern value'
+            print('y_label:', y_label)
             try:
                 assert not force_legacy, 'Legacy scan requested'
                 scan_res = self._valscan(parameter,
@@ -348,6 +354,7 @@ class CCoef(CCBase):
             x_label = '[%s]' % parameter.replace('_', ' ')
         else:
             x_label = parameter
+        print('labels:', x_label, y_label)
         ax_properties = {'ylabel': y_label,
                          'xlabel': x_label,
                          'xscale': 'linear',

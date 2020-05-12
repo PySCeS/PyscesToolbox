@@ -82,7 +82,8 @@ class RateChar(object):
             assert fixed in self.mod.species, 'Invalid species'
             to_scan = [fixed]
 
-        for each in to_scan:
+        for i in to_scan:
+            each = str(i)   # fix for Python 2 compatibility
             fixed_mod, fixed_ss = self._fix_at_ss(each)
 
             scan_start = self._min_max_chooser(fixed_ss,
@@ -160,8 +161,10 @@ class RateChar(object):
 
         demand_blocks = [
             'J_' + r for r in getattr(self._model_map, fixed).isSubstrateOf()]
+        demand_blocks = [str(i) for i in demand_blocks]
         supply_blocks = [
             'J_' + r for r in getattr(self._model_map, fixed).isProductOf()]
+        supply_blocks = [str(i) for i in supply_blocks]
         user_output = [fixed] + demand_blocks + supply_blocks
 
         scanner = Scanner(fixed_mod)
@@ -779,6 +782,7 @@ class RateCharData(object):
         ec_ld_dict = {}
 
         for ec_name in self.scan_results.ec_names:
+            ec_name = str(ec_name)              # Py2 fix with unicode_literals
             for flux, flux_ld in self._flux_ld_dict.items():
                 ec_reaction = flux[2:]
                 if 'ec' + ec_reaction + '_' + self.scan_results.fixed in ec_name:
@@ -804,6 +808,7 @@ class RateCharData(object):
         rc_ld_dict = {}
 
         for rc_name in self.scan_results.rc_names:
+            rc_name = str(rc_name)              # Py2 fix with unicode_literals
             for flux, flux_ld in self._flux_ld_dict.items():
                 rc_flux = 'J' + flux[2:]
                 if 'rc' + rc_flux + '_' in rc_name:
@@ -837,6 +842,7 @@ class RateCharData(object):
         prc_ld_dict = {}
 
         for prc_name in self.scan_results.prc_names:
+            prc_name = str(prc_name)            # Py2 fix with unicode_literals
             for flux, flux_ld in self._flux_ld_dict.items():
                 prc_flux = 'J' + flux[2:]
                 if 'prc' + prc_flux + '_' + self.scan_results.fixed in prc_name:

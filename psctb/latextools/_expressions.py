@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from sympy import latex, sympify, Symbol
+import sys
 
 __all__ = ['LatexExpr']
 
@@ -243,6 +244,9 @@ class LatexExpr(object):
         return self._tk_subs
 
     def expression_to_latex(self, expression,mul_symbol=None):
+        if sys.version_info[0] == 2:
+            if type(expression) == unicode:
+                expression = str(expression)
         if type(expression) == str:
             expression = sympify(expression)
 
@@ -277,4 +281,4 @@ class LatexExpr(object):
             for k, v in self.tk_subs.items():
                 latex_expr = latex_expr.replace(k, v)
 
-        return latex_expr
+        return str(latex_expr)

@@ -1,3 +1,7 @@
+from __future__ import division, print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 import subprocess
 from os import devnull
 from os.path import join
@@ -618,9 +622,9 @@ class SymcaToolBox(object):
         CC_dict = {}
         CC_dict[cc_container_name] = dict(list(zip(
             [cc.name for cc in list(cc_container.values()) if
-             cc.name is not 'common_denominator'],
+             cc.name != 'common_denominator'],
             [cc.numerator for cc in list(cc_container.values()) if
-             cc.name is not 'common_denominator'])))
+             cc.name != 'common_denominator'])))
         CC_dict[cc_container_name]['common_denominator'] = cc_container.common_denominator.expression
         return CC_dict
 

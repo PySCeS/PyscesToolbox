@@ -90,7 +90,7 @@ def strip_fixed(fstr):
     Fhead = None
     for line in Fi:
         if line[:4] == "FIX:":
-            Fhead = string.strip(line)
+            Fhead = line.strip()
             Fo.write('\n')
         else:
             Fo.write(line)
