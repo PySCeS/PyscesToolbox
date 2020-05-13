@@ -304,7 +304,6 @@ class CCoef(CCBase):
 
         if scan_type == 'percentage':
             y_label = 'Control pattern percentage contribution'
-            print('y_label:', y_label)
             try:
                 assert not force_legacy, 'Legacy scan requested'
                 scan_res = self._perscan(parameter,
@@ -324,7 +323,6 @@ class CCoef(CCBase):
         elif scan_type == 'value':
             column_names = column_names + [self.name]
             y_label = 'Control coefficient/pattern value'
-            print('y_label:', y_label)
             try:
                 assert not force_legacy, 'Legacy scan requested'
                 scan_res = self._valscan(parameter,
@@ -354,7 +352,6 @@ class CCoef(CCBase):
             x_label = '[%s]' % parameter.replace('_', ' ')
         else:
             x_label = parameter
-        print('labels:', x_label, y_label)
         ax_properties = {'ylabel': y_label,
                          'xlabel': x_label,
                          'xscale': 'linear',
