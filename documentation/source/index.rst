@@ -19,8 +19,7 @@ Contents:
    Thermokin
    included_files
    references
-
-.. :py:class:`.Symca`
+   modules
 
 Indices and tables
 ==================
