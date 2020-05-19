@@ -1,8 +1,7 @@
-
 Installation
 ============
 
-PySCeSToolbox is compatible with Mac OS X, Linux, and Windows. Operating
+PySCeSToolbox is compatible with macOS, Linux, and Windows. Operating
 system-specific instructions are discussed in the sections below. We have made
 special
 effort to provide as detailed instructions as possible, assuming a
@@ -19,37 +18,55 @@ exceptions (as discussed in the operating system-specific sections), will be
 taken care of automatically during installation. An abbreviated list of
 requirements follows:
 
-- A Python 2.7 installation
+- A Python 3.x installation (Python 3.6 or higher is recommended)
 - The full SciPy Stack (see http://scipy.org/install.html).
 - PySCeS (see http://pysces.sourceforge.net)
 - Maxima (see http://maxima.sourceforge.net)
-- Jupyter Notebook (version in the 4.x.x series)
+- Jupyter Notebook (jupyter-core version in the 4.x.x series)
 
 
 Windows
 -------
 
-Windows requires the manual installation of **Python 2.7**,
-**PySCeS** and **Maxima**. Installation was tested on Windows 8 and
-10.
+Windows requires the manual installation of **Python 3.x**,
+**PySCeS** and **Maxima**. Installation was tested on Windows 10.
 
 Python
 ~~~~~~
 
-For Windows users (especially those unfamiliar with Python) we recommend using
-the Anaconda Python distribution
-(https://www.continuum.io/downloads#windows). This is a low fuss solution
-that will install Python on you system *together with many of the packages
-necessary for running PySCeSToolbox*. Download the appropriate **Python 2.7**
-package from the download page (most probably the 64bit edition) and follow the
-instructions of the installation wizard.
+For Windows users (especially those unfamiliar with Python) we recommend using 
+the Anaconda Python distribution 
+(https://www.anaconda.com/products/individual#Downloads). This is a low fuss 
+solution that will install Python on you system *together with many of the 
+packages necessary for running PySCeSToolbox*. Download the appropriate **Python 
+3.7** package from the download page (most probably the 64bit edition) and 
+follow the instructions of the installation wizard.
+
+If you prefer more fine-grained control it is also possible to install Python 
+from Python.org (https://www.python.org/downloads/windows/); be sure to install 
+``pip`` as well when prompted by the installer, and add the Python directories 
+to the system PATH.
 
 PySCeS
 ~~~~~~
-After installing Anaconda, download and install the latest PySCeS binary
-package from \break http://pysces.sourceforge.net/download.html. PySCeS can also
-be built from source (for more details see the instructions given at the
-provided URL).
+
+If you installed Anaconda, PySCeS can be installed by opening a command prompt 
+in an Anaconda environment (Python 3.6 or 3.7) and executing the command:
+
+.. code:: bash
+
+    conda install -c sbmlteam -c pysces pysces
+
+If you installed Python from Python.org directly, open a Windows Command 
+Prompt, verify that the Python paths are set up correctly by checking the 
+``pip`` version and install PySCeS by executing:
+
+.. code:: bash
+
+    pip -V
+    pip install pysces
+    
+Currently Python versions 3.6-3.8 are supported with a pip install.
 
 Maxima
 ~~~~~~
@@ -59,25 +76,36 @@ The latest version of Maxima can be downloaded and installed from the Windows
 download page at http://maxima.sourceforge.net/download.html.
 
 Windows might also require the path to ``maxima.bat`` to be defined in the
-``psctb_config.ini`` file (found at ``C:\Pysces\psctb_config.ini`` by default).
-The default path included in ``psctb_config.ini`` is set as ``C:\Program
-Files?\Maxima?\bin\maxima.bat``, where the question marks are wildcards
-(since the specific path will depend on the version of Maxima). If Maxima has
-been installed to a user specified directory, the correct path to the
+``psctb_config.ini`` file, found at ``C:\Pysces\psctb_config.ini``
+by default.
+
+.. note:: As of PySCeS version 0.9.8 the default location of configuration and 
+    model files moved from ``C:\Pysces`` to ``%USERPROFILE%\Pysces``, i.e. 
+    typically ``C:\Users\<username>\Pysces``, to bring the Windows installation 
+    more in line with the macOS and Linux installations. Refer to the 
+    `PySCeS 0.9.8 release notes 
+    <https://github.com/PySCeS/pysces/releases/tag/0.9.8>`_ 
+    for more information.
+    
+The default path included in ``psctb_config.ini`` is set as 
+``C:\Program Files?\Maxima?\bin\maxima.bat``, where the question marks are 
+wildcards (since the specific path will depend on the version of Maxima). If 
+Maxima has been installed to a user specified directory, the correct path to the
 ``maxima.bat`` file must be specified here.
 
 PySCeSToolbox
 ~~~~~~~~~~~~~
 
-Now you are ready to install PySCeSToolbox. In the
-Anaconda Command Prompt (Start --> Anaconda Command Prompt), simply
-type in and execute the command:
+Now you are ready to install PySCeSToolbox. If you are using Anaconda, open 
+up the Anaconda Command Prompt (Start --> Anaconda Command Prompt), else 
+open up the Windows Command Prompt if you installed PySCeS with ``pip``. In the 
+command prompt, type in and execute the command:
 
 .. code:: bash
 
     pip install pyscestoolbox
 
-As previously mentioned, this will automatically download both PySCeSToolbox
+This will automatically download both PySCeSToolbox
 and any outstanding requirements.
 
 Enabling widgets
@@ -91,7 +119,7 @@ yet enabled the notebook widgets you may need to run the following command:
     jupyter nbextension enable --py --sys-prefix widgetsnbextension
 
 We also recommend running the following two commands to enable the
-`ModelGraph <basic_usage.html#graphic-representation-of-metabolic-networks>`__
+`ModelGraph <basic_usage.html#graphic-representation-of-metabolic-networks>`_
 functionality of PySCeSToolbox. Rerunning this command may be necessary when
 updating/reinstalling PySCeSToolbox.
 
@@ -101,49 +129,49 @@ updating/reinstalling PySCeSToolbox.
     jupyter nbextension enable --py --user d3networkx_psctb
 
 
-Mac OS X (MacOS)
+macOS (Mac OS X)
 ----------------
 
 
-Mac OS X requires the manual installation of **PySCeS** and **Maxima**. While
-OS X comes pre-installed with **Python 2.7** we still recommend installing a
-Python distribution such as Anaconda as it will take care of many of the SciPy
-stack requirements. Installation was tested on MacOS Sierra.
+macOS requires the manual installation of **PySCeS** and **Maxima**. While OS X 
+comes pre-installed with Python 2.7, **Python 3.x** is needed and we recommend 
+installing a Python distribution such as Anaconda as it will take care of many 
+of the SciPy stack requirements. Installation was tested on macOS High Sierra.
 
 Python
 ~~~~~~
-One of the most simple ways to get Python on your system is to install the
-Anaconda Python distribution (https://www.continuum.io/downloads#macos).
-Download either of the Python 2.7 installers from the download page and
-follow the provided instructions.
+One of the easiest ways to get Python on your system is to install the
+Anaconda Python distribution 
+(https://www.anaconda.com/products/individual#Downloads).
+Download either of the Python 3.7 installers for macOS from the download page 
+and follow the provided instructions.
+
+If you prefer more fine-grained control, there are other options such as 
+installing directly from Python.org 
+(https://www.python.org/downloads/mac-osx/), or installing
+`Homebrew <https://docs.brew.sh/Installation>`_ and then installing Python 3.7 
+with Homebrew. **These are advanced options for experienced users, and if you 
+are starting out, we recommend Anaconda!**
+
 
 PySCeS
 ~~~~~~
 
-Currently the only options for installing PySCeS on OS X are to either build it
-from source (see http://pysces.sourceforge.net/download.html) or to
-install it with pip via the command:
+Binary packages are available for Anaconda, and binary wheels are available for 
+direct installation with ``pip``. Depending on your Python installation (see 
+above), the process is similar to the Windows install.
 
+For Anaconda:
+
+.. code:: bash
+
+    conda install -c sbmlteam -c pysces pysces
+
+For a ``pip`` based install (Python versions 3.6-3.8 are supported):
+    
 .. code:: bash
 
     pip install pysces
-
-Both cases requires the **xcode** command line tools and the **gfortran compiler**
-to be present on the system. The xcode command line tools can be
-installed by running:
-
-.. code:: bash
-
-    sudo xcode-select --install
-
-in the terminal and following the instructions given in the resulting
-popup (the full xcode package is *not required*. Gfortran dmg's for your
-particular version of OS X (or MacOS) can downloaded and installed from
-http://gcc.gnu.org/wiki/GFortranBinaries.
-
-Once the appropriate compilers are present the actual PySCeS install may be
-skipped as PySCeS will be installed automatically when PySCeSToolbox is
-installed.
 
 Maxima
 ~~~~~~
@@ -168,18 +196,19 @@ added to your ``.bash_profile`` file:
 PySCeSToolbox
 ~~~~~~~~~~~~~
 
-Now you are ready to install PySCeSToolbox. In the Terminal (or iTerm) simply
-type in and execute the command:
+Now you are ready to install PySCeSToolbox. If you are using Anaconda, open 
+up a terminal in the Anaconda environment where PySCeS is installed. For 
+``pip`` based installations, just open up a Terminal. Execute the command:
 
 .. code:: bash
 
     pip install pyscestoolbox
 
-As previously mentioned, this will automatically download both
-PySCeSToolbox and any outstanding requirements.
+This will automatically download both PySCeSToolbox and any outstanding 
+requirements.
 
 .. note:: You may encounter an error during the installation of PySCeSToolbox
-          relating to the removal of temporary files on OS X or MacOS. This does
+          relating to the removal of temporary files on OS X or macOS. This does
           not impact on the functioning of PySCeSToolbox at all, and we mean
           to address this bug in the future.
 
@@ -194,7 +223,7 @@ yet enabled the notebook widgets you may need to run the following command:
     jupyter nbextension enable --py --sys-prefix widgetsnbextension
 
 We also recommend running the following two commands to enable the
-`ModelGraph <basic_usage.html#graphic-representation-of-metabolic-networks>`__
+`ModelGraph <basic_usage.html#graphic-representation-of-metabolic-networks>`_
 functionality of PySCeSToolbox. Rerunning this command may be necessary when
 updating/reinstalling PySCeSToolbox.
 
@@ -207,36 +236,42 @@ Linux
 -----
 
 Linux requires the manual installation **Maxima** and **PySCeS**.
-Most Linux systems come pre-installed with **Python 2.7**, however a
+Most Linux systems come pre-installed with a version of **Python 3.x** or it 
+is available from the distribution repositories. However, a
 Python distribution such as Anaconda may be used instead. Installation
-was tested on Ubuntu 16.04.
+was tested on Ubuntu 18.04.
 
 Python
 ~~~~~~
 
-We assume that your system comes with Python 2.7 and with pip (necessary for
+We assume that your system comes with Python 3.x (versions 3.6-3.8 are 
+recommended) and with ``pip`` (necessary for
 installing Python packages that are not available in your OS's repositories).
-Pip may be installed from your OS's repositories or by following the
-instructions found at https://pip.pypa.io/en/stable/installing/.
+In case ``pip`` is not yet installed, it may be installed from your OS's 
+repositories or by following the instructions found at 
+https://pip.pypa.io/en/stable/installing/.
+
+If you prefer Anaconda, Linux installers are available 
+`here <https://www.anaconda.com/products/individual#Downloads>`_.
 
 PySCeS
 ~~~~~~
 
-Currently the only options for installing PySCeS on Linux are to build it from
-source (see http://pysces.sourceforge.net/download.html) or to install it
-with the command:
+Binary packages are available for Anaconda, and binary wheels are available for 
+direct installation with ``pip``. Depending on your Python installation (see 
+above), the process is similar to the Windows and macOS installs.
+
+For Anaconda:
 
 .. code:: bash
 
+    conda install -c sbmlteam -c pysces pysces
+
+For a ``pip`` based install (Python versions 3.6-3.8 are supported):
+    
+.. code:: bash
+
     pip install pysces
-
-Both cases require the gcc, g++, and gfortran compilers to be present on the
-system. These compilers are most probably available from your OS's
-repositories.
-
-Once the appropriate compilers are present the actual PySCeS install may be
-skipped as PySCeS will be installed automatically when PySCeSToolbox is
-installed.
 
 Maxima
 ~~~~~~
@@ -249,8 +284,9 @@ http://maxima.sourceforge.net/download.html.
 PySCeSToolbox
 ~~~~~~~~~~~~~
 
-Now you are ready to install PySCeSToolbox. In the terminal simply
-type in and execute the command:
+Now you are ready to install PySCeSToolbox. Open a terminal in the
+environment where you installed PySCeS (i.e. Anaconda environment or the native 
+Python environment of your OS), and simply type in and execute the command:
 
 .. code:: bash
 
@@ -268,7 +304,7 @@ yet enabled the notebook widgets you may need to run the following command:
     jupyter nbextension enable --py --sys-prefix widgetsnbextension
 
 We also recommend running the following two commands to enable the
-`ModelGraph <basic_usage.html#graphic-representation-of-metabolic-networks>`__
+`ModelGraph <basic_usage.html#graphic-representation-of-metabolic-networks>`_
 functionality of PySCeSToolbox. Rerunning this command may be necessary when
 updating/reinstalling PySCeSToolbox.
 
