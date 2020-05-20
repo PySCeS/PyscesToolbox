@@ -1,6 +1,5 @@
 
 
-
 Basic Usage
 ===========
 
@@ -14,18 +13,19 @@ Starting a PySCeSToolbox session
 
 To start a PySCeSToolbox session in a Jupyter notebook:
 
-1. Start up the Jupyter Notebook using the ``jupyter notebook`` command
+1. Open a terminal in the environment where you installed PyscesToolbox (i.e. 
+   Anaconda environment or other Python environment)
+2. Start up the Jupyter Notebook using the ``jupyter notebook`` command
    in the terminal
-2. Create a new notebook by clicking the ``New`` button on the top right
-   of the window and selecting ``Python 2``
-3. Run the following three commands in the first cell:
+3. Create a new notebook by clicking the ``New`` button on the top right
+   of the window and selecting ``Python 3``
+4. Run the following three commands in the first cell:
 
 .. code:: python
 
     %matplotlib inline
     import pysces
     import psctb
-
 
 Syntax
 ------
@@ -123,10 +123,13 @@ provided by a ``save_session`` method and a corresponding
 ``load_session`` method will read these results from disk.
 
 .. note:: Depending on your OS the default PySCeS directory will be
-          either ``~/Pysces`` or ``C:\Pysces``. PySCeSToolbox will therefore
-          create the following type of folder structure:
-          ``~/Pysces/model_name/analysis_method/`` or
-          ``C:\Pysces\model_name\analysis_method\``
+          either ``~/Pysces`` or ``C:\Pysces`` (on Windows with PySCeS versions up
+          to 0.9.7) or ``C:\Users\<username>\Pysces`` (on Windows with PySCeS
+          version 0.9.8+). PySCeSToolbox will therefore create the following type
+          of folder structure: ``~/Pysces/model_name/analysis_method/`` or
+          ``C:\Pysces\model_name\analysis_method\`` or
+          ``C:\Users\<username>\Pysces\model_name\analysis_method\`` depending on
+          your configuration.
 
 Plotting and Displaying Results
 -------------------------------
@@ -171,18 +174,18 @@ parameter scan are saved to a object.
     # with name `mod`
     mod = pysces.model('example_model')
     mod.SetQuiet()
-
+    
     # Parameter scan setup and execution
     # Here we are changing the value of `Vf2` over logarithmic
     # scale from `log10(1)` (or 0) to log10(100) (or 2) for a
-    # 100 points.
+    # 100 points. 
     mod.scan_in = 'Vf2'
     mod.scan_out = ['J_R1','J_R2','J_R3']
     mod.Scan1(numpy.logspace(0,2,100))
-
+    
     # Instantiation of `Data2D` object with name `scan_data`
     column_names = [mod.scan_in] + mod.scan_out
-
+    
     scan_data = psctb.utils.plotting.Data2D(mod=mod,
                                             column_names=column_names,
                                             data_array=mod.scan_res)
@@ -193,18 +196,13 @@ parameter scan are saved to a object.
 .. parsed-literal::
 
     Assuming extension is .psc
-    Using model directory: /home/carl/Pysces/psc
-    /home/carl/Pysces/psc/example_model.psc loading .....
-    Parsing file: /home/carl/Pysces/psc/example_model.psc
-
+    Using model directory: /home/jr/Pysces/psc
+    /home/jr/Pysces/psc/example_model.psc loading ..... 
+    Parsing file: /home/jr/Pysces/psc/example_model.psc
+     
     Calculating L matrix . . . . . . .  done.
     Calculating K matrix . . . . . . .  done.
-
-
-    Scanning ...
-    100 80 60 40 20 0
-    done.
-
+     
 
 
 Results that can be accessed via ``scan_results``:
@@ -214,7 +212,7 @@ Results that can be accessed via ``scan_results``:
 .. code:: python
 
     # Each key represents a field through which results can be accessed
-    scan_data.scan_results.keys()
+    list(scan_data.scan_results.keys())
 
 
 
@@ -223,7 +221,7 @@ Results that can be accessed via ``scan_results``:
 
 .. parsed-literal::
 
-    ['scan_in', 'scan_points', 'scan_out', 'scan_results', 'scan_range']
+    ['scan_in', 'scan_out', 'scan_range', 'scan_results', 'scan_points']
 
 
 
@@ -242,16 +240,16 @@ e.g. The first 10 data points for the scan results:
 
 .. parsed-literal::
 
-    array([[ 10.92333359,   0.97249011,   9.95084348],
-           [ 10.96942935,   1.01871933,   9.95071002],
-           [ 11.01771234,   1.06714226,   9.95057008],
-           [ 11.06828593,   1.1178626 ,   9.95042334],
-           [ 11.12125839,   1.17098892,   9.95026946],
-           [ 11.176743  ,   1.2266349 ,   9.9501081 ],
-           [ 11.23485838,   1.28491951,   9.94993887],
-           [ 11.29572869,   1.34596731,   9.94976138],
-           [ 11.35948389,   1.40990867,   9.94957522],
-           [ 11.42626002,   1.47688006,   9.94937996]])
+    array([[10.92333359,  0.97249011,  9.95084348],
+           [10.96942935,  1.01871933,  9.95071002],
+           [11.01771234,  1.06714226,  9.95057008],
+           [11.06828593,  1.1178626 ,  9.95042334],
+           [11.12125839,  1.17098892,  9.95026946],
+           [11.176743  ,  1.2266349 ,  9.9501081 ],
+           [11.23485838,  1.28491951,  9.94993887],
+           [11.29572869,  1.34596731,  9.94976138],
+           [11.35948389,  1.40990867,  9.94957522],
+           [11.42626002,  1.47688006,  9.94937996]])
 
 
 
@@ -272,13 +270,13 @@ Or they can be saved to a specified location:
 
     # This path leads to the Pysces root folder
     data_file_name = '~/Pysces/example_mod_Vf2_scan.csv'
-
+    
     # Correct path depending on platform - necessary for platform independent scripts
-    if platform == 'win32':
+    if platform == 'win32' and pysces.version.current_version_tuple() < (0,9,8):
         data_file_name = psctb.utils.misc.unix_to_windows_path(data_file_name)
     else:
         data_file_name = path.expanduser(data_file_name)
-
+    
     scan_data.save_results(file_name=data_file_name)
 
 Finally, a ``ScanFig`` object can be created using the ``plot`` method:
@@ -332,6 +330,8 @@ parameter scan of ``Vf2`` as generated by ``Scan1`` is shown.
 
 
 
+
+
 .. image:: basic_usage_files/basic_usage_19_0.png
 
 
@@ -349,7 +349,7 @@ enabled. Then we click the other buttons:
     # scan_figure.toggle_category('J_R1',True)
     # scan_figure.toggle_category('J_R2',True)
     # scan_figure.toggle_category('J_R3',True)
-
+    
     scan_figure.interact()
 
 
@@ -382,8 +382,8 @@ accessed via ``line_names`` and ``category_names``:
 
 .. code:: python
 
-    print 'Line names     : ', scan_figure.line_names
-    print 'Category names : ', scan_figure.category_names
+    print('Line names     : ', scan_figure.line_names)
+    print('Category names : ', scan_figure.category_names)
 
 
 ``Out[9]:``
@@ -391,7 +391,7 @@ accessed via ``line_names`` and ``category_names``:
 .. parsed-literal::
 
     Line names     :  ['J_R1', 'J_R2', 'J_R3']
-    Category names :  ['J_R3', 'J_R1', 'Flux Rates', 'J_R2']
+    Category names :  ['J_R2', 'Flux Rates', 'J_R1', 'J_R3']
 
 
 In the example below we set the ``Flux Rates`` visibility to ``False``,
@@ -422,6 +422,12 @@ its minimum value to ``1``. These settings are applied by clicking the
 .. code:: python
 
     scan_figure.adjust_figure()
+
+
+
+
+
+
 
 
 
@@ -473,13 +479,13 @@ be specified:
 
     # This path leads to the Pysces root folder
     fig_file_name = '~/Pysces/example_mod_Vf2_scan.png'
-
+    
     # Correct path depending on platform - necessary for platform independent scripts
-    if platform == 'win32':
+    if platform == 'win32' and pysces.version.current_version_tuple() < (0,9,8):
         fig_file_name = psctb.utils.misc.unix_to_windows_path(fig_file_name)
     else:
         fig_file_name = path.expanduser(fig_file_name)
-
+        
     scan_figure.save(file_name=fig_file_name)
 
 Tables
@@ -566,11 +572,11 @@ setup parameters.
 
 .. code:: python
 
-    print formatter(0.09) # outlier
-    print formatter(0.1)  # min for default
-    print formatter(2)    # within range for default
-    print formatter(9)    # max int for default
-    print formatter(10)   # outlier
+    print(formatter(0.09)) # outlier
+    print(formatter(0.1))  # min for default
+    print(formatter(2))    # within range for default
+    print(formatter(9))    # max int for default
+    print(formatter(10))   # outlier
 
 
 ``Out[18]:``
@@ -592,7 +598,7 @@ the data:
 
 .. code:: python
 
-    psctb.utils.misc.html_table(list_of_lists,
+    psctb.utils.misc.html_table(list_of_lists, 
                                 caption='Example',
                                 formatter=formatter,    # Previously constructed formatter
                                 first_row_headers=True) # The first row can be set as the header
@@ -662,8 +668,6 @@ nodes will be placed randomly. Nodes are snap to an invisible grid.
 
 
 
-
-
 .. image:: basic_usage_files/basic_usage_51_0.png
 
 
@@ -676,20 +680,18 @@ disk during ``ModelGraph`` instantiation.
 
 .. code:: python
 
-    # This path leads to the provided layout file
+    # This path leads to the provided layout file 
     path_to_layout = '~/Pysces/psc/example_model_layout.dict'
-
+    
     # Correct path depending on platform - necessary for platform independent scripts
-    if platform == 'win32':
+    if platform == 'win32' and pysces.version.current_version_tuple() < (0,9,8):
         path_to_layout = psctb.utils.misc.unix_to_windows_path(path_to_layout)
     else:
         path_to_layout = path.expanduser(path_to_layout)
-
-
+    
+    
     model_graph = psctb.ModelGraph(mod, pos_dic=path_to_layout)
     model_graph.show()
-
-
 
 
 
@@ -698,7 +700,7 @@ disk during ``ModelGraph`` instantiation.
 
 Clicking the ``Save Layout`` button saves this layout to the
 ``~/Pysces/example_model/model_graph`` or
-``C:\\Pysces\example_model\model_graph`` directory for later use. The
+``C:\Pysces\example_model\model_graph`` directory for later use. The
 ``Save Image`` Button wil save an svg image of the graph to the same
 location.
 
@@ -711,8 +713,6 @@ Now any future instantiation of a ``ModelGraph`` object for
 
     model_graph = psctb.ModelGraph(mod)
     model_graph.show()
-
-
 
 
 
