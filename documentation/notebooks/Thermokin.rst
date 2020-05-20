@@ -1,6 +1,5 @@
 
 
-
 Thermokin
 =========
 
@@ -168,7 +167,6 @@ model a ``Thermokin`` session is instantiated as follows:
 .. code:: python
 
     mod = pysces.model('lin4_fb')
-    mod.doLoad() # this method call is necessary to ensure that future `doLoad` method calls are executed correctly
     tk = psctb.ThermoKin(mod)
 
 
@@ -177,17 +175,14 @@ model a ``Thermokin`` session is instantiated as follows:
 .. parsed-literal::
 
     Assuming extension is .psc
-    Using model directory: /home/carl/Pysces/psc
-    /home/carl/Pysces/psc/lin4_fb.psc loading ..... 
-    Parsing file: /home/carl/Pysces/psc/lin4_fb.psc
+    Using model directory: /home/jr/Pysces/psc
+    /home/jr/Pysces/psc/lin4_fb.psc loading ..... 
+    Parsing file: /home/jr/Pysces/psc/lin4_fb.psc
     Info: "X4" has been initialised but does not occur in a rate equation
      
     Calculating L matrix . . . . . . .  done.
     Calculating K matrix . . . . . . .  done.
      
-    PySCeS now automatically loads the model on model object instantiation. If you do not want this behaviour pass the autoload=False argument to the constructor, if you really want to reload the model, run doLoad() again.
-    
-    Further calls to doLoad() will work as normal.
 
 
 Now that ``ThermoKin`` has automatically generated a ``.reqn`` file for
@@ -202,7 +197,7 @@ follows:
     path_to_reqn = '~/Pysces/psc/lin4_fb.reqn'
     
     # Correct path depending on platform - necessary for platform independent scripts
-    if platform == 'win32':
+    if platform == 'win32' and pysces.version.current_version_tuple() < (0,9,8):
         path_to_reqn = psctb.utils.misc.unix_to_windows_path(path_to_reqn)
     else:
         path_to_reqn = path.expanduser(path_to_reqn)
@@ -227,11 +222,11 @@ file by setting the ``overwrite`` argument to ``True``:
 
 .. parsed-literal::
 
-    The file /home/carl/Pysces/psc/lin4_fb.reqn will be overwritten with automatically generated file.
-    R4        : rate equation not included - irreversible or unknown form
+    The file /home/jr/Pysces/psc/lin4_fb.reqn will be overwritten with automatically generated file.
     R1        : successful separation of rate equation terms
     R2        : successful separation of rate equation terms
     R3        : successful separation of rate equation terms
+    R4        : rate equation not included - irreversible or unknown form
 
 
 Accessing results
@@ -538,11 +533,9 @@ the results of ``Symca``:
 
 
 
-``Out[7]:``
+.. math::
 
-.. parsed-literal::
-
-    1.0*Vf_1*(S1/S1_05_1 + X0/X0_05_1)**(h_1 - 1.0)*(a_1*(S3/S3_05_1)**h_1 + 1)/(X0_05_1*(a_1*(S3/S3_05_1)**h_1*(S1/S1_05_1 + X0/X0_05_1)**h_1 + (S3/S3_05_1)**h_1 + (S1/S1_05_1 + X0/X0_05_1)**h_1 + 1))
+    \displaystyle \frac{1.0 Vf_{1} \left(\frac{S_{1}}{S_{1 05 1}} + \frac{X_{0}}{X_{0 05 1}}\right)^{h_{1} - 1.0} \left(a_{1} \left(\frac{S_{3}}{S_{3 05 1}}\right)^{h_{1}} + 1\right)}{X_{0 05 1} \left(a_{1} \left(\frac{S_{3}}{S_{3 05 1}}\right)^{h_{1}} \left(\frac{S_{1}}{S_{1 05 1}} + \frac{X_{0}}{X_{0 05 1}}\right)^{h_{1}} + \left(\frac{S_{3}}{S_{3 05 1}}\right)^{h_{1}} + \left(\frac{S_{1}}{S_{1 05 1}} + \frac{X_{0}}{X_{0 05 1}}\right)^{h_{1}} + 1\right)}
 
 
 
@@ -561,7 +554,7 @@ the results of ``Symca``:
 
 .. parsed-literal::
 
-    44.660921051608447
+    44.66092105160845
 
 
 
@@ -605,7 +598,7 @@ the following manner:
 
 .. math::
 
-    \varepsilon^{{R1}_{bindvc}}_{X0} = - \frac{1.0 \cdot S_{1051} \cdot X_{0} \cdot \left(\frac{S_{1}}{S_{1051}} + \frac{X_{0}}{X_{0051}}\right)^{- h_{1} + 1.0} \cdot \left(\frac{S_{1}}{S_{1051}} + \frac{X_{0}}{X_{0051}}\right)^{h_{1} - 1.0} \cdot \left(1.0 \cdot a_{1} \cdot \left(\frac{S_{3}}{S_{3051}}\right)^{h_{1}} \cdot \left(\frac{S_{1}}{S_{1051}} + \frac{X_{0}}{X_{0051}}\right)^{h_{1}} - 1.0 \cdot h_{1} \cdot \left(\frac{S_{3}}{S_{3051}}\right)^{h_{1}} - 1.0 \cdot h_{1} + 1.0 \cdot \left(\frac{S_{3}}{S_{3051}}\right)^{h_{1}} + 1.0 \cdot \left(\frac{S_{1}}{S_{1051}} + \frac{X_{0}}{X_{0051}}\right)^{h_{1}} + 1.0\right)}{\left(S_{1} \cdot X_{0051} + S_{1051} \cdot X_{0}\right) \cdot \left(a_{1} \cdot \left(\frac{S_{3}}{S_{3051}}\right)^{h_{1}} \cdot \left(\frac{S_{1}}{S_{1051}} + \frac{X_{0}}{X_{0051}}\right)^{h_{1}} + \left(\frac{S_{3}}{S_{3051}}\right)^{h_{1}} + \left(\frac{S_{1}}{S_{1051}} + \frac{X_{0}}{X_{0051}}\right)^{h_{1}} + 1\right)} = 2.553
+    \varepsilon^{{R1}_{bindvc}}_{X0} = - \frac{1.0 \cdot S_{1051} \cdot X_{0} \cdot \left(\frac{S_{1}}{S_{1051}} + \frac{X_{0}}{X_{0051}}\right)^{1.0 - h_{1}} \cdot \left(\frac{S_{1}}{S_{1051}} + \frac{X_{0}}{X_{0051}}\right)^{h_{1} - 1.0} \cdot \left(1.0 \cdot a_{1} \cdot \left(\frac{S_{3}}{S_{3051}}\right)^{h_{1}} \cdot \left(\frac{S_{1}}{S_{1051}} + \frac{X_{0}}{X_{0051}}\right)^{h_{1}} - 1.0 \cdot h_{1} \cdot \left(\frac{S_{3}}{S_{3051}}\right)^{h_{1}} - 1.0 \cdot h_{1} + 1.0 \cdot \left(\frac{S_{3}}{S_{3051}}\right)^{h_{1}} + 1.0 \cdot \left(\frac{S_{1}}{S_{1051}} + \frac{X_{0}}{X_{0051}}\right)^{h_{1}} + 1.0\right)}{\left(S_{1} \cdot X_{0051} + S_{1051} \cdot X_{0}\right) \cdot \left(a_{1} \cdot \left(\frac{S_{3}}{S_{3051}}\right)^{h_{1}} \cdot \left(\frac{S_{1}}{S_{1051}} + \frac{X_{0}}{X_{0051}}\right)^{h_{1}} + \left(\frac{S_{3}}{S_{3051}}\right)^{h_{1}} + \left(\frac{S_{1}}{S_{1051}} + \frac{X_{0}}{X_{0051}}\right)^{h_{1}} + 1\right)} = 2.553
 
 
 
@@ -671,7 +664,7 @@ model. Thus changing a parameter of ``lin4_hill``, such as the
 
 .. code:: python
 
-    mod.doLoad()
+    mod.reLoad()
     # mod.Vf_3 has a default value of 1000
     mod.Vf_3 = 0.1
     # calculating new steady state
@@ -680,7 +673,7 @@ model. Thus changing a parameter of ``lin4_hill``, such as the
 
 
     
-    Parsing file: /home/carl/Pysces/psc/lin4_fb.psc
+    Parsing file: /home/jr/Pysces/psc/lin4_fb.psc
     Info: "X4" has been initialised but does not occur in a rate equation
      
     Calculating L matrix . . . . . . .  done.
@@ -715,13 +708,13 @@ model. Thus changing a parameter of ``lin4_hill``, such as the
 .. code:: python
 
     # resetting to default Vf_3 value and recalculating
-    mod.doLoad()
+    mod.reLoad()
     mod.doState()
 
 
 
     
-    Parsing file: /home/carl/Pysces/psc/lin4_fb.psc
+    Parsing file: /home/jr/Pysces/psc/lin4_fb.psc
     Info: "X4" has been initialised but does not occur in a rate equation
      
     Calculating L matrix . . . . . . .  done.
@@ -813,6 +806,12 @@ space:
 
 
 
+
+
+
+
+
+
 .. image:: Thermokin_files/Thermokin_36_0.png
 
 
@@ -874,6 +873,10 @@ Similarly, we can perform an elasticity scan using the same parameters:
 
 
 
+
+
+
+
 .. image:: Thermokin_files/Thermokin_41_0.png
 
 
@@ -913,7 +916,7 @@ The contents of the saved data file is as follows:
     results_path = '~/Pysces/lin4_fb/thermokin/tk_summary_0.csv'
     
     # Correct path depending on platform - necessary for platform independent scripts
-    if platform == 'win32':
+    if platform == 'win32' and pysces.version.current_version_tuple() < (0,9,8):
         results_path = psctb.utils.misc.unix_to_windows_path(results_path)
     else:
         results_path = path.expanduser(results_path)
@@ -935,6 +938,19 @@ The contents of the saved data file is as follows:
 .. raw:: html
 
    </div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+    
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+    
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
     <table border="1" class="dataframe">
       <thead>
         <tr style="text-align: right;">
@@ -1089,6 +1105,5 @@ The contents of the saved data file is as follows:
       </tbody>
     </table>
     </div>
-
 
 
