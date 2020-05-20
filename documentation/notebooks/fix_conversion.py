@@ -76,9 +76,9 @@ def remove_startsswith(lines, exclude_string):
 def remove_empty_block(lines, block_string):
     new_lines = []
     for i, line in enumerate(lines):
-        if line.startswith(block_string) and lines[i + 2] == '    \n':
-            pass
-        elif line.startswith(block_string) and lines[i + 2] == '\n':
+        #if line.startswith(block_string) and lines[i + 2] == '    \n':
+            #pass
+        if line.startswith(block_string) and lines[i + 2] == '\n':
             pass
         else:
             new_lines.append(line)

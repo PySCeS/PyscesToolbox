@@ -671,6 +671,9 @@ model. Thus changing a parameter of ``lin4_hill``, such as the
     mod.doState()
 
 
+``Out[13]:``
+
+.. parsed-literal::
 
     
     Parsing file: /home/jr/Pysces/psc/lin4_fb.psc
@@ -712,6 +715,9 @@ model. Thus changing a parameter of ``lin4_hill``, such as the
     mod.doState()
 
 
+``Out[15]:``
+
+.. parsed-literal::
 
     
     Parsing file: /home/jr/Pysces/psc/lin4_fb.psc

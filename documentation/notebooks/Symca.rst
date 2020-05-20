@@ -436,6 +436,9 @@ coefficient and control pattern values:
     mod.doMca()
 
 
+``Out[13]:``
+
+.. parsed-literal::
 
     
     Parsing file: /home/jr/Pysces/psc/lin4_fb.psc
@@ -504,6 +507,9 @@ coefficient and control pattern values:
     mod.doMca()
 
 
+``Out[17]:``
+
+.. parsed-literal::
 
     
     Parsing file: /home/jr/Pysces/psc/lin4_fb.psc
