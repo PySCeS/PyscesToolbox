@@ -1,6 +1,5 @@
 
 
-
 Symca
 =====
 
@@ -70,7 +69,6 @@ model a ``Symca`` session is instantiated as follows:
 .. code:: python
 
     mod = pysces.model('lin4_fb')
-    mod.doLoad() # this method call is necessary to ensure that future `doLoad` method calls are executed correctly
     sc = psctb.Symca(mod)
 
 
@@ -79,17 +77,14 @@ model a ``Symca`` session is instantiated as follows:
 .. parsed-literal::
 
     Assuming extension is .psc
-    Using model directory: /home/carl/Pysces/psc
-    /home/carl/Pysces/psc/lin4_fb.psc loading ..... 
-    Parsing file: /home/carl/Pysces/psc/lin4_fb.psc
+    Using model directory: /home/jr/Pysces/psc
+    /home/jr/Pysces/psc/lin4_fb.psc loading ..... 
+    Parsing file: /home/jr/Pysces/psc/lin4_fb.psc
     Info: "X4" has been initialised but does not occur in a rate equation
      
     Calculating L matrix . . . . . . .  done.
     Calculating K matrix . . . . . . .  done.
      
-    PySCeS now automatically loads the model on model object instantiation. If you do not want this behaviour pass the autoload=False argument to the constructor, if you really want to reload the model, run doLoad() again.
-    
-    Further calls to doLoad() will work as normal.
     (hybrd) The solution converged.
 
 
@@ -223,7 +218,7 @@ yields a table of control coefficient values:
 +--------------------------+-------------+
 | :math:`C^{S3}_{R4}`      | -0.334      |
 +--------------------------+-------------+
-| :math:`\Sigma`           | 631.165     |
+| :math:`\Sigma`           | 631.138     |
 +--------------------------+-------------+
 
 .. raw:: html
@@ -266,11 +261,9 @@ the: \* Expression (as a ``SymPy`` expression)
 
 
 
-``Out[5]:``
+.. math::
 
-.. parsed-literal::
-
-    (-ecR1_S1*ecR2_S2*ecR3_S3 - ecR1_S3*ecR2_S1*ecR3_S2)/(-ecR1_S1*ecR2_S2*ecR3_S3 + ecR1_S1*ecR2_S2*ecR4_S3 - ecR1_S1*ecR3_S2*ecR4_S3 - ecR1_S3*ecR2_S1*ecR3_S2 + ecR2_S1*ecR3_S2*ecR4_S3)
+    \displaystyle \frac{- ecR_{1 S1} ecR_{2 S2} ecR_{3 S3} - ecR_{1 S3} ecR_{2 S1} ecR_{3 S2}}{- ecR_{1 S1} ecR_{2 S2} ecR_{3 S3} + ecR_{1 S1} ecR_{2 S2} ecR_{4 S3} - ecR_{1 S1} ecR_{3 S2} ecR_{4 S3} - ecR_{1 S3} ecR_{2 S1} ecR_{3 S2} + ecR_{2 S1} ecR_{3 S2} ecR_{4 S3}}
 
 
 
@@ -285,11 +278,9 @@ the: \* Expression (as a ``SymPy`` expression)
 
 
 
-``Out[6]:``
+.. math::
 
-.. parsed-literal::
-
-    -ecR1_S1*ecR2_S2*ecR3_S3 - ecR1_S3*ecR2_S1*ecR3_S2
+    \displaystyle - ecR_{1 S1} ecR_{2 S2} ecR_{3 S3} - ecR_{1 S3} ecR_{2 S1} ecR_{3 S2}
 
 
 
@@ -304,11 +295,9 @@ the: \* Expression (as a ``SymPy`` expression)
 
 
 
-``Out[7]:``
+.. math::
 
-.. parsed-literal::
-
-    -ecR1_S1*ecR2_S2*ecR3_S3 + ecR1_S1*ecR2_S2*ecR4_S3 - ecR1_S1*ecR3_S2*ecR4_S3 - ecR1_S3*ecR2_S1*ecR3_S2 + ecR2_S1*ecR3_S2*ecR4_S3
+    \displaystyle - ecR_{1 S1} ecR_{2 S2} ecR_{3 S3} + ecR_{1 S1} ecR_{2 S2} ecR_{4 S3} - ecR_{1 S1} ecR_{3 S2} ecR_{4 S3} - ecR_{1 S3} ecR_{2 S1} ecR_{3 S2} + ecR_{2 S1} ecR_{3 S2} ecR_{4 S3}
 
 
 
@@ -327,7 +316,7 @@ the: \* Expression (as a ``SymPy`` expression)
 
 .. parsed-literal::
 
-    0.96407998035447406
+    0.9640799846074221
 
 
 
@@ -392,7 +381,7 @@ towards the overall control coefficient value:
 
 .. parsed-literal::
 
-    0.030873274606631446
+    0.03087580996475991
 
 
 
@@ -409,7 +398,7 @@ towards the overall control coefficient value:
 
 .. parsed-literal::
 
-    99.969126725393366
+    99.96912419003525
 
 
 
@@ -440,7 +429,7 @@ coefficient and control pattern values:
 
 .. code:: python
 
-    mod.doLoad()
+    mod.reLoad()
     # mod.Vf_4 has a default value of 50
     mod.Vf_4 = 0.1
     # calculating new steady state
@@ -449,7 +438,7 @@ coefficient and control pattern values:
 
 
     
-    Parsing file: /home/carl/Pysces/psc/lin4_fb.psc
+    Parsing file: /home/jr/Pysces/psc/lin4_fb.psc
     Info: "X4" has been initialised but does not occur in a rate equation
      
     Calculating L matrix . . . . . . .  done.
@@ -511,13 +500,13 @@ coefficient and control pattern values:
 .. code:: python
 
     # resetting to default Vf_4 value and recalculating
-    mod.doLoad()
+    mod.reLoad()
     mod.doMca()
 
 
 
     
-    Parsing file: /home/carl/Pysces/psc/lin4_fb.psc
+    Parsing file: /home/jr/Pysces/psc/lin4_fb.psc
     Info: "X4" has been initialised but does not occur in a rate equation
      
     Calculating L matrix . . . . . . .  done.
@@ -543,7 +532,7 @@ functionality can be accessed via the ``highlight_patterns`` method:
     path_to_layout = '~/Pysces/psc/lin4_fb.dict'
     
     # Correct path depending on platform - necessary for platform independent scripts
-    if platform == 'win32':
+    if platform == 'win32' and pysces.version.current_version_tuple() < (0,9,8):
         path_to_layout = psctb.utils.misc.unix_to_windows_path(path_to_layout)
     else:
         path_to_layout = path.expanduser(path_to_layout)
@@ -553,8 +542,6 @@ functionality can be accessed via the ``highlight_patterns`` method:
 .. code:: python
 
     sc.cc_results.ccJR1_R4.highlight_patterns(height = 350, pos_dic=path_to_layout)
-
-
 
 
 
@@ -588,8 +575,6 @@ the total control coefficient.
 
 
 
-
-
 .. image:: Symca_files/Symca_41_0.png
 
 
@@ -601,8 +586,6 @@ the total control coefficient.
     # the chain of effects of the main pathway does not contribute
     # at all to the control coefficient value.
     sc.cc_results.ccJR1_R4.highlight_patterns(height = 350, pos_dic=path_to_layout)
-
-
 
 
 
@@ -649,8 +632,8 @@ method has the following arguments:
    slower algorithm for performing the parameter scan. This is mostly
    used for debugging purposes. (*default*: ``False``)
 
-Below we will perform a percentage scan of :math:`V_{f^4}` for 200
-points between 0.01 and 1000 in log space:
+Below we will perform a percentage scan of :math:`V_{f4}` for 200 points
+between 0.01 and 1000 in log space:
 
 ``In [22]:``
 
@@ -704,6 +687,8 @@ lines can be enabled/disabled using the ``toggle_category`` method of
 
 
 
+
+
 .. image:: Symca_files/Symca_48_0.png
 
 
@@ -734,6 +719,10 @@ present:
     
     # display the plot
     value_scan_plot.interact()
+
+
+
+
 
 
 
@@ -790,10 +779,10 @@ as follows:
     
     Parameters
     Assuming extension is .psc
-    Using model directory: /home/carl/Pysces/psc
+    Using model directory: /home/jr/Pysces/psc
     Using file: lin4_fb_S3.psc
-    /home/carl/Pysces/psc/orca/lin4_fb_S3.psc loading ..... 
-    Parsing file: /home/carl/Pysces/psc/orca/lin4_fb_S3.psc
+    /home/jr/Pysces/psc/orca/lin4_fb_S3.psc loading ..... 
+    Parsing file: /home/jr/Pysces/psc/orca/lin4_fb_S3.psc
     Info: "X4" has been initialised but does not occur in a rate equation
      
     Calculating L matrix . . . . . . .  done.
@@ -866,7 +855,7 @@ For the ``mod_fixed_c`` model two additional results objects
 +--------------------------+-------------+
 | :math:`C^{S2}_{R3}`      | -0.052      |
 +--------------------------+-------------+
-| :math:`\Sigma`           | 210.608     |
+| :math:`\Sigma`           | 210.616     |
 +--------------------------+-------------+
 
 .. raw:: html
@@ -966,7 +955,7 @@ The contents of the saved data file is as follows:
     results_path = '~/Pysces/lin4_fb/symca/cc_summary_0.csv'
     
     # Correct path depending on platform - necessary for platform independent scripts
-    if platform == 'win32':
+    if platform == 'win32' and pysces.version.current_version_tuple() < (0,9,8):
         results_path = psctb.utils.misc.unix_to_windows_path(results_path)
     else:
         results_path = path.expanduser(results_path)
@@ -986,6 +975,19 @@ The contents of the saved data file is as follows:
 .. raw:: html
 
    </div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+    
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+    
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
     <table border="1" class="dataframe">
       <thead>
         <tr style="text-align: right;">
@@ -1055,17 +1057,17 @@ The contents of the saved data file is as follows:
         </tr>
         <tr>
           <th>8</th>
-          <td>CP002</td>
-          <td>0.963782</td>
-          <td>CP002</td>
-          <td>- \varepsilon^{R1}_{S3} \varepsilon^{R2}_{S1} ...</td>
-        </tr>
-        <tr>
-          <th>9</th>
           <td>CP001</td>
           <td>0.000298</td>
           <td>CP001</td>
           <td>- \varepsilon^{R1}_{S1} \varepsilon^{R2}_{S2} ...</td>
+        </tr>
+        <tr>
+          <th>9</th>
+          <td>CP002</td>
+          <td>0.963782</td>
+          <td>CP002</td>
+          <td>- \varepsilon^{R1}_{S3} \varepsilon^{R2}_{S1} ...</td>
         </tr>
         <tr>
           <th>10</th>
@@ -1118,17 +1120,17 @@ The contents of the saved data file is as follows:
         </tr>
         <tr>
           <th>17</th>
-          <td>CP002</td>
-          <td>0.963782</td>
-          <td>CP002</td>
-          <td>- \varepsilon^{R1}_{S3} \varepsilon^{R2}_{S1} ...</td>
-        </tr>
-        <tr>
-          <th>18</th>
           <td>CP001</td>
           <td>0.000298</td>
           <td>CP001</td>
           <td>- \varepsilon^{R1}_{S1} \varepsilon^{R2}_{S2} ...</td>
+        </tr>
+        <tr>
+          <th>18</th>
+          <td>CP002</td>
+          <td>0.963782</td>
+          <td>CP002</td>
+          <td>- \varepsilon^{R1}_{S3} \varepsilon^{R2}_{S1} ...</td>
         </tr>
         <tr>
           <th>19</th>
@@ -1248,12 +1250,11 @@ metabolites are handled automatically.
 +--------------------------+-------------+
 | :math:`C^{S3}_{R4}`      | -0.334      |
 +--------------------------+-------------+
-| :math:`\Sigma`           | 631.165     |
+| :math:`\Sigma`           | 631.138     |
 +--------------------------+-------------+
 
 .. raw:: html
 
    </div>
-
 
 
