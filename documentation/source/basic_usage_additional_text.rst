@@ -14,6 +14,6 @@ To start a PySCeSToolbox session in a Jupyter notebook:
 
 .. code:: python
 
-    %matplotlib inline
     import pysces
     import psctb
+    %matplotlib inline
