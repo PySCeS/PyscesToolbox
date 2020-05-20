@@ -52,6 +52,16 @@ def remove_cell_with(cell, pattern):
     else:
         return cell
 
+def remove_stderr_from_cell(cell):
+    """
+    Removes any stderr from cell outputs list.
+    """
+    if 'outputs' in cell:
+        outputs = cell['outputs']
+        good_outputs = [d for d in outputs if not \
+                        ('name' in d and d['name']=='stderr')]
+        cell['outputs'] = good_outputs
+    return cell
 
 def iterlines(text):
     """
@@ -103,6 +113,8 @@ if __name__ == "__main__":
             new_cell['source'] = new_source
             # convert cell to NotebookNode
             new_cell = nbformat.NotebookNode(new_cell)
+            # remove any stderr from cell
+            new_cell = remove_stderr_from_cell(new_cell)
             # add cell to the new notebook
             nb_sans_cells['cells'].append(new_cell)
     new_nb = nbformat.NotebookNode(nb_sans_cells)

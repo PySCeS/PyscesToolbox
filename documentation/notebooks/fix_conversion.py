@@ -84,6 +84,21 @@ def remove_empty_block(lines, block_string):
             new_lines.append(line)
     return new_lines
 
+def remove_block_contains(lines, block_string, match_string):
+    new_lines = []
+    flag = False
+    for i, line in enumerate(lines):
+        if line.startswith(block_string) and \
+                lines[i + 2].startswith(match_string):
+            flag = True
+        elif line == '\n' and i < len(lines)-2 and \
+                lines[i + 1] != '\n' and lines[i + 1][:2] != '  ':
+            flag = False
+        if flag:
+            pass
+        else:
+            new_lines.append(line)
+    return new_lines
 
 # In[ ]:
 
@@ -301,7 +316,7 @@ if __name__ == "__main__":
     replacements = [('*#', '`'),
                     ('#*', '`_'),
                     ('.ipynb#', '.html#'),
-                    ('code:: ipython2', 'code:: python')]
+                    ('code:: ipython3', 'code:: python')]
 
     if len(sys.argv) == 1:
         file_names = get_rst_file_names()
@@ -328,6 +343,9 @@ if __name__ == "__main__":
 
         for block_to_remove in to_remove_block_strings:
             lines = remove_empty_block(lines, block_to_remove)
+        
+        lines = remove_block_contains(lines, '.. parsed-literal::', 
+                                      '    Widget Javascript not detected.')
 
         lines = add_in_out(lines)
 
