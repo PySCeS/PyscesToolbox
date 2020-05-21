@@ -17,7 +17,9 @@ PySCeSToolbox was designed to be used within the Jupyter notebook, but most of t
 Documentation can be found at 
 [http://pyscestoolbox.readthedocs.io](http://pyscestoolbox.readthedocs.io). 
 While all major tools have been documented, the documentation is still a work in 
-progress.
+progress. A PDF copy of the documentation is also included in the 
+`site-packages/psctb/docs` subfolder of the Python prefix where PySCeSToolbox 
+is installed.
 
 ## Contents of README
 
