@@ -608,7 +608,7 @@ representations of metabolic networks through the ``ModelGraph`` tool.
 The main purpose of this feature is to allow for the visualisation of
 control patterns in ``SymCa``. Currently, this tool is fairly limited in
 terms of its capabilities and therefore does not represent a replacement
-for more fully featured tools such as (cell designer? Or ???). One such
+for more fully featured tools such as e.g. CellDesigner. One such
 limitation is that no automatic layout capabilities are included, and
 nodes representing species and concentrations have to be laid out by
 hand. Nonetheless it is useful for quickly visualising the structure of

@@ -7,7 +7,7 @@ notebook versions of the documentation.
 Models
 ------
 
-The models used in this documentation are included below (together other
+The models used in this documentation are included below (together with other
 additional files). These files must be downloaded to the ``psc`` directory to be
 used in the example notebooks unless otherwise specified.
 
@@ -167,8 +167,8 @@ Example Notebooks
 -----------------
 
 The example Jupyter notebooks are runnable versions of the pages
-`Basic Usage  <basic_usage.html>`__, `RateChar <RateChar.html>`__,
-`Symca <Symca.html>`__  and `Thermokin <Thermokin.html>`__ found in
+`Basic Usage  <basic_usage.html>`_, `RateChar <RateChar.html>`_,
+`Symca <Symca.html>`_  and `Thermokin <Thermokin.html>`_ found in
 this documentation.
 
 :download:`basic_usage.ipynb <example_notebooks/basic_usage.ipynb>`

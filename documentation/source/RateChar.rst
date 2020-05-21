@@ -4,7 +4,7 @@ RateChar
 ========
 
 RateChar is a tool for performing generalised supply-demand analysis
-(GSDA) `[2,3] <references.html>`__. This entails the generation data
+(GSDA) `[5,6] <references.html>`__. This entails the generation data
 needed to draw rate characteristic plots for all the variable species of
 metabolic model through parameter scans and the subsequent visualisation
 of these data in the form of ``ScanFig`` objects.
@@ -62,7 +62,7 @@ Like most tools provided in PySCeSToolbox, instantiation of a
 ``RateChar`` object requires a pysces model object (``PysMod``) as an
 argument. A ``RateChar`` session will typically be initiated as follows
 (here we will use the included
-`lin4\_fb.psc <included_files.html#lin4-fb-hill-psc>`__ model):
+`lin4\_fb.psc <included_files.html#lin4-fb-psc>`__ model):
 
 ``In [1]:``
 

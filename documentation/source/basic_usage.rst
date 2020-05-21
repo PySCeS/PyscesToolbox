@@ -27,6 +27,19 @@ To start a PySCeSToolbox session in a Jupyter notebook:
     import psctb
     %matplotlib inline
 
+Downloading interactive Jupyter notebooks
+-----------------------------------------
+
+To facilitate learning of this software, a set of interactive Jupyter notebooks 
+are provided that mirror the pages for Basic Usage (this page), 
+`RateChar <RateChar.html>`_, `Symca <Symca.html>`_  and 
+`Thermokin <Thermokin.html>`_ found in 
+this documentation. They can be downloaded from 
+`Included Files <included_files.html>`_. The
+`models and associated files <included_files.html#models>`_ should be saved in 
+the ``~/Pysces/psc`` folder, while the 
+`example notebooks <included_files.html#example-notebooks>`_ can go anywhere.
+
 Syntax
 ------
 
@@ -627,7 +640,7 @@ representations of metabolic networks through the ``ModelGraph`` tool.
 The main purpose of this feature is to allow for the visualisation of
 control patterns in ``SymCa``. Currently, this tool is fairly limited in
 terms of its capabilities and therefore does not represent a replacement
-for more fully featured tools such as (cell designer? Or ???). One such
+for more fully featured tools such as e.g. CellDesigner. One such
 limitation is that no automatic layout capabilities are included, and
 nodes representing species and concentrations have to be laid out by
 hand. Nonetheless it is useful for quickly visualising the structure of

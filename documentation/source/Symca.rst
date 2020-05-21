@@ -4,7 +4,7 @@ Symca
 =====
 
 Symca is used to perform symbolic metabolic control analysis
-`[1] <references.html>`__ on metabolic pathway models in order to
+`[3,4] <references.html>`__ on metabolic pathway models in order to
 dissect the control properties of these pathways in terms of the
 different chains of local effects (or control patterns) that make up the
 total control coefficient values. Symbolic/algebraic expressions are
@@ -46,7 +46,7 @@ following steps:
 2. Generation of symbolic control coefficient expressions.
 3. Access generated control coefficient expression results via
    ``cc_results`` and the corresponding control coefficient name (see
-   `basic\_usage <basic_usage.html#syntax>`__)
+   `Basic Usage <basic_usage.html#syntax>`__)
 4. Inspection of control coefficient values.
 5. Inspection of control pattern values and their contributions towards
    the total control coefficient values.
@@ -61,8 +61,8 @@ Object instantiation
 
 Instantiation of a ``Symca`` analysis object requires ``PySCeS`` model
 object (``PysMod``) as an argument. Using the included
-`lin4\_fb.psc <http://pyscestoolbox.readthedocs.io/en/latest/included_files.html>`__
-model a ``Symca`` session is instantiated as follows:
+`lin4\_fb.psc <included_files.html#lin4-fb-psc>`__ model a ``Symca``
+session is instantiated as follows:
 
 ``In [1]:``
 
@@ -139,7 +139,7 @@ Accessing control coefficient expressions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Generated results may be accessed via a dictionary-like ``cc_results``
-object (see `basic\_usage#tables <basic_usage.html#tables>`__).
+object (see `Basic Usage - Tables <basic_usage.html#tables>`__).
 Inspecting this ``cc_results`` object in a IPython/Jupyter notebook
 yields a table of control coefficient values:
 
@@ -525,7 +525,7 @@ Control pattern graphs
 ~~~~~~~~~~~~~~~~~~~~~~
 
 As described under `Basic
-Usage <basic_usage.html##graphic-representation-of-metabolic-networks>`__,
+Usage <basic_usage.html#graphic-representation-of-metabolic-networks>`__,
 ``Symca`` has the functionality to display the chains of local effects
 represented by control patterns on a scheme of a metabolic model. This
 functionality can be accessed via the ``highlight_patterns`` method:
@@ -606,10 +606,10 @@ parameter change on either the control coefficient and control pattern
 values or of the effect of a parameter change on the contribution of the
 control patterns towards the control coefficient (as discussed
 `above <Symca.html#control-pattern-percentage-contribution>`__). The
-procedure for both the "value" and "percentage" scans are very much the
-same and rely on the same principles as described under
-`basic\_usage#plotting-and-displaying-results <basic_usage.html#plotting-and-displaying-results>`__
-and `RateChar#plotting-results <RateChar.html#plotting-results>`__.
+procedures for both the "value" and "percentage" scans are very much the
+same and rely on the same principles as described in the `Basic
+Usage <basic_usage.html#plotting-and-displaying-results>`__ and
+`RateChar <RateChar.html#plotting-results>`__ sections.
 
 To perform a parameter scan the ``do_par_scan`` method is called. This
 method has the following arguments:
@@ -1159,12 +1159,12 @@ to ``RateChar``. Saving a session takes place with the ``save_session``
 method, whereas the ``load_session`` method loads the saved expressions.
 As with the ``save_results`` method and most other saving and loading
 functionality, if no ``file_name`` argument is provided, files will be
-saved to the default directory (see also
-`basic\_usage.html#saving-and-default-directories <basic_usage.html#saving-and-default-directories>`__).
-As previously described, expressions can also automatically be
-loaded/saved by ``do_symca`` by using the ``auto_save_load`` argument
-which saves and loads using the default path. Models with internal fixed
-metabolites are handled automatically.
+saved to the default directory (see also `Basic
+Usage <basic_usage.html#saving-and-default-directories>`__). As
+previously described, expressions can also automatically be loaded/saved
+by ``do_symca`` by using the ``auto_save_load`` argument which saves and
+loads using the default path. Models with internal fixed metabolites are
+handled automatically.
 
 ``In [30]:``
 
