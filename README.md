@@ -14,7 +14,10 @@ PySCeSToolbox currently provides tools for:
 
 PySCeSToolbox was designed to be used within the Jupyter notebook, but most of the core features should work in a normal Python script.
 
-Documentation can be found at [http://pyscestoolbox.readthedocs.org](http://pyscestoolbox.readthedocs.org). While all major tools have been documented, the documentation is still a work in progress.
+Documentation can be found at 
+[http://pyscestoolbox.readthedocs.io](http://pyscestoolbox.readthedocs.io). 
+While all major tools have been documented, the documentation is still a work in 
+progress.
 
 ## Contents of README
 
@@ -26,13 +29,17 @@ Documentation can be found at [http://pyscestoolbox.readthedocs.org](http://pysc
 
 ## Requirements
 
-An abbreviated list of requirements is given below. Python dependencies will be installed automatically when installing PySCeSToolbox via pip. For detailed operating system specific instructions on installing the requirements see the documentation at [http://pyscestoolbox.readthedocs.io/](http://pyscestoolbox.readthedocs.io),
+An abbreviated list of requirements is given below. Python dependencies will be 
+installed automatically when installing PySCeSToolbox via pip. For detailed 
+operating system specific instructions on installing the requirements see the 
+documentation at 
+[http://pyscestoolbox.readthedocs.io/](http://pyscestoolbox.readthedocs.io).
 
-- A Python 2.7 installation
+- A Python 3.x installation (versions 3.6-3.8 recommended)
 - The full SciPy stack (see [http://scipy.org/install.html](http://scipy.org/install.html))
 - PySCeS (see [http://pysces.sourceforge.net/download.html](http://pysces.sourceforge.net/download.html) or install using ``pip install pysces``)
 - Maxima (see [http://maxima.sourceforge.net/download.html](http://maxima.sourceforge.net/download.html))
-- Jupyter Notebook (version in the 4.x.x series)
+- Jupyter Notebook (jupyter-core version in the 4.x.x series)
 
 **Notes:**
 
@@ -74,42 +81,68 @@ pip install git+https://github.com/PySCeS/PySCeSToolbox.git@f63b5ab660f103105750
 To start a PySCeSToolbox session in a Jupyter notebook:
 
  1. Start up the Jupyter Notebook using the ``jupyter notebook`` command in the terminal
- 2. Create a new notebook by clicking the ``New`` button on the top right of the window and selecting ``Python 2``
+ 2. Create a new notebook by clicking the ``New`` button on the top right of the 
+    window and selecting ``Python 3`` 
  3. Run the following three commands in the first cell:
 
 ```python
-%matplotlib inline
 import pysces
 import psctb
+%matplotlib inline
 ```
 
-Model files must be placed in `~/Pysces/psc/` if using Linux or `C:\Pysces\psc\` for Windows.
+Model files must be placed in `~/Pysces/psc/` if using Linux or macOS, and in 
+`C:\Pysces\psc\` for Windows (PySCeS version < 0.9.8) or 
+`C:\Users\<username>\Pysces\psc` (PySCeS version 0.9.8+). 
 
 ## Important notices
 
-### For readers of "Tracing regulatory routes in metabolism using generalised supply-demand analysis" published in BMC Systems Biology on 03/12/2015:
+### For readers of "Tracing regulatory routes in metabolism using generalised supply-demand analysis" published in [BMC Systems Biology](https://doi.org/10.1186/s12918-015-0236-1)
 
-To use the IPython notebook file included as "Additional file 5" in the paper, please install the **latest version** of PySCeSToolbox specified under [Installation](#installation).
+To use the Jupyter notebook file included as "Additional file 5" in the paper, 
+please install the **latest version** of PySCeSToolbox specified under 
+[Installation](#installation).
 
-The two PySCeS MDL model files included as "Addition file 1" and "Addition file 2" are required to run the notebook. They should be renamed to "Hoefnagel_moiety_ratio.psc" and "Curien.psc", respectively. Further instructions are included within the notebook and on this page.
-
-Firefox users should download these files using a different browser or switch to the new beta version of the BMC Systems Biology website.
+The two PySCeS MDL model files included as "Addition file 1" and "Addition file 
+2" are required to run the notebook. They should be renamed to 
+"Hoefnagel_moiety_ratio.psc" and "Curien.psc", respectively. Further 
+instructions are included within the notebook and on this page. 
 
 ### Changes:
-Because this project is still in its infancy, future changes might break older scripts. These types of changes will be kept to a minimum and will be documented here.
+Because this project is undergoing development, future changes might break 
+older scripts. These types of changes will be kept to a minimum and will be 
+documented here.
 
 #### Changes on 2017-02-09: Full cross compatibility
-On 2017-02-09 Symca support via Maxima has been added to PySCeSToolbox on Windows. A configuration file located at `C:\Pysces\psctb_config.ini` can be used to specify the path to `maxima.bat`. By default, however, PySCeSToolbox should detect the path to `maxima.bat` automatically if it has been installed using the default options. This change should have no impact on any older scripts save for making them platform independent.
+On 2017-02-09 Symca support via Maxima has been added to PySCeSToolbox on 
+Windows. A configuration file located at `C:\Pysces\psctb_config.ini` can be 
+used to specify the path to `maxima.bat`. By default, however, PySCeSToolbox 
+should detect the path to `maxima.bat` automatically if it has been installed 
+using the default options. This change should have no impact on any older 
+scripts save for making them platform independent. 
 
 #### Changes on 2017-02-02: Dropped IPython Notebook 3.x.x support
-As of 2017-02-02 IPython Notebook 3.x.x support has been dropped in favour of Jupyter 4.x.x. This should not affect the functioning of scripts (save for those based on versions before that of 2015-11-11). PySCeSToolbox will however require the Jupyter Notebook as of this date in order to use its interactive features. Note that `ipywidgets` (an automatically installed requirement for the Jupyter notebook) needs you to run the command "`jupyter nbextension enable --py --sys-prefix widgetsnbextension`" before enabling widgets in the notebook.
+As of 2017-02-02 IPython Notebook 3.x.x support has been dropped in favour of 
+Jupyter 4.x.x. This should not affect the functioning of scripts (save for those 
+based on versions before that of 2015-11-11). PySCeSToolbox will however require 
+the Jupyter Notebook as of this date in order to use its interactive features. 
+Note that `ipywidgets` (an automatically installed requirement for the Jupyter 
+notebook) needs you to run the command "`jupyter nbextension enable --py 
+--sys-prefix widgetsnbextension`" before enabling widgets in the notebook. 
 
 #### Changes on 2015-11-11: API changes
-Major changes were made on 2015-11-11 that might break scripts coded before this date. These changes are related to the naming of methods and fields. For scripts older than 2015-11-11 we recommend using an older version of PySCeSToolbox (noted under [Installation](#installation)). Manual porting of scripts is also possible with details of necessary changes outlined under [Porting scripts to latest version](#porting-scripts-to-latest-version).
+Major changes were made on 2015-11-11 that might break scripts coded before this 
+date. These changes are related to the naming of methods and fields. For scripts 
+older than 2015-11-11 we recommend using an older version of PySCeSToolbox 
+(noted under [Installation](#installation)). Manual porting of scripts is also 
+possible with details of necessary changes outlined under 
+[Porting scripts to latest version](#porting-scripts-to-latest-version). 
 
 ## Porting scripts to latest version
 
-Method and variable names and the analysis objects they belong to that were changed on 2015-11-11 are documented in the tables below. To port any older script simply change the old name of any method/variable to the new name.
+Method and variable names and the analysis objects they belong to that were 
+changed on 2015-11-11 are documented in the tables below. To port any older 
+script simply change the old name of any method/variable to the new name. 
 
 **RateChar**
 

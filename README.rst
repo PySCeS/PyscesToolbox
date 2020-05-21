@@ -17,9 +17,9 @@ PySCeSToolbox currently provides tools for:
 PySCeSToolbox was designed to be used within the Jupyter notebook, but
 most of the core features should work in a normal Python script.
 
-Documentation can be found at http://pyscestoolbox.readthedocs.org.
-While all major tools have been documented, the documentation is still a
-work in progress.
+Documentation can be found at http://pyscestoolbox.readthedocs.io. While
+all major tools have been documented, the documentation is still a work
+in progress.
 
 Contents of README
 ------------------
@@ -38,14 +38,14 @@ An abbreviated list of requirements is given below. Python dependencies
 will be installed automatically when installing PySCeSToolbox via pip.
 For detailed operating system specific instructions on installing the
 requirements see the documentation at
-`http://pyscestoolbox.readthedocs.io/ <http://pyscestoolbox.readthedocs.io>`__,
+`http://pyscestoolbox.readthedocs.io/ <http://pyscestoolbox.readthedocs.io>`__.
 
--  A Python 2.7 installation
+-  A Python 3.x installation (versions 3.6-3.8 recommended)
 -  The full SciPy stack (see http://scipy.org/install.html)
 -  PySCeS (see http://pysces.sourceforge.net/download.html or install
    using ``pip install pysces``)
 -  Maxima (see http://maxima.sourceforge.net/download.html)
--  Jupyter Notebook (version in the 4.x.x series)
+-  Jupyter Notebook (jupyter-core version in the 4.x.x series)
 
 **Notes:**
 
@@ -72,7 +72,6 @@ To enable widgets you may need to run the following commands:
     jupyter nbextension install --py --user d3networkx_psctb
     jupyter nbextension enable --py --user d3networkx_psctb
 
-
 The latest development version can be installed from GitHub with:
 
 .. code:: bash
@@ -94,25 +93,26 @@ To start a PySCeSToolbox session in a Jupyter notebook:
 1. Start up the Jupyter Notebook using the ``jupyter notebook`` command
    in the terminal
 2. Create a new notebook by clicking the ``New`` button on the top right
-   of the window and selecting ``Python 2``
+   of the window and selecting ``Python 3``
 3. Run the following three commands in the first cell:
 
 .. code:: python
 
-    %matplotlib inline
     import pysces
     import psctb
+    %matplotlib inline
 
-Model files must be placed in ``~/Pysces/psc/`` if using Linux or
-``C:\Pysces\psc\`` for Windows.
+Model files must be placed in ``~/Pysces/psc/`` if using Linux or macOS,
+and in ``C:\Pysces\psc\`` for Windows (PySCeS version < 0.9.8) or
+``C:\Users\<username>\Pysces\psc`` (PySCeS version 0.9.8+).
 
 Important notices
 -----------------
 
-For readers of "Tracing regulatory routes in metabolism using generalised supply-demand analysis" published in BMC Systems Biology on 03/12/2015:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For readers of "Tracing regulatory routes in metabolism using generalised supply-demand analysis" published in `BMC Systems Biology <https://doi.org/10.1186/s12918-015-0236-1>`__
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To use the IPython notebook file included as "Additional file 5" in the
+To use the Jupyter notebook file included as "Additional file 5" in the
 paper, please install the **latest version** of PySCeSToolbox specified
 under `Installation <#installation>`__.
 
@@ -122,15 +122,12 @@ renamed to "Hoefnagel\_moiety\_ratio.psc" and "Curien.psc",
 respectively. Further instructions are included within the notebook and
 on this page.
 
-Firefox users should download these files using a different browser or
-switch to the new beta version of the BMC Systems Biology website.
-
 Changes:
 ~~~~~~~~
 
-Because this project is still in its infancy, future changes might break
-older scripts. These types of changes will be kept to a minimum and will
-be documented here.
+Because this project is undergoing development, future changes might
+break older scripts. These types of changes will be kept to a minimum
+and will be documented here.
 
 Changes on 2017-02-09: Full cross compatibility
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -153,7 +150,7 @@ PySCeSToolbox will however require the Jupyter Notebook as of this date
 in order to use its interactive features. Note that ``ipywidgets`` (an
 automatically installed requirement for the Jupyter notebook) needs you
 to run the command
-"``jupyter nbextension enable --py --sys-prefix widgetsnbextension``"
+"``jupyter nbextension enable --py  --sys-prefix widgetsnbextension``"
 before enabling widgets in the notebook.
 
 Changes on 2015-11-11: API changes
