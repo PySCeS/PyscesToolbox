@@ -59,6 +59,9 @@ Maxima is only a requirement for SymCA.
 Installation
 ------------
 
+    **Note:** Detailed installation instructions are provided
+    `here <https://pyscestoolbox.readthedocs.io/en/latest/installation.html>`__.
+
 The latest release of PySCeSToolbox can be installed from PyPi by
 running the following commands in the terminal (or Windows equivalent):
 
