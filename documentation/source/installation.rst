@@ -88,7 +88,7 @@ by default.
     for more information.
     
 The default path included in ``psctb_config.ini`` is set as 
-``C:\Program Files?\Maxima?\bin\maxima.bat``, where the question marks are 
+``C:\maxima?\bin\maxima.bat``, where the question marks are 
 wildcards (since the specific path will depend on the version of Maxima). If 
 Maxima has been installed to a user specified directory, the correct path to the
 ``maxima.bat`` file must be specified here.

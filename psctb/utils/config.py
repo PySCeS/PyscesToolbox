@@ -10,7 +10,7 @@ from pysces import output_dir
 from warnings import warn
 
 _DEFAULT_CONFIG = {'Settings': {
-    'maxima_path': 'C:\\Program Files?\\Maxima?\\bin\\maxima.bat'}}
+    'maxima_path': 'C:\\maxima?\\bin\\maxima.bat'}}
 
 _DEFAULT_CONF_NAME = 'default_config.ini'
 _USER_CONF_PATH = path.join(output_dir, 'psctb_config.ini')
