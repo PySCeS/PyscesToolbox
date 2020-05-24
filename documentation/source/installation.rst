@@ -187,9 +187,9 @@ added to your ``.bash_profile`` file:
 .. code:: bash
 
     export M_PREFIX=/Applications/Maxima.app/Contents/Resources/opt
-    export PYTHONPATH=${M_PREFIX/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/:$PYTHONPATH
-    export MANPATH=${M_PREFIX/share/man:$MANPATH
-    export PATH=${M_PREFIX/bin:$PATH
+    export PYTHONPATH=${M_PREFIX}/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/:$PYTHONPATH
+    export MANPATH=${M_PREFIX}/share/man:$MANPATH
+    export PATH=${M_PREFIX}/bin:$PATH
     alias maxima=rmaxima
 
 
