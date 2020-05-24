@@ -70,7 +70,7 @@ def compare_models(model_list, model_mapping = None, augment_mapping=True, compa
     elif comparison_type == 'closed_open':
         comparer = ClosedOpenComparer
     else:
-        raise AssertionError, 'Incorrect comparison_type'
+        raise AssertionError('Incorrect comparison_type')
     return  comparer(model_list, model_mapping, augment_mapping)
 
 
@@ -122,8 +122,8 @@ class ModelMapper(object):
                                                             map_dict)
             map_dict.update(mca_map_dict)
 
-        model_map_params = zip(model_list, model_names,
-                               map_dict_list, fixed_param_list)
+        model_map_params = list(zip(model_list, model_names,
+                               map_dict_list, fixed_param_list))
 
         model_maps = []
         for model, model_name, map_dict, fixed_params in model_map_params:
@@ -143,9 +143,9 @@ class ModelMapper(object):
         """
         base_vals = mapping_array[:, 0]
         comp_vals = mapping_array[:, 1:]
-        dict_mapping = [dict(zip(base_vals, base_vals))]
+        dict_mapping = [dict(list(zip(base_vals, base_vals)))]
         for col in comp_vals.T:
-            dict_mapping.append(dict(zip(base_vals, col)))
+            dict_mapping.append(dict(list(zip(base_vals, col))))
         return dict_mapping
 
     @staticmethod
@@ -225,7 +225,7 @@ class ModelMapper(object):
         get_equiv_coeff
         """
         return {k: ModelMapper.get_equiv_coeff(k, mca_dict, map_dict)
-                for k in mca_dict.iterkeys()}
+                for k in mca_dict.keys()}
 
     @staticmethod
     def get_equiv_coeff(coeff, mca_dict, map_dict):
@@ -283,7 +283,7 @@ class ModelMapper(object):
     @staticmethod
     def get_now_fixed(base_model, comparison_model, map_dict):
         now_fixed_list = []
-        for k, v in map_dict.iteritems():
+        for k, v in map_dict.items():
             if is_species(k, base_model) and is_parameter(v, comparison_model):
                 now_fixed_list.append(k)
         return now_fixed_list
@@ -301,7 +301,7 @@ class ModelMap(object):
 
     @staticmethod
     def _reverse_dict(dict_):
-        return {v: k for k, v in dict_.iteritems()}
+        return {v: k for k, v in dict_.items()}
 
     def getattrname(self, key):
         prefix, suffix, key = ModelMap._prefix_suffix_getter(key)
@@ -315,7 +315,7 @@ class ModelMap(object):
 
     def hasattr(self, item):
         _, _, item = ModelMap._prefix_suffix_getter(item)
-        if item in self.attr_dict.keys():
+        if item in list(self.attr_dict.keys()):
             return True
         else:
             return False
@@ -359,7 +359,7 @@ class ModelMap(object):
         return converted_attrs
 
     def setattrs_from_dict(self, attr_dict):
-        for key, value in attr_dict.iteritems():
+        for key, value in attr_dict.items():
             self.setattr(key, value)
 
     def getattrs_from_list(self, attr_list):
@@ -482,7 +482,7 @@ class BaseModelComparer(object):
                 for custom_init_dict, mmap in zip(custom_init, self.mmap_list):
                     mmap.setattrs_from_dict(custom_init_dict)
             else:
-                raise AssertionError, "custom_inits must be a dictionary or a list of dictionaries"
+                raise AssertionError("custom_inits must be a dictionary or a list of dictionaries")
 
     @silence_print
     def _uniform_init(self, uniform_init):
@@ -685,8 +685,8 @@ class ParameterScanComparer(BaseModelComparer):
         axxarr: 2-dimensional numpy array of AxesSubplots
             An array that contains the axes associate with the figure.
         """
-        columns = self.raw_data.values()[0].columns
-        index = self.raw_data.values()[0].index
+        columns = list(self.raw_data.values())[0].columns
+        index = list(self.raw_data.values())[0].index
 
         assert cols >= 2
         rows = int(np.ceil(len(columns)/float(cols)))
@@ -699,11 +699,11 @@ class ParameterScanComparer(BaseModelComparer):
         f, axarr = plt.subplots(rows,cols)
         f.set_size_inches(w=width, h=height)
 
-        for i in xrange(cols*rows - len(columns)):
+        for i in range(cols*rows - len(columns)):
             f.delaxes(axarr.flat[-1-i])
 
         for column, ax in zip(columns,axarr.flat):
-            for k, v in self.raw_data.iteritems():
+            for k, v in self.raw_data.items():
                 ax.plot(index, v[column], '-',label=k)
             ax.set_xlabel(index.name)
             ax.set_title(column)
@@ -764,7 +764,7 @@ class SimulationComparer(ParameterScanComparer):
             for ind in reversed(now_fixed_indicies):
                 out_val = mmap.getattr(output_list[ind])
                 new_output_list.pop(ind)
-                param_cols.append([out_val for _ in xrange(time_range.shape[0])])
+                param_cols.append([out_val for _ in range(time_range.shape[0])])
             param_cols = param_cols
 
             current_sim_out = mmap.attr_names_from_base_names(new_output_list)
@@ -860,7 +860,7 @@ class ClosedOpenComparer(SimulationComparer):
             raw_results = []
             for input_vals in zip(*input_val_list):
                 current_row = [] + list(input_vals)
-                dict_to_set = dict(zip(scan_column_names, input_vals))
+                dict_to_set = dict(list(zip(scan_column_names, input_vals)))
                 mmap.setattrs_from_dict(dict_to_set)
                 mmap.model.doState()
                 current_row = current_row + mmap.getattrs_from_list(outputs)

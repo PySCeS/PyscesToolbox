@@ -92,7 +92,7 @@ class EventfulDict(dict):
         return popped
 
     def update(self, other_dict):
-        for (key, value) in other_dict.items():
+        for (key, value) in list(other_dict.items()):
             self[key] = value
 
     def clear(self):

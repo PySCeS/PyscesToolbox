@@ -1,3 +1,7 @@
+from __future__ import division, print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 from os import path
 from re import match, findall, sub
 
@@ -24,8 +28,8 @@ def get_term_types_from_raw_data(raw_data_dict):
 
     """
     term_types = set()
-    for v in raw_data_dict.itervalues():
-        for k in v.iterkeys():
+    for v in raw_data_dict.values():
+        for k in v.keys():
             term_types.add(k)
     return term_types
 
@@ -284,7 +288,7 @@ def replace_pow(str_formulas):
 
     """
     new_str_formulas = {}
-    for k, v in str_formulas.iteritems():
+    for k, v in str_formulas.items():
         new_str_formulas[k] = sub(r'pow\((\S*?),(\S*?)\)', r'\1**\2', v)
     return new_str_formulas
 
@@ -311,7 +315,7 @@ def get_sympy_formulas(str_formulas):
         Dictionary where values are symbolic sympy expressions
 
     """
-    return {k: sympify(v) for (k, v) in str_formulas.items()}
+    return {k: sympify(v) for (k, v) in list(str_formulas.items())}
 
 
 def get_sympy_terms(sympy_formulas):
@@ -347,7 +351,7 @@ def get_sympy_terms(sympy_formulas):
     check_for_negatives
     """
     sympy_terms = {}
-    for name, formula in sympy_formulas.iteritems():
+    for name, formula in sympy_formulas.items():
         terms = formula.expand().as_coeff_add()[1]
         if len(terms) == 2 and check_for_negatives(terms):
             sympy_terms[name] = terms
@@ -390,7 +394,7 @@ def get_ma_terms(mod, sympy_terms):
 
     messages = {}
     ma_terms = {}
-    for name, terms in sympy_terms.iteritems():
+    for name, terms in sympy_terms.items():
         reaction_map = getattr(model_map, name)
 
         substrates = [sympify(substrate) for substrate in
@@ -612,7 +616,7 @@ def get_binding_vc_terms(sympy_formulas, ma_terms):
         terms as values.
     """
     binding_terms = {}
-    for name, ma_term in ma_terms.iteritems():
+    for name, ma_term in ma_terms.items():
         binding_terms[name] = (sympy_formulas[name] / ma_term).factor().factor()
     return binding_terms
 
@@ -669,7 +673,7 @@ def get_gamma_keq_terms(mod, sympy_terms):
 
     messages = {}
     gamma_keq_terms = {}
-    for name, terms in sympy_terms.iteritems():
+    for name, terms in sympy_terms.items():
         reaction_map = getattr(model_map, name)
 
         substrates = [sympify(substrate) for substrate in
@@ -696,7 +700,7 @@ def get_gamma_keq_terms(mod, sympy_terms):
 
 def filter_irreversible(sympy_terms):
     new_sympy_terms = {}
-    for k, v in sympy_terms.iteritems():
+    for k, v in sympy_terms.items():
         if len(v) == 2:
             new_sympy_terms[k] = v
     return new_sympy_terms
@@ -711,7 +715,7 @@ def write_reqn_file(file_name, model_name, ma_terms, vc_binding_terms, gamma_keq
         f.write('# Note that this is a best effort attempt that is highly dependent\n')
         f.write('# on the form of the rate equations as defined in the model file.\n')
         f.write('# Check correctness before use.\n\n')
-        for reaction_name, ma_term in ma_terms.iteritems():
+        for reaction_name, ma_term in ma_terms.items():
             already_written.append(reaction_name)
             f.write('# %s :%s\n' % (reaction_name, messages[reaction_name]))
             f.write('!T{%s}{ma} %s\n' % (reaction_name, ma_term))
@@ -719,7 +723,7 @@ def write_reqn_file(file_name, model_name, ma_terms, vc_binding_terms, gamma_keq
                 reaction_name, vc_binding_terms[reaction_name]))
             f.write('!G{%s}{gamma_keq} %s\n' % (reaction_name, gamma_keq_terms[reaction_name]))
             f.write('\n')
-        for k, v in messages.iteritems():
+        for k, v in messages.items():
             if k not in already_written:
                 f.write('# %s :%s\n' % (k, v))
 
@@ -734,7 +738,7 @@ def term_to_file(file_name, expression, parent_name=None, term_name=None ):
         f.write('\n')
         f.write('# Additional term appended on %s\n' % date)
         if 'undefined' in (term_name,parent_name):
-            print 'Warning: writing partially defined term to %s. Please inspect file for further details.' % file_name
+            print('Warning: writing partially defined term to %s. Please inspect file for further details.' % file_name)
             f.write('# The term below is partially defined - fix term manually by defining reaction and term names\n')
         f.write('!G{%s}{%s} %s\n' % (parent_name,
                                      term_name,
