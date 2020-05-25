@@ -1,5 +1,5 @@
-psctb
-=====
+Module reference
+================
 
 .. toctree::
    :maxdepth: 4

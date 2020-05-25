@@ -1,11 +1,10 @@
 
 
-
 RateChar
 ========
 
 RateChar is a tool for performing generalised supply-demand analysis
-(GSDA) `[2,3] <references.html>`__. This entails the generation data
+(GSDA) `[5,6] <references.html>`__. This entails the generation data
 needed to draw rate characteristic plots for all the variable species of
 metabolic model through parameter scans and the subsequent visualisation
 of these data in the form of ``ScanFig`` objects.
@@ -63,7 +62,7 @@ Like most tools provided in PySCeSToolbox, instantiation of a
 ``RateChar`` object requires a pysces model object (``PysMod``) as an
 argument. A ``RateChar`` session will typically be initiated as follows
 (here we will use the included
-`lin4\_fb.psc <included_files.html#lin4-fb-hill-psc>`__ model):
+`lin4\_fb.psc <included_files.html#lin4-fb-psc>`__ model):
 
 ``In [1]:``
 
@@ -77,9 +76,9 @@ argument. A ``RateChar`` session will typically be initiated as follows
 
 .. parsed-literal::
 
-    Using model directory: /home/carl/Pysces/psc
-    /home/carl/Pysces/psc/lin4_fb.psc loading ..... 
-    Parsing file: /home/carl/Pysces/psc/lin4_fb.psc
+    Using model directory: /home/jr/Pysces/psc
+    /home/jr/Pysces/psc/lin4_fb.psc loading ..... 
+    Parsing file: /home/jr/Pysces/psc/lin4_fb.psc
     Info: "X4" has been initialised but does not occur in a rate equation
      
     Calculating L matrix . . . . . . .  done.
@@ -305,13 +304,11 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 .. parsed-literal::
 
-    array([  2.00000000e-02,   3.42884038e-02,   5.87847316e-02,
-             1.00781731e-01,   1.72782234e-01,   2.96221349e-01,
-             5.07847861e-01,   8.70664626e-01,   1.49268501e+00,
-             2.55908932e+00,   4.38735439e+00,   7.52176893e+00,
-             1.28954725e+01,   2.21082584e+01,   3.79028445e+01,
-             6.49814018e+01,   1.11405427e+02,   1.90995713e+02,
-             3.27446907e+02,   5.61381587e+02])
+    array([2.00000000e-02, 3.42884038e-02, 5.87847316e-02, 1.00781731e-01,
+           1.72782234e-01, 2.96221349e-01, 5.07847861e-01, 8.70664626e-01,
+           1.49268501e+00, 2.55908932e+00, 4.38735439e+00, 7.52176893e+00,
+           1.28954725e+01, 2.21082584e+01, 3.79028445e+01, 6.49814018e+01,
+           1.11405427e+02, 1.90995713e+02, 3.27446907e+02, 5.61381587e+02])
 
 
 
@@ -329,11 +326,11 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 .. parsed-literal::
 
-    array([ 199.95837618,  199.95793443,  199.95717575,  199.95586349,
-            199.95351373,  199.94862132,  199.93277067,  199.84116362,
-            199.13023486,  193.32039795,  154.71345957,   58.57037566,
-             12.34220931,    4.95993525,    4.0627301 ,    3.94870431,
-              3.91873852,    3.88648387,    3.83336626,    3.74248032])
+    array([199.95837618, 199.95793443, 199.95717575, 199.95586349,
+           199.95351373, 199.94862132, 199.93277067, 199.84116362,
+           199.13023486, 193.32039795, 154.71345957,  58.57037566,
+            12.34220931,   4.95993525,   4.0627301 ,   3.94870431,
+             3.91873852,   3.88648387,   3.83336626,   3.74248032])
 
 
 
@@ -354,11 +351,11 @@ represent input (``scan_range``) or output (``J_R3``, ``J_R4``,
 
 .. parsed-literal::
 
-    array([ 199.95837618,  199.95793443,  199.95717575,  199.95586349,
-            199.95351373,  199.94862132,  199.93277067,  199.84116362,
-            199.13023486,  193.32039795,  154.71345957,   58.57037566,
-             12.34220931,    4.95993525,    4.0627301 ,    3.94870431,
-              3.91873852,    3.88648387,    3.83336626,    3.74248032])
+    array([199.95837618, 199.95793443, 199.95717575, 199.95586349,
+           199.95351373, 199.94862132, 199.93277067, 199.84116362,
+           199.13023486, 193.32039795, 154.71345957,  58.57037566,
+            12.34220931,   4.95993525,   4.0627301 ,   3.94870431,
+             3.91873852,   3.88648387,   3.83336626,   3.74248032])
 
 
 
@@ -406,8 +403,8 @@ line data for each coefficient type into single arrays (under
 
 .. parsed-literal::
 
-    array([[   7.74367648,  166.89714142],
-           [   8.87554125,   11.92812809]])
+    array([[  7.74368133, 166.89714925],
+           [  8.87553568,  11.92812753]])
 
 
 
@@ -426,8 +423,8 @@ line data for each coefficient type into single arrays (under
 
 .. parsed-literal::
 
-    array([[  2.77554202,  39.66048804],
-           [ 24.76248588,  50.19530973]])
+    array([[ 2.77554202, 39.66048804],
+           [24.76248588, 50.19530973]])
 
 
 
@@ -446,8 +443,8 @@ line data for each coefficient type into single arrays (under
 
 .. parsed-literal::
 
-    array([[   2.77554202,   39.66048804,    7.74367648,  166.89714142],
-           [  24.76248588,   50.19530973,    8.87554125,   11.92812809]])
+    array([[  2.77554202,  39.66048804,   7.74368133, 166.89714925],
+           [ 24.76248588,  50.19530973,   8.87553568,  11.92812753]])
 
 
 
@@ -492,7 +489,7 @@ displayed as a table (see `Basic Usage <basic_usage.html#tables>`__):
 +-------------------------------------+-------------+
 | :math:`\varepsilon^{R1}_{S3}`       | -2.888      |
 +-------------------------------------+-------------+
-| :math:`\varepsilon^{R3}_{S3}`       | -19.340     |
+| :math:`\varepsilon^{R3}_{S3}`       | -19.341     |
 +-------------------------------------+-------------+
 | :math:`\varepsilon^{R4}_{S3}`       | 0.108       |
 +-------------------------------------+-------------+
@@ -500,7 +497,7 @@ displayed as a table (see `Basic Usage <basic_usage.html#tables>`__):
 +-------------------------------------+-------------+
 
 +-----------------------------------+--------------+
-| :math:`\,^{R3}R^{JR3}_{S3}`       | -8.921e-04   |
+| :math:`\,^{R3}R^{JR3}_{S3}`       | -8.920e-04   |
 +-----------------------------------+--------------+
 | :math:`\,^{R4}R^{JR3}_{S3}`       | 0.000        |
 +-----------------------------------+--------------+
@@ -537,7 +534,7 @@ Naturally, coefficients can also be accessed individually:
 
 .. parsed-literal::
 
-    0.99986784585886035
+    0.999867853018012
 
 
 
@@ -629,7 +626,7 @@ sets can be saved to any arbitrary location by supplying a path:
     save_file = '~/Pysces/rc_doc_example.npz'
     
     # Correct path depending on platform - necessary for platform independent scripts
-    if platform == 'win32':
+    if platform == 'win32' and pysces.version.current_version_tuple() < (0,9,8):
         save_file = psctb.utils.misc.unix_to_windows_path(save_file)
     else:
         save_file = path.expanduser(save_file)
@@ -673,7 +670,7 @@ specified:
     save_folder = '~/Pysces/lin4_fb/'
     
     # Correct path depending on platform - necessary for platform independent scripts
-    if platform == 'win32':
+    if platform == 'win32' and pysces.version.current_version_tuple() < (0,9,8):
         save_folder = psctb.utils.misc.unix_to_windows_path(save_folder)
     else:
         save_folder = path.expanduser(save_folder)

@@ -11,7 +11,7 @@ dictionaries within dictionaries."""
 import networkx
 from networkx.generators.classic import empty_graph
 
-from eventful_dict import EventfulDict
+from .eventful_dict import EventfulDict
 
 class EventfulGraph(networkx.Graph):
 

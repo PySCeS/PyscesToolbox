@@ -20,3 +20,7 @@ python clean_notebooks.py $file_name_sans_extension.ipynb
 echo "Copying example notebook to ~/example_notebooks:"
 clean=_clean
 cp -v $file_name_sans_extension$clean.ipynb ../../example_notebooks/$file_name_sans_extension.ipynb
+
+if [ "$file_name_sans_extension" == "basic_usage" ]; then
+    ./fix_basic_usage.sh
+fi

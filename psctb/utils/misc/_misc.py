@@ -1,3 +1,7 @@
+from __future__ import division, print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 import sys
 from os import path, devnull
 
@@ -234,7 +238,7 @@ def column_multiply(arr):
            [ 72.]])
     """
     new_arr = ones((arr.shape[0], 1))
-    for col in xrange(arr.shape[1]):
+    for col in range(arr.shape[1]):
         new_arr = new_arr * arr[:, col].reshape(arr.shape[0], 1)
     return new_arr
 
@@ -412,7 +416,7 @@ def do_safe_state(mod, parameter, value, type='ss'):
 
 
 def get_value_eval(expression, subs_dict):
-    for k, v in subs_dict.iteritems():
+    for k, v in subs_dict.items():
         subs_dict[k] = float64(v)
     ans = eval(expression, {}, subs_dict)
     # sometimes subs_dict is empty
@@ -421,8 +425,8 @@ def get_value_eval(expression, subs_dict):
         # the answer and the subs_dict arrays are of equal length
         # there is probably a faster solution, but this works fine by
         # falling back to get_value_sympy
-        if is_iterable(subs_dict.values()[0]):
-            if len(ans) != len(subs_dict.values()[0]):
+        if is_iterable(list(subs_dict.values())[0]):
+            if len(ans) != len(list(subs_dict.values())[0]):
                 raise Exception
     # print 'gve'
     return ans
@@ -437,22 +441,22 @@ def get_value_sympy(expression, subs_dict):
     if len(subs_dict) == 0:
         ans = expression.subs(subs_dict)
     else:
-        first_value = subs_dict.values()[0]
+        first_value = list(subs_dict.values())[0]
         if is_iterable(first_value):
             ans = []
             if not isinstance(first_value[0], float64):
-                for k, v in subs_dict.iteritems():
+                for k, v in subs_dict.items():
                     subs_dict[k] = float64(v)
 
             number_of_array_elements = len(first_value)
             for i in range(number_of_array_elements):
-                temp_subsdict = {k: v[i] for k, v in subs_dict.iteritems()}
+                temp_subsdict = {k: v[i] for k, v in subs_dict.items()}
                 ans_val = expression.subs(temp_subsdict)
                 ans.append(ans_val)
             ans = float64(array(ans))
         else:
             if not isinstance(first_value, float64):
-                for k, v in subs_dict.iteritems():
+                for k, v in subs_dict.items():
                     subs_dict[k] = float64(v)
             ans = expression.subs(subs_dict)
     # print 'gvs'
@@ -698,7 +702,7 @@ def silence_print(func):
             returns = func(*args, **kwargs)
             fix_printing()
             return returns
-        except KeyboardInterrupt, e:
+        except KeyboardInterrupt as e:
             fix_printing()
             raise e
     return wrapper
@@ -735,10 +739,10 @@ def cc_list(mod):
     for base_reaction in mod.reactions:
         for top_species in mod.species:
             cc = 'cc%s_%s' % (top_species, base_reaction)
-            ccs.append(cc)
+            ccs.append(str(cc))
         for top_reaction in mod.reactions:
             cc = 'ccJ%s_%s' % (top_reaction, base_reaction)
-            ccs.append(cc)
+            ccs.append(str(cc))
     ccs.sort()
     return ccs
 
@@ -748,10 +752,12 @@ def cc_dict(mod):
     for base_reaction in mod.reactions:
         for top_species in mod.species:
             cc = 'cc%s_%s' % (top_species, base_reaction)
-            ccs[cc] = (top_species, base_reaction)
+            cc = str(cc)
+            ccs[cc] = (str(top_species), str(base_reaction))
         for top_reaction in mod.reactions:
             cc = 'ccJ%s_%s' % (top_reaction, base_reaction)
-            ccs[cc] = (top_reaction, base_reaction)
+            cc = str(cc)
+            ccs[cc] = (str(top_reaction), str(base_reaction))
     return ccs
 
 @memoize
@@ -782,10 +788,10 @@ def ec_list(mod):
     for top_reaction in mod.reactions:
         for base_species in mod.species:
             ec = 'ec%s_%s' % (top_reaction, base_species)
-            ecs.append(ec)
+            ecs.append(str(ec))
         for base_param in mod.parameters:
             ec = 'ec%s_%s' % (top_reaction, base_param)
-            ecs.append(ec)
+            ecs.append(str(ec))
     ecs.sort()
     return ecs
 
@@ -795,10 +801,12 @@ def ec_dict(mod):
     for top_reaction in mod.reactions:
         for base_species in mod.species:
             ec = 'ec%s_%s' % (top_reaction, base_species)
-            ecs[ec] = (top_reaction, base_species)
+            ec = str(ec)
+            ecs[ec] = (str(top_reaction), str(base_species))
         for base_param in mod.parameters:
             ec = 'ec%s_%s' % (top_reaction, base_param)
-            ecs[ec] = (top_reaction, base_param)
+            ec = str(ec)
+            ecs[ec] = (str(top_reaction), str(base_param))
     return ecs
 
 @memoize
@@ -829,10 +837,10 @@ def rc_list(mod):
     for base_param in mod.parameters:
         for top_species in mod.species:
             rc = 'rc%s_%s' % (top_species, base_param)
-            rcs.append(rc)
+            rcs.append(str(rc))
         for top_reaction in mod.reactions:
             rc = 'rcJ%s_%s' % (top_reaction, base_param)
-            rcs.append(rc)
+            rcs.append(str(rc))
     rcs.sort()
     return rcs
 
@@ -842,10 +850,12 @@ def rc_dict(mod):
     for base_param in mod.parameters:
         for top_species in mod.species:
             rc = 'rc%s_%s' % (top_species, base_param)
-            rcs[rc] = (top_species, base_param)
+            rc = str(rc)
+            rcs[rc] = (str(top_species), str(base_param))
         for top_reaction in mod.reactions:
             rc = 'rcJ%s_%s' % (top_reaction, base_param)
-            rcs[rc] = (top_reaction, base_param)
+            rc = str(rc)
+            rcs[rc] = (str(top_reaction), str(base_param))
     return rcs
 
 @memoize
@@ -878,11 +888,13 @@ def prc_list(mod):
         for back_reaction in mod.reactions:
             for top_species in mod.species:
                 prc = 'prc%s_%s_%s' % (top_species, base_param, back_reaction)
+                prc = str(prc)
                 prcs.append(prc)
             for top_reaction in mod.reactions:
                 prc = 'prcJ%s_%s_%s' % (top_reaction,
                                         base_param,
                                         back_reaction)
+                prc = str(prc)
                 prcs.append(prc)
     prcs.sort()
     return prcs
@@ -894,28 +906,30 @@ def prc_dict(mod):
         for back_reaction in mod.reactions:
             for top_species in mod.species:
                 prc = 'prc%s_%s_%s' % (top_species, base_param, back_reaction)
-                prcs[prc] = (top_species, base_param, back_reaction)
+                prc = str(prc)
+                prcs[prc] = (str(top_species), str(base_param), str(back_reaction))
             for top_reaction in mod.reactions:
                 prc = 'prcJ%s_%s_%s' % (top_reaction,
                                         base_param,
                                         back_reaction)
-                prcs[prc] = (top_reaction,
-                             base_param,
-                             back_reaction)
+                prc = str(prc)
+                prcs[prc] = (str(top_reaction),
+                             str(base_param),
+                             str(back_reaction))
     return prcs
 
 @memoize
 def flux_list(mod):
     fluxes = []
     for reaction in mod.reactions:
-        fluxes.append('J_' + reaction)
+        fluxes.append(str('J_' + reaction))
     return fluxes
 
 @memoize
 def ss_species_list(mod):
     ss_species = []
     for species in mod.species:
-        ss_species.append(species + '_ss')
+        ss_species.append(str(species + '_ss'))
     return ss_species
 
 def group_sort(old_list, num_of_groups):
@@ -927,9 +941,9 @@ def group_sort(old_list, num_of_groups):
     # sending the data tp data2d because otherwise button grouping will also be
     # affected by this sorting scheme.
     group_size = len(old_list) / num_of_groups
-    first_group = range(0, len(old_list), num_of_groups)
+    first_group = list(range(0, len(old_list), num_of_groups))
     groups = first_group
-    for i in xrange(1, group_size - 1):
+    for i in range(1, group_size - 1):
         groups = groups + [j + i for j in first_group]
     new_list = [old_list[pos] for pos in groups]
 
@@ -945,7 +959,7 @@ def print_f(message, status):
     status : bool
     """
     if status:
-        print message
+        print(message)
 
 
 class PseudoDotDict:
@@ -980,7 +994,7 @@ class PseudoDotDict:
         initialisation. Throws exception if any of the keys are
         reserved.
         """
-        for k, v in self._dict.iteritems():
+        for k, v in self._dict.items():
             if k in PseudoDotDict._reserved:
                 raise Exception('%s is a reserved key' % k)
             else:
@@ -1000,7 +1014,7 @@ class PseudoDotDict:
         return self._dict.__repr__()
 
     def update(self, dic):
-        for k, v in dic.iteritems():
+        for k, v in dic.items():
             self.__setitem__(k, v)
 
 
@@ -1049,14 +1063,14 @@ class DotDict(dict):
         initialisation. Throws exception if any of the keys are
         reserved.
         """
-        for k, v in self.iteritems():
+        for k, v in self.items():
             if k in DotDict._reserved:
                 raise Exception('%s is a reserved key' % k)
             else:
                 setattr(self, k, v)
 
     def update(self, dic):
-        for k, v in dic.iteritems():
+        for k, v in dic.items():
             self.__setitem__(k, v)
 
     def _make_repr(self, key, value, formatter=None):
@@ -1088,10 +1102,10 @@ class DotDict(dict):
             formatter = formatter_factory()
 
         def representation(the_self=self):
-            keys = self.keys()
+            keys = list(self.keys())
             keys.sort()
             values = [self[the_key] for the_key in keys]
-            items = zip(keys, values)
+            items = list(zip(keys, values))
             lst = []
             for k, v in items:
                 col1 = eval(key)

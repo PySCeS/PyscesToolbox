@@ -1,4 +1,8 @@
-from ConfigParser import ConfigParser
+#from __future__ import division, print_function
+#from __future__ import absolute_import
+#from __future__ import unicode_literals
+
+from configparser import ConfigParser
 from sys import platform, stdout
 from os import path, sep, listdir, access, X_OK, environ, pathsep
 # from pkg_resources import resource_stream, resource_filename
@@ -6,7 +10,7 @@ from pysces import output_dir
 from warnings import warn
 
 _DEFAULT_CONFIG = {'Settings': {
-    'maxima_path': 'C:\\Program Files?\\Maxima?\\bin\\maxima.bat'}}
+    'maxima_path': 'C:\\maxima?\\bin\\maxima.bat'}}
 
 _DEFAULT_CONF_NAME = 'default_config.ini'
 _USER_CONF_PATH = path.join(output_dir, 'psctb_config.ini')
@@ -107,7 +111,7 @@ class ConfigChecker:
         error_string = ('The {config_name} located at\n{config_path}\n'
                         'does not contain the required section\n'
                         '"{section}".')
-        for section in _DEFAULT_CONFIG.keys():
+        for section in list(_DEFAULT_CONFIG.keys()):
             if section not in config_dict:
                 raise MissingSection(
                     error_string.format(**locals()))
@@ -117,8 +121,8 @@ class ConfigChecker:
         error_string = ('The {config_name} located at\n{config_path}\n'
                         'does not contain the required setting\n'
                         '"{setting}"\nunder the section\n"{section}".')
-        for section in _DEFAULT_CONFIG.keys():
-            for setting in _DEFAULT_CONFIG[section].keys():
+        for section in list(_DEFAULT_CONFIG.keys()):
+            for setting in list(_DEFAULT_CONFIG[section].keys()):
                 if setting not in config_dict[section]:
                     raise MissingSetting(
                         error_string.format(**locals()))
@@ -149,9 +153,9 @@ class ConfigWriter:
     @staticmethod
     def write_config(config_dict, config_path):
         conf = ConfigParser()
-        for section, settings in config_dict.iteritems():
+        for section, settings in config_dict.items():
             conf.add_section(section)
-            for setting, value in settings.iteritems():
+            for setting, value in settings.items():
                 conf.set(section, setting, value)
         with open(config_path, 'w') as f:
             conf.write(f)

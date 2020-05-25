@@ -7,6 +7,7 @@
 reinstall.sh
 .idea
 *.old
+*.bak
 /documentation/build/
 *.ipynb_checkpoints*
 doctemp.odt

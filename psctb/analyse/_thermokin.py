@@ -1,3 +1,7 @@
+from __future__ import division, print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 from os import path
 
 from numpy import log10, array, float, NaN, nanmin, nanmax, savetxt, hstack, float
@@ -107,7 +111,7 @@ class ThermoKin(object):
             return None
         gamma_keq_todo = []
         add_raw_data = self._add_raw_data
-        for reaction in self._raw_data.iterkeys():
+        for reaction in self._raw_data.keys():
             if not add_raw_data.get(reaction) or not add_raw_data.get(
                     reaction).get('gamma_keq'):
                 gamma_keq_todo.append(reaction)
@@ -137,7 +141,7 @@ class ThermoKin(object):
         if condition_1 or condition_2:
             ma_terms, vc_binding_terms, gamma_keq_terms, messages = create_reqn_data(
                 self.mod)
-            for k, v in messages.iteritems():
+            for k, v in messages.items():
                 print_f('{:10.10}: {}'.format(k, v), warnings)
             write_reqn_file(self._path_to, self.mod.ModelFile, ma_terms,
                             vc_binding_terms, gamma_keq_terms, messages)
@@ -146,7 +150,7 @@ class ThermoKin(object):
         self.reaction_results = DotDict()
         self.reaction_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                          formatter_factory())
-        for reaction, terms_dict in self._raw_data.iteritems():
+        for reaction, terms_dict in self._raw_data.items():
             additional_terms = self._add_raw_data.get(reaction)
             reqn_obj = RateEqn(self.mod,
                                reaction,
@@ -155,7 +159,7 @@ class ThermoKin(object):
                                additional_terms)
             setattr(self, 'J_' + reaction, reqn_obj)
             self.reaction_results['J_' + reaction] = reqn_obj
-            for term in reqn_obj.terms.itervalues():
+            for term in reqn_obj.terms.values():
                 self.reaction_results[term.name] = term
 
     def _populate_ec_results(self):
@@ -163,7 +167,7 @@ class ThermoKin(object):
         self.ec_results._make_repr('"$" + v.latex_name + "$"', 'v.value',
                                    formatter_factory())
 
-        for rate_eqn in self.reaction_results.itervalues():
+        for rate_eqn in self.reaction_results.values():
             self.ec_results.update(rate_eqn.ec_results)
 
     def save_results(self, file_name=None, separator=',',fmt='%.9f'):
@@ -184,9 +188,9 @@ class ThermoKin(object):
                 max_len = len(cols[3])
 
         for elasticity_name in sorted(
-                [ec for ec in self.ec_results.keys() if ec.startswith('ec')]):
+                [ec for ec in list(self.ec_results.keys()) if ec.startswith('ec')]):
             if self.ec_results[elasticity_name].expression != 0:
-                related_ecs = sorted([ec for ec in self.ec_results.keys() if
+                related_ecs = sorted([ec for ec in list(self.ec_results.keys()) if
                                       elasticity_name in ec])
                 for related_ec_name in related_ecs:
                     cols = (related_ec_name,
@@ -197,7 +201,7 @@ class ThermoKin(object):
                     if len(cols[3]) > max_len:
                         max_len = len(cols[3])
 
-        str_fmt = 'S%s' % max_len
+        str_fmt = 'U%s' % max_len
         head = ['name', 'value', 'latex_name', 'latex_expression']
         X = array(values,
                   dtype=[(head[0], str_fmt),
@@ -213,7 +217,7 @@ class ThermoKin(object):
                     fmt=['%s', fmt, '%s', '%s'], )
 
         except IOError as e:
-            print e.strerror
+            print(e.strerror)
 
 
 class RateEqn(object):
@@ -228,9 +232,9 @@ class RateEqn(object):
         self._rname = name
         self._ltxe = ltxe
 
-        for val in term_dict.itervalues():
+        for val in term_dict.values():
             self._unfac_expression = self._unfac_expression * (sympify(val))
-        for term_name, expression in term_dict.iteritems():
+        for term_name, expression in term_dict.items():
             term = RateTerm(parent=self,
                             mod=self.mod,
                             name='J_%s_%s' % (self._rname, term_name),
@@ -241,7 +245,7 @@ class RateEqn(object):
             self.terms[term_name] = term
 
         if additional_terms:
-            for term_name, expression in additional_terms.iteritems():
+            for term_name, expression in additional_terms.items():
                 term = AdditionalRateTerm(parent=self,
                                           mod=self.mod,
                                           name='J_%s_%s' % (
@@ -274,7 +278,7 @@ class RateEqn(object):
             self.ec_results[ec_name] = Term(self, self.mod, ec_name,
                                             self._rname, ec,
                                             self._ltxe)
-        for each in self.terms.itervalues():
+        for each in self.terms.values():
             self.ec_results.update(each.ec_results)
 
     def _repr_latex_(self):
@@ -313,14 +317,14 @@ class RateEqn(object):
 
     def _calc_value(self):
         subs_dict = get_subs_dict(self._unfac_expression, self.mod)
-        for each in self.terms.itervalues():
+        for each in self.terms.values():
             if type(each) is not AdditionalRateTerm:
                 each._calc_value(subs_dict)
-        self._value = mult([each._value for each in self.terms.itervalues() if
+        self._value = mult([each._value for each in self.terms.values() if
                             type(each) is not AdditionalRateTerm])
 
     def _valscan_x(self, parameter, scan_range):
-        scan_res = [list() for _ in range(len(self.terms.values()) + 2)]
+        scan_res = [list() for _ in range(len(list(self.terms.values())) + 2)]
         scan_res[0] = scan_range
 
         for parvalue in scan_range:
@@ -369,7 +373,7 @@ class RateEqn(object):
         for i, symbol in enumerate(scanner.UserOutputList):
             subs_dict[symbol] = scanner.UserOutputResults[:, i]
 
-        term_expressions = [term.expression for term in self.terms.values()]\
+        term_expressions = [term.expression for term in list(self.terms.values())]\
             + [self.expression]
         term_str_expressions = stringify(term_expressions)
         parameter_values = subs_dict[parameter].reshape(points, 1)
@@ -419,7 +423,7 @@ class RateEqn(object):
         # we include all ec_terms that are not zero (even though they are
         # included in the main dict)
         ec_term_expressions = [ec_term.expression for ec_term in
-                               self.ec_results.values() if
+                               list(self.ec_results.values()) if
                                ec_term.expression != 0 and
                                not ec_term.name.endswith('gamma_keq')]
         ec_term_str_expressions = stringify(ec_term_expressions)
@@ -436,7 +440,7 @@ class RateEqn(object):
         return scan_res
 
     def _ecscan_x(self, parameter, scan_range):
-        mca_objects = [ec_term for ec_term in self.ec_results.values() if
+        mca_objects = [ec_term for ec_term in list(self.ec_results.values()) if
                        ec_term.expression != 0 and not ec_term.name.endswith(
                            'gamma_keq')]
 
@@ -465,12 +469,12 @@ class RateEqn(object):
             assert scan_type in ['elasticity', 'value'], 'scan_type must be one\
                 of "value" or "elasticity".'
         except AssertionError as ae:
-            print ae
+            print(ae)
 
         init = getattr(self.mod, parameter)
 
         if scan_type == 'elasticity':
-            mca_objects = [ec_term for ec_term in self.ec_results.values() if
+            mca_objects = [ec_term for ec_term in list(self.ec_results.values()) if
                            ec_term.expression != 0 and
                            not ec_term.name.endswith('gamma_keq')]
 
@@ -499,7 +503,7 @@ class RateEqn(object):
         elif scan_type == 'value':
             additional_cat_classes = {'All Fluxes/Reactions/Species':
                                       ['Term Rates']}
-            term_names = [term.name for term in self.terms.values()]
+            term_names = [term.name for term in list(self.terms.values())]
             additional_cats = {'Term Rates': term_names}
             column_names = [parameter] + term_names + [self.name]
             y_label = 'Reaction/Term rate'
