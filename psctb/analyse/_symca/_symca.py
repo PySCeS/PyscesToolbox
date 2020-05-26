@@ -7,6 +7,7 @@ from sympy.matrices import Matrix
 from sympy import sympify
 import sys
 
+from .ccobjects import CCBase
 from ...utils.misc import extract_model
 from ...utils.misc import get_filename_from_caller
 from ...modeltools import make_path, get_file_path
@@ -400,6 +401,15 @@ class Symca(object):
                 self.species_dependent
             )
 
+            common_denom_object = CCBase(self.mod,
+                                     'common_denominator',
+                                     common_denom_expr,
+                                     self._ltxe)
+            if common_denom_object.value < 0:
+                common_denom_expr *= -1
+                cc_sol *= -1
+            del common_denom_object
+            
             cc_names = SMCAtools.build_cc_matrix(
                 self.fluxes,
                 self.fluxes_independent,
