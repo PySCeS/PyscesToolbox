@@ -10,6 +10,7 @@ from numpy.ma import log10
 from numpy import array, errstate, nanmin, nanmax, nonzero, float64,\
     bool_, string_, ones
 from pysces.PyscesModel import PysMod
+from pysces import ModelMap
 from IPython.display import HTML
 from sympy import sympify
 from functools import wraps
@@ -17,6 +18,8 @@ from ..config import ConfigReader
 
 __all__ = ['cc_list',
            'ec_list',
+           'prod_ec_list',
+           'mod_ec_list',
            'rc_list',
            'prc_list',
            'silence_print',
@@ -84,7 +87,7 @@ def is_species(attr, model):
 
 @memoize
 def is_reaction(attr, model):
-    if attr.endswith('J_'):
+    if attr.startswith('J_'):
         attr = attr[2:]
     if attr in model.reactions:
         return True
@@ -791,6 +794,55 @@ def ec_list(mod):
             ecs.append(str(ec))
         for base_param in mod.parameters:
             ec = 'ec%s_%s' % (top_reaction, base_param)
+            ecs.append(str(ec))
+    ecs.sort()
+    return ecs
+
+@memoize
+def prod_ec_list(mod):
+    """
+    Returns a list of product elasticity coefficients of a model.
+
+    Returns
+    -------
+    list of str
+        The prod_ec_list is sorted alphabetically.
+
+    See Also
+    --------
+    ec_list, cc_list, rc_list, prc_list
+
+    """
+    ecs = []
+    model_map = ModelMap(mod)
+    for top_reaction in mod.reactions:
+        r = getattr(model_map, top_reaction)
+        for base_product in r.hasProducts():
+            ec = 'ec%s_%s' % (top_reaction, base_product)
+            ecs.append(str(ec))
+    ecs.sort()
+    return ecs
+
+@memoize
+def mod_ec_list(mod):
+    """
+    Returns a list of modifier elasticity coefficients of a model.
+
+    Returns
+    -------
+    list of str
+        The mod_ec_list is sorted alphabetically.
+
+    See Also
+    --------
+    ec_list, cc_list, rc_list, prc_list
+
+    """
+    ecs = []
+    modifiers = dict(mod.__modifiers__)
+    for top_reaction in modifiers:
+        for base_species in modifiers[top_reaction]:
+            ec = 'ec%s_%s' % (top_reaction, base_species)
             ecs.append(str(ec))
     ecs.sort()
     return ecs

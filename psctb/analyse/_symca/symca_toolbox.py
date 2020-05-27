@@ -8,14 +8,15 @@ from os.path import join
 # from os import mkdir
 import sys
 #from re import sub
+from pysces import ModelMap
 from sympy import Symbol, sympify, nsimplify, fraction, S
 from sympy.matrices import Matrix, diag, NonSquareMatrixError
 from .ccobjects import CCBase, CCoef
 from ...utils.misc import DotDict
 from ...utils.misc import formatter_factory
 from ...utils import ConfigReader
-from ...utils.misc import ec_list, flux_list, ss_species_list
-
+from ...utils.misc import ec_list, prod_ec_list, mod_ec_list, \
+                          flux_list, ss_species_list
 
 ## Everything in this file can be a function rather than a static method
 ## better yet, almost everything can be part of symca. Finally everything can
@@ -638,6 +639,10 @@ class SymcaToolBox(object):
     @staticmethod
     def populate_with_fake_elasticities(mod):
         SymcaToolBox.generic_populate(mod, ec_list)
+        # set product elasticities to -1 to avoid divide by zero errors in Symca
+        SymcaToolBox.generic_populate(mod, prod_ec_list, value=-1)
+        # same for modifiers as these are mostly allosteric inhibitors
+        SymcaToolBox.generic_populate(mod, mod_ec_list, value=-1)
 
     @staticmethod
     def populate_with_fake_fluxes(mod):

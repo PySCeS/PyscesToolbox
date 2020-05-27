@@ -52,7 +52,7 @@ class Symca(object):
             warnings.warn_explicit("\nIgnoring steady-state solution: Steady-state variables set to 1. Note that parameter scan functionality is unavailable.",
                                    Warning,
                                    filename=get_filename_from_caller(),
-                                   lineno=36)
+                                   lineno=42)
             SMCAtools.populate_with_fake_elasticities(mod)
             SMCAtools.populate_with_fake_fluxes(mod)
             SMCAtools.populate_with_fake_ss_concentrations(mod)
