@@ -8,3 +8,4 @@ from .analyse import ThermoKin
 from .utils.model_graph import ModelGraph
 from .utils.plotting import SimpleData2D
 from .utils.plotting import Data2D
+from .version import __version__

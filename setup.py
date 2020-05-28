@@ -17,30 +17,28 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.rst')) as f:
         long_description = f.read()
 
+with open(path.join(here, 'requirements.txt')) as f:
+    requirements = f.read().splitlines()
+  
+with open(path.join(here, 'psctb', 'version.py')) as f:
+    exec(f.read())
+
+dlurl = 'http://github.com/PySCeS/PyscesToolbox/archive/' + __version__ + '.tar.gz'
+
 packages = find_packages()
 
 setup(
     name='PyscesToolbox',
-    version='0.9.0',
+    version=__version__,
     packages=packages,
     url='https://github.com/PySCeS/PyscesToolbox',
-    download_url='http://github.com/PySCeS/PyscesToolbox/archive/0.9.0.tar.gz',
+    download_url=dlurl,
     license='BSD-3-Clause',
     author='Carl Christensen and Johann Rohwer',
     author_email='exe0cdc@gmail.com, j.m.rohwer@gmail.com',
     description='A set of metabolic model analysis tools for PySCeS.',
     long_description=long_description,
-    install_requires=['IPython>=4.0.0',
-                      'numpy',
-                      'sympy',
-                      'pysces',
-                      'matplotlib',
-                      'numpydoc',
-                      'networkx==1.11',
-                      'ipywidgets==6.0.0',
-                      'widgetsnbextension==2.0.0',
-                      'jupyter-pip',
-                      'pandas'],
+    install_requires=requirements,
     package_data={'d3networkx_psctb': ['widget.js'],
                   'psctb': ['docs/*']},
     keywords=['metabolism','metabolic control analysis','modelling'],
