@@ -36,8 +36,8 @@ class EventfulGraph(networkx.Graph):
         # Override internal dictionaries with custom eventful ones.
         sleep = kwargs.get('sleep', 0.0)
         self.graph = EventfulDict(self.graph, sleep=sleep)
-        self.node = EventfulDict(self.node, sleep=sleep)
-        self.adj = EventfulDict(self.adj, sleep=sleep)
+        self._node = EventfulDict(self._node, sleep=sleep)
+        self._adj = EventfulDict(self._adj, sleep=sleep)
 
         # Notify callback of construction event.
         if EventfulGraph._constructed_callback:
