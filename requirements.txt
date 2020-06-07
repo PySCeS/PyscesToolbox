@@ -4,8 +4,8 @@ sympy
 pysces
 matplotlib
 numpydoc
-networkx==1.11
-ipywidgets==6.0.0
-widgetsnbextension==2.0.0
+networkx
+ipywidgets
+widgetsnbextension
 jupyter-pip
 pandas
