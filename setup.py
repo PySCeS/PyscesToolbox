@@ -1,14 +1,13 @@
 from setuptools import setup, find_packages
 from os import path
+
 try:
     from jupyterpip import cmdclass
 except:
-    try:
-        from pip import main as pip_main
-    except:
-        from pip._internal import main as pip_main
+    import sys
+    import subprocess
     import importlib
-    pip_main(['install', 'jupyter-pip'])
+    subprocess.call([sys.executable, '-m', 'pip', 'install', 'jupyter-pip'])
     cmdclass = importlib.import_module('jupyterpip').cmdclass
 
 here = path.abspath(path.dirname(__file__))
