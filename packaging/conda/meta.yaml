@@ -1,0 +1,71 @@
+{% set name = "PyscesToolbox" %}
+{% set version = "0.9.0" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: "https://pypi.org/packages/source/{{ name[0]|lower }}/{{ name|lower }}/{{ name }}-{{ version }}.post1.tar.gz"
+  sha256: 0dc0e52b41753aa22c5e0a6c6db48143c4128fef978813af9dab884a4789887c
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install --no-deps --ignore-installed . -vv"
+
+requirements:
+  host:
+    - ipython >=4.0.0
+    - ipywidgets ==6.0.0
+    - jupyter-pip
+    - matplotlib
+    - networkx ==1.11
+    - numpy >=1.15
+    - numpydoc
+    - pandas
+    - pip
+    - pysces
+    - python >=3.5
+    - sympy
+    - widgetsnbextension ==2.0.0
+  run:
+    - ipython >=4.0.0
+    - ipywidgets ==6.0.0
+    - jupyter-pip
+    - matplotlib
+    - networkx ==1.11
+    - numpy >=1.15
+    - numpydoc
+    - pandas
+    - pysces
+    - python >=3.5
+    - sympy
+    - widgetsnbextension ==2.0.0
+
+test:
+  imports:
+    - d3networkx_psctb
+    - psctb
+    - psctb.analyse
+    - psctb.analyse._symca
+    - psctb.latextools
+    - psctb.modeltools
+    - psctb.utils
+    - psctb.utils.misc
+    - psctb.utils.model_graph
+    - psctb.utils.plotting
+
+about:
+  home: "https://github.com/PySCeS/PyscesToolbox"
+  license: BSD
+  license_family: BSD
+  license_file: 
+  summary: "A set of metabolic model analysis tools for PySCeS."
+  doc_url: "https://pyscestoolbox.readthedocs.io/en/latest/index.html"
+
+extra:
+  recipe-maintainers:
+    - jmrohwer
+  maintainers:
+    - Johann M. Rohwer
