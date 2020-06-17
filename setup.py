@@ -14,7 +14,7 @@ here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the relevant file
 with open(path.join(here, 'README.rst')) as f:
-        long_description = f.read()
+    long_description = f.read()
 
 with open(path.join(here, 'requirements.txt')) as f:
     requirements = f.read().splitlines()
