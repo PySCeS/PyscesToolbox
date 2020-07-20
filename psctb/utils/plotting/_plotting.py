@@ -250,7 +250,7 @@ class SimpleData2D(object):
                                           self.scan_results.scan_in})
         return scan_fig
 
-    def save_results(self, file_name=None, separator=',',fmt='%f'):
+    def save_results(self, file_name=None, separator=',', fmt='%f'):
         """
         Saves data stores in current instance of ``Data2D`` as a comma
         separated file.
@@ -265,7 +265,7 @@ class SimpleData2D(object):
         separator : str, Optional (Default : ',')
             The symbol which should be used to separate values in the output
             file.
-        format : str, Optional (Default : '%f')
+        fmt : str, Optional (Default : '%f')
             Format for the data.
         """
         file_name = modeltools.get_file_path(working_dir=None,
@@ -292,7 +292,7 @@ class Data2D(object):
     """
     An object that wraps results from a PySCeS parameter scan.
 
-    Results from parameter scan of timecourse are used to initialise this
+    Results from parameter scan or timecourse are used to initialise this
     object which in turn is used to create a ``ScanFig`` object. Here results
     can easily be accessed and saved to disk.
 
@@ -727,18 +727,24 @@ class ScanFig(object):
 
         super(ScanFig, self).__init__()
 
-        rcParams.update({'font.size': 16})
-
         self._categories_ = None
         self._categories_status = None
         self._lines_ = None
         self._widgets_ = None
         self._figure_widgets_ = None
         self._raw_line_data = line_data_list
+        self._figure_output = widgets.Output()
+        self._widget_output = widgets.Output()
+        self._figure_widget_output = widgets.Output()
 
         # figure setup
         plt.ioff()
-        self.fig = plt.figure(figsize=(10, 5.72))
+        # inline displays figures smaller than nbAgg for some reason
+        if 'backend_inline' in rcParams['backend']:
+            self.fig = plt.figure(figsize=(10, 5.7))
+            rcParams.update({'font.size': 16})
+        else:
+            self.fig = plt.figure(figsize=(7, 5))
         if fig_properties:
             self.fig.set(**fig_properties)
 
@@ -780,14 +786,11 @@ class ScanFig(object):
         else:
             self._working_dir = psc_out_dir
 
-        self._save_counter = 0
-
         self._lines
 
         if 'backend_inline' in rcParams['backend']:
             plt.close()
         self._save_button_ = None
-
 
     @property
     def _save_button(self):
@@ -809,7 +812,7 @@ class ScanFig(object):
         ``--pylab=inline`` switch or with the %matplotlib inline IPython line
         magic, alternately it will display the figure as determined by the
         ``rcParams['backend']`` option of ``matplotlib``. Either the inline or
-        nbagg backends are recommended.
+        nbAgg backends are recommended.
 
         See Also
         --------
@@ -817,18 +820,23 @@ class ScanFig(object):
         adjust_figure
         """
 
+        display(self._figure_output)
+        self._redraw()
+
+    def _redraw(self):
         _add_legend_viewlim(
             self.ax,
             bbox_to_anchor=(0, -0.17),
-            ncol=3,
+            ncol=5,
             loc=2,
             borderaxespad=0.)
 
-        if 'backend_inline' in rcParams['backend']:
-            clear_output(wait=True)
+        if not 'backend_inline' in rcParams['backend']:
+            self.fig.tight_layout()  # need to rescale, nbAgg does not provide extra space for legend
+
+        self._figure_output.clear_output(wait=True)
+        with self._figure_output:
             display(self.fig)
-        else:
-            self.fig.show()
 
     def save(self, file_name=None, dpi=None, fmt=None, include_legend=True):
         """
@@ -880,9 +888,9 @@ class ScanFig(object):
                 box.layout.display = 'flex-flow'
                 widget_classes[k] = box
             def oc(cat):
-                def on_change(name, value):
-                    self.toggle_category(cat, value)
-                    self.show()
+                def on_change(value):
+                    self.toggle_category(cat, value['new'])
+                    self._redraw()
 
                 return on_change
 
@@ -895,7 +903,7 @@ class ScanFig(object):
                 w.width = width
                 w.value = self.categories_status[each]
                 on_change = oc(each)
-                w.on_trait_change(on_change, 'value')
+                w.observe(on_change, 'value')
                 for k, v in self._category_classes.items():
                     if each in v:
                         widget_classes[k].children += (w),
@@ -1019,14 +1027,14 @@ class ScanFig(object):
                 self.ax.set_xscale(convert_scale(log_x.value))
                 self.ax.set_yscale(convert_scale(log_y.value))
 
-                self.show()
+                self._redraw()
 
             apply_btn.on_click(set_values)
 
             x_lims = widgets.HBox(children=[min_x, max_x])
             y_lims = widgets.HBox(children=[min_y, max_y])
             lin_log = widgets.HBox(children=[log_x, log_y])
-            apply_con = widgets.HBox(children=[apply_btn])
+            apply_con = widgets.HBox(children=[apply_btn, self._save_button])
 
             _figure_widgets_ = OrderedDict()
             _figure_widgets_['X axis limits'] = x_lims
@@ -1183,23 +1191,27 @@ class ScanFig(object):
         show
         adjust_figure
         """
-        self.show()
-        for k, v in self._widgets.items():
-            if len(v.children) > 0:
-                head = widgets.Label(value=k)
-                display(head)
-                display(v)
-                v._css = [(None, 'flex-wrap', 'wrap'), ]
-                # v.remove_class('vbox')
-                # v.add_class('hbox')
-                # v.set_css({'flex-wrap': 'wrap'})
-        display(widgets.Label(value='$~$'))
-        display(self._save_button)
-        for boxes in self._widgets.values():
-            for button in boxes.children:
-                button.value = self.categories_status[button.description]
-                # self._save_button.remove_class('vbox')
-                # self._save_button.add_class('hbox')
+        display(self._figure_output)
+        self._redraw()
+        display(self._widget_output)
+        self._widget_output.clear_output()
+        with self._widget_output:
+            for k, v in self._widgets.items():
+                if len(v.children) > 0:
+                    head = widgets.Label(value=k)
+                    display(head)
+                    display(v)
+                    v._css = [(None, 'flex-wrap', 'wrap'), ]
+                    # v.remove_class('vbox')
+                    # v.add_class('hbox')
+                    # v.set_css({'flex-wrap': 'wrap'})
+            # display(widgets.Label(value='$~$'))
+            display(self._save_button)
+            for boxes in self._widgets.values():
+                for button in boxes.children:
+                    button.value = self.categories_status[button.description]
+                    # self._save_button.remove_class('vbox')
+                    # self._save_button.add_class('hbox')
 
     def adjust_figure(self):
         """
@@ -1216,17 +1228,19 @@ class ScanFig(object):
         interact
 
         """
+        display(self._figure_widget_output)
+        with self._figure_widget_output:
+            for k, v in self._figure_widgets.items():
+                if len(v.children) > 0:
+                    head = widgets.Label(value=k)
+                    display(head)
+                    display(v)
+                    # v.remove_class('vbox')
+                    # v.add_class('hbox')
+                    v._css = [(None, 'flex-wrap', 'wrap'), ]
+            # display(widgets.Label(value='$~$'))
+            # display(self._save_button)
         self.show()
-        for k, v in self._figure_widgets.items():
-            if len(v.children) > 0:
-                head = widgets.Label(value=k)
-                display(head)
-                display(v)
-                # v.remove_class('vbox')
-                # v.add_class('hbox')
-                v._css = [(None, 'flex-wrap', 'wrap'), ]
-        display(widgets.Label(value='$~$'))
-        display(self._save_button)
         # self._save_button.remove_class('vbox')
         # self._save_button.add_class('hbox')
 
