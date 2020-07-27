@@ -6,21 +6,22 @@ package:
   version: "{{ version }}"
 
 source:
-  url: "https://pypi.org/packages/source/{{ name[0]|lower }}/{{ name|lower }}/{{ name }}-{{ version }}.post1.tar.gz"
-  sha256: 0dc0e52b41753aa22c5e0a6c6db48143c4128fef978813af9dab884a4789887c
+#  url: "https://pypi.org/packages/source/{{ name[0]|lower }}/{{ name|lower }}/{{ name }}-{{ version }}.post1.tar.gz"
+#  sha256: 0dc0e52b41753aa22c5e0a6c6db48143c4128fef978813af9dab884a4789887c
+  path: ../..
 
 build:
   noarch: python
-  number: 0
+  number: 1
   script: "{{ PYTHON }} -m pip install --no-deps --ignore-installed . -vv"
 
 requirements:
   host:
     - ipython >=4.0.0
-    - ipywidgets ==6.0.0
+    - ipywidgets
     - jupyter-pip
     - matplotlib
-    - networkx ==1.11
+    - networkx <=2.0
     - numpy >=1.15
     - numpydoc
     - pandas
@@ -28,20 +29,20 @@ requirements:
     - pysces
     - python >=3.5
     - sympy
-    - widgetsnbextension ==2.0.0
+    - widgetsnbextension
   run:
     - ipython >=4.0.0
-    - ipywidgets ==6.0.0
+    - ipywidgets
     - jupyter-pip
     - matplotlib
-    - networkx ==1.11
+    - networkx <=2.0
     - numpy >=1.15
     - numpydoc
     - pandas
     - pysces
     - python >=3.5
     - sympy
-    - widgetsnbextension ==2.0.0
+    - widgetsnbextension
 
 test:
   imports:
