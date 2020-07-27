@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from os import path, mkdir, listdir
+import re
 
 from pysces import output_dir
 
@@ -59,8 +60,8 @@ def next_suffix(directory, base_name, ext=None):
     for each in files:
         if each.startswith(base_name) and each.endswith(ext):
             start = len(base_name + '_')
-            end = start + 1
-            num = int(each[start:end])
+            m = re.search('\d+', each[start:])
+            num = int(m.group())
             if num >= next_num:
                 next_num = num + 1
     return next_num
