@@ -43,6 +43,19 @@ class EventfulGraph(networkx.Graph):
         if EventfulGraph._constructed_callback:
             EventfulGraph._constructed_callback(self)
 
+    def add_node(self, n, attr_dict=None, **attr):
+        # set up attribute dict
+        if attr_dict is None:
+            attr_dict = attr
+        else:
+            attr_dict.update(attr)
+
+        if n not in self._node:
+            self._adj[n] = self.adjlist_inner_dict_factory()
+            self._node[n] = attr_dict
+        else:  # update attr even if node already exists
+            self._node[n].update(attr_dict)
+
 
 def empty_eventfulgraph_hook(*pargs, **kwargs):
     def wrapped(*wpargs, **wkwargs):
