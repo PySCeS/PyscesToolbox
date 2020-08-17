@@ -12,7 +12,7 @@ source:
 
 build:
   noarch: python
-  number: 1
+  number: 0
   script: "{{ PYTHON }} -m pip install --no-deps --ignore-installed . -vv"
 
 requirements:
@@ -21,7 +21,7 @@ requirements:
     - ipywidgets
     - jupyter-pip
     - matplotlib
-    - networkx <=2.0
+    - networkx
     - numpy >=1.15
     - numpydoc
     - pandas
@@ -35,7 +35,7 @@ requirements:
     - ipywidgets
     - jupyter-pip
     - matplotlib
-    - networkx <=2.0
+    - networkx
     - numpy >=1.15
     - numpydoc
     - pandas
@@ -61,7 +61,7 @@ about:
   home: "https://github.com/PySCeS/PyscesToolbox"
   license: BSD
   license_family: BSD
-  license_file: 
+  license_file: LICENCE.txt
   summary: "A set of metabolic model analysis tools for PySCeS."
   doc_url: "https://pyscestoolbox.readthedocs.io/en/latest/index.html"
 
