@@ -37,58 +37,67 @@ Requirements
 ------------
 
 An abbreviated list of requirements is given below. Python dependencies
-will be installed automatically when installing PySCeSToolbox via pip.
-For detailed operating system specific instructions on installing the
-requirements see the documentation at
+will be installed automatically when installing PySCeSToolbox via pip or
+with conda. For detailed operating system-specific instructions on
+installing the requirements see the documentation at
 `http://pyscestoolbox.readthedocs.io/ <http://pyscestoolbox.readthedocs.io>`__.
 
 -  A Python 3.x installation (versions 3.6-3.8 recommended)
 -  The full SciPy stack (see http://scipy.org/install.html)
--  PySCeS (see http://pysces.sourceforge.net/download.html or install
-   using ``pip install pysces``)
+-  PySCeS (see http://pysces.sourceforge.net/download.html)
 -  Maxima (see http://maxima.sourceforge.net/download.html)
 -  Jupyter Notebook (jupyter-core version in the 4.x.x series)
 
-**Notes:**
+..
 
-Required packages should automatically download and install when using
-the commands specified under `Installation <#installation>`__ below.
-
-Maxima is only a requirement for SymCA.
+   | **Notes:**
+   | Required packages should automatically download and install when
+     using the commands specified under `Installation <#installation>`__
+     below.
+   | Maxima is only a requirement for SymCA.
 
 Installation
 ------------
 
-    **Note:** Detailed installation instructions are provided
-    `here <https://pyscestoolbox.readthedocs.io/en/latest/installation.html>`__.
+   **Note:** *Detailed installation instructions* are provided
+   `here <https://pyscestoolbox.readthedocs.io/en/latest/installation.html>`__.
 
-The latest release of PySCeSToolbox can be installed from PyPi by
-running the following commands in the terminal (or Windows equivalent):
+The latest release of PySCeSToolbox can be installed either on Anaconda
+or from PyPI by running the following commands in the terminal (or
+Windows equivalent).
+
+Install on Anaconda:
 
 .. code:: bash
 
-    pip install pyscestoolbox
+   conda install -c pysces -c sbmlteam pyscestoolbox
+
+Install from PyPi using ``pip``:
+
+.. code:: bash
+
+   pip install pyscestoolbox
 
 To enable widgets you may need to run the following commands:
 
 .. code:: bash
 
-    jupyter nbextension enable --py --sys-prefix widgetsnbextension
-    jupyter nbextension install --py --user d3networkx_psctb
-    jupyter nbextension enable --py --user d3networkx_psctb
+   jupyter nbextension enable --py --sys-prefix widgetsnbextension
+   jupyter nbextension install --py --user d3networkx_psctb
+   jupyter nbextension enable --py --user d3networkx_psctb
 
 The latest development version can be installed from GitHub with:
 
 .. code:: bash
 
-    pip install git+https://github.com/PySCeS/PySCeSToolbox.git
+   pip install git+https://github.com/PySCeS/PySCeSToolbox.git
 
 For the pre-2015-11-11 version:
 
 .. code:: bash
 
-    pip install git+https://github.com/exe0cdc/ipython-d3networkx.git
-    pip install git+https://github.com/PySCeS/PySCeSToolbox.git@f63b5ab660f103105750159885608a5f48de1551
+   pip install git+https://github.com/exe0cdc/ipython-d3networkx.git
+   pip install git+https://github.com/PySCeS/PySCeSToolbox.git@f63b5ab660f103105750159885608a5f48de1551
 
 Basic usage
 -----------
@@ -103,9 +112,9 @@ To start a PySCeSToolbox session in a Jupyter notebook:
 
 .. code:: python
 
-    import pysces
-    import psctb
-    %matplotlib inline
+   import pysces
+   import psctb
+   %matplotlib inline
 
 Model files must be placed in ``~/Pysces/psc/`` if using Linux or macOS,
 and in ``C:\Pysces\psc\`` for Windows (PySCeS version < 0.9.8) or
@@ -114,18 +123,17 @@ and in ``C:\Pysces\psc\`` for Windows (PySCeS version < 0.9.8) or
 Important notices
 -----------------
 
-For readers of "Tracing regulatory routes in metabolism using generalised supply-demand analysis" published in `BMC Systems Biology <https://doi.org/10.1186/s12918-015-0236-1>`__
+For readers of “Tracing regulatory routes in metabolism using generalised supply-demand analysis” published in `BMC Systems Biology <https://doi.org/10.1186/s12918-015-0236-1>`__
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To use the Jupyter notebook file included as "Additional file 5" in the
+To use the Jupyter notebook file included as “Additional file 5” in the
 paper, please install the **latest version** of PySCeSToolbox specified
 under `Installation <#installation>`__.
 
-The two PySCeS MDL model files included as "Addition file 1" and
-"Addition file 2" are required to run the notebook. They should be
-renamed to "Hoefnagel\_moiety\_ratio.psc" and "Curien.psc",
-respectively. Further instructions are included within the notebook and
-on this page.
+The two PySCeS MDL model files included as “Additional file 1” and
+“Additional file 2” are required to run the notebook. They should be
+renamed to “Hoefnagel_moiety_ratio.psc” and “Curien.psc”, respectively.
+Further instructions are included within the notebook and on this page.
 
 Changes:
 ~~~~~~~~
@@ -155,7 +163,7 @@ PySCeSToolbox will however require the Jupyter Notebook as of this date
 in order to use its interactive features. Note that ``ipywidgets`` (an
 automatically installed requirement for the Jupyter notebook) needs you
 to run the command
-"``jupyter nbextension enable --py  --sys-prefix widgetsnbextension``"
+“``jupyter nbextension enable --py  --sys-prefix widgetsnbextension``”
 before enabling widgets in the notebook.
 
 Changes on 2015-11-11: API changes
@@ -179,52 +187,41 @@ the new name.
 
 **RateChar**
 
-+-------------------+-----------------+
-| Old name          | New Name        |
-+===================+=================+
-| save              | save\_session   |
-+-------------------+-----------------+
-| load              | load\_session   |
-+-------------------+-----------------+
-| plot\_data        | scan\_results   |
-+-------------------+-----------------+
-| mca\_data         | mca\_results    |
-+-------------------+-----------------+
-| plot\_decompose   | do\_mca\_scan   |
-+-------------------+-----------------+
+============== ============
+Old name       New Name
+============== ============
+save           save_session
+load           load_session
+plot_data      scan_results
+mca_data       mca_results
+plot_decompose do_mca_scan
+============== ============
 
 **Thermokin**
 
-+-------------------+---------------------+
-| Old name          | New Name            |
-+===================+=====================+
-| reactions         | reaction\_results   |
-+-------------------+---------------------+
-| mca\_data         | ec\_results         |
-+-------------------+---------------------+
-| reaction name\*   | J\_reaction name    |
-+-------------------+---------------------+
-| par\_scan         | do\_par\_scan       |
-+-------------------+---------------------+
+=============== ================
+Old name        New Name
+=============== ================
+reactions       reaction_results
+mca_data        ec_results
+reaction name\* J_reaction name
+par_scan        do_par_scan
+=============== ================
 
 \*reaction name refers to the naming of a reaction as it is defined in
 the model file.
 
 **Symca**
 
-+-------------+------------------+
-| Old name    | New Name         |
-+=============+==================+
-| CC          | cc\_results      |
-+-------------+------------------+
-| CCn\*       | cc\_results\_n   |
-+-------------+------------------+
-| save        | save\_session    |
-+-------------+------------------+
-| load        | load\_session    |
-+-------------+------------------+
-| par\_scan   | do\_par\_scan    |
-+-------------+------------------+
+======== ============
+Old name New Name
+======== ============
+CC       cc_results
+CCn\*    cc_results_n
+save     save_session
+load     load_session
+par_scan do_par_scan
+======== ============
 
 \*CCn refers to any of the additional result dictionaries that are
 created when an internal metabolite is fixed and the ``internal_fixed``
@@ -232,13 +229,12 @@ paramenter of ``do_symca`` is set to ``True``
 
 **Data2D**
 
-+--------------+-----------------+
-| Old name     | New Name        |
-+==============+=================+
-| plot\_data   | scan\_results   |
-+--------------+-----------------+
-| save\_data   | save\_results   |
-+--------------+-----------------+
+========= ============
+Old name  New Name
+========= ============
+plot_data scan_results
+save_data save_results
+========= ============
 
 .. |Documentation Status| image:: https://readthedocs.org/projects/pyscestoolbox/badge/?version=latest
    :target: http://pyscestoolbox.readthedocs.org/en/latest/?badge=latest

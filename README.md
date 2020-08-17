@@ -32,29 +32,37 @@ is installed.
 ## Requirements
 
 An abbreviated list of requirements is given below. Python dependencies will be 
-installed automatically when installing PySCeSToolbox via pip. For detailed 
-operating system specific instructions on installing the requirements see the 
-documentation at 
+installed automatically when installing PySCeSToolbox via pip or with conda. 
+For detailed operating system-specific instructions on installing the 
+requirements see the documentation at 
 [http://pyscestoolbox.readthedocs.io/](http://pyscestoolbox.readthedocs.io).
 
 - A Python 3.x installation (versions 3.6-3.8 recommended)
 - The full SciPy stack (see [http://scipy.org/install.html](http://scipy.org/install.html))
-- PySCeS (see [http://pysces.sourceforge.net/download.html](http://pysces.sourceforge.net/download.html) or install using ``pip install pysces``)
+- PySCeS (see [http://pysces.sourceforge.net/download.html](http://pysces.sourceforge.net/download.html))
 - Maxima (see [http://maxima.sourceforge.net/download.html](http://maxima.sourceforge.net/download.html))
 - Jupyter Notebook (jupyter-core version in the 4.x.x series)
 
-**Notes:**
-
-Required packages should automatically download and install when using the commands specified under [Installation](#installation) below.
-
-Maxima is only a requirement for SymCA.
+> **Notes:**    
+> Required packages should automatically download and install when using the 
+> commands specified under [Installation](#installation) below.    
+> Maxima is only a requirement for SymCA.
 
 ## Installation
 
-> **Note:** Detailed installation instructions are provided
+> **Note:** *Detailed installation instructions* are provided
 > [here](https://pyscestoolbox.readthedocs.io/en/latest/installation.html).
 
-The latest release of PySCeSToolbox can be installed from PyPi by running the following commands in the terminal (or Windows equivalent):
+The latest release of PySCeSToolbox can be installed either on Anaconda or from PyPI
+by running the following commands in the terminal (or Windows equivalent).
+
+Install on Anaconda:
+
+```bash
+conda install -c pysces -c sbmlteam pyscestoolbox
+```
+
+Install from PyPi using `pip`:
 
 ```bash
 pip install pyscestoolbox
@@ -108,7 +116,7 @@ To use the Jupyter notebook file included as "Additional file 5" in the paper,
 please install the **latest version** of PySCeSToolbox specified under 
 [Installation](#installation).
 
-The two PySCeS MDL model files included as "Addition file 1" and "Addition file 
+The two PySCeS MDL model files included as "Additional file 1" and "Additional file 
 2" are required to run the notebook. They should be renamed to 
 "Hoefnagel_moiety_ratio.psc" and "Curien.psc", respectively. Further 
 instructions are included within the notebook and on this page. 
