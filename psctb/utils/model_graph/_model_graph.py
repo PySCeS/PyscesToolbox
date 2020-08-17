@@ -16,10 +16,19 @@ from d3networkx_psctb import EventfulGraph
 from ... import modeltools
 from ..misc import split_coefficient
 
-
 __author__ = 'carl'
 
 __all__ = ['ModelGraph']
+
+
+def extract_svg_from_xml(xml_string):
+    start_string = '<svg'
+    end_string = '</svg>'
+
+    start_index = xml_string.index(start_string)
+    end_index = xml_string.index(end_string) + len(end_string)
+
+    return xml_string[start_index:end_index]
 
 
 class ModelGraph(object):
@@ -54,8 +63,7 @@ class ModelGraph(object):
                     8: "rgb(213,62,79)", 9: "rgb(158,1,66)",
                     10: "rgb(158,1,66)"}
 
-    DUMMY_SINK_NAMES = ['dummy','sink']
-
+    DUMMY_SINK_NAMES = ['dummy', 'sink']
 
     def __init__(self, mod, pos_dic=None, analysis_method=None,
                  base_name=None):
@@ -111,7 +119,6 @@ class ModelGraph(object):
         for rx in self._model_map.reactions:
             self._pos_dic[rx.name] = ('none', 'none')
 
-
     # TODO Change d3networkx_psctb so that dumping json and dumping svg work in the same way
     def _pos_change_setup(self):
         def make_pos_dic(nodes_json):
@@ -131,13 +138,12 @@ class ModelGraph(object):
         self._force_directed_graph.on_trait_change(save_json, 'gnode_json')
 
     def _save_image_setup(self):
-        def save_image(sender, content):
+        def save_image(sender, content, *args):
             if 'button_click' in content:
                 if content['button_click'] == 'save_image':
                     self.save()
 
         self._force_directed_graph.on_msg(save_image)
-
 
     def _make_species_nodes(self):
         for species in self._model_map.species:
@@ -204,10 +210,10 @@ class ModelGraph(object):
                                               strokewidth="0px",
                                               distance=200,
                                               stroke='black')
-                self._eventful_graph.adj[reaction][species.name][
+                self._eventful_graph._adj[reaction][species.name][
                     'strokewidth'] = '2px'
                 self._ec_dict[elas] = (reaction, species.name)
-                del self._eventful_graph.adj[species.name][reaction]
+                del self._eventful_graph._adj[species.name][reaction]
 
     def _make_product_links(self):
         for species in self._model_map.species:
@@ -220,9 +226,9 @@ class ModelGraph(object):
                                               distance=200,
                                               stroke='black',
                                               marker_end='arrowhead')
-                self._eventful_graph.adj[reaction][species.name][
+                self._eventful_graph._adj[reaction][species.name][
                     'strokewidth'] = '2px'
-                del self._eventful_graph.adj[species.name][reaction]
+                del self._eventful_graph._adj[species.name][reaction]
                 self._ec_dict[elas] = (reaction, species.name)
 
     def _make_modifier_links(self):
@@ -236,11 +242,10 @@ class ModelGraph(object):
                                               distance=200,
                                               stroke='gray',
                                               marker_end='dagger', )
-                self._eventful_graph.adj[species.name][reaction][
+                self._eventful_graph._adj[species.name][reaction][
                     'strokewidth'] = '2px'
-                del self._eventful_graph.adj[reaction][species.name]
+                del self._eventful_graph._adj[reaction][species.name]
                 self._ec_dict[elas] = (species.name, reaction)
-
 
     def remove_external_modifier_links(self):
         for species in self._model_map.species:
@@ -252,8 +257,8 @@ class ModelGraph(object):
 
     def remove_dummy_sinks(self):
         for each in ModelGraph.DUMMY_SINK_NAMES:
-            if each in self._eventful_graph.node:
-                del self._eventful_graph.node[each]
+            if each in self._eventful_graph._node:
+                del self._eventful_graph._node[each]
 
     def change_link_properties(self, elas, prop_dic=None,
                                only_overwrite=False):
@@ -263,7 +268,7 @@ class ModelGraph(object):
         s_t = self._ec_dict.get(elas)
         if s_t:
             source, target = s_t
-            dic_to_change = self._eventful_graph.adj[source][target]
+            dic_to_change = self._eventful_graph._adj[source][target]
             for k, v in prop_dic.items():
                 if only_overwrite and k in dic_to_change or not only_overwrite:
                     dic_to_change[k] = v
@@ -276,11 +281,10 @@ class ModelGraph(object):
             self.change_node_properties(reaction.name,
                                         ModelGraph.REACTION_NODE)
 
-
     def change_node_properties(self, node_name, prop_dic=None):
         if not prop_dic:
             prop_dic = {}
-        dic = self._eventful_graph.node.get(node_name)
+        dic = self._eventful_graph._node.get(node_name)
         if dic:
             for k, v in prop_dic.items():
                 dic[k] = v
@@ -300,7 +304,6 @@ class ModelGraph(object):
         for node in self._model_map.reactions + self._model_map.species:
             self.change_node_properties(node.name,
                                         {'fixed': self._nodes_fixed})
-
 
     @property
     def straight_links(self):
@@ -340,29 +343,29 @@ class ModelGraph(object):
         -------
         None
         """
-
         svg = self._force_directed_graph.svg_image
+
+        svg = extract_svg_from_xml(svg)
 
         file_name = modeltools.get_file_path(working_dir=self._working_dir,
                                              internal_filename=self._base_name,
                                              fmt='svg',
                                              file_name=file_name)
+
         with open(file_name, 'w') as f:
             f.write(svg)
-
 
     def show(self, no_links=False, clear_top_box=True):
         if clear_top_box:
             self._top_box.children = ()
         self._base_name = self._default_base_name
         display(self._big_box)
-        self._eventful_graph.node.clear()
+        self._eventful_graph._node.clear()
         self._make_species_nodes()
         self._make_reaction_nodes()
         self.nodes_fixed = self._nodes_fixed
         if not no_links:
             self.draw_all_links()
-
 
     def highlight_cp(self, cp, show_dummy_sinks=False,
                      show_external_modifier_links=False):
@@ -407,7 +410,6 @@ class ModelGraph(object):
             self.remove_dummy_sinks()
         if not show_external_modifier_links:
             self.remove_external_modifier_links()
-
 
     def highlight_cc(self, cc, show_dummy_sinks=False,
                      show_external_modifier_links=False):

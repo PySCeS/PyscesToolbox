@@ -4,7 +4,7 @@ sympy
 pysces
 matplotlib
 numpydoc
-networkx==1.11
+networkx
 ipywidgets
 widgetsnbextension
 jupyter-pip
