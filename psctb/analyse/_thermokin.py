@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from os import path
 
-from numpy import log10, array, float, NaN, nanmin, nanmax, savetxt, hstack, float
+from numpy import log10, array, NaN, nanmin, nanmax, savetxt, hstack
 from pysces import ModelMap, ParScanner, Scanner
 from sympy import sympify, diff, Symbol
 
