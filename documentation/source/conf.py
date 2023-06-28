@@ -40,7 +40,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-    'numpydoc',
+    # 'numpydoc',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -302,10 +302,10 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = project
-epub_author = author
-epub_publisher = author
-epub_copyright = copyright
+# epub_title = project
+# epub_author = author
+# epub_publisher = author
+# epub_copyright = copyright
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = project
@@ -345,7 +345,7 @@ epub_copyright = copyright
 #epub_post_files = []
 
 # A list of files that should not be packed into the epub file.
-epub_exclude_files = ['search.html']
+# epub_exclude_files = ['search.html']
 
 # The depth of the table of contents in toc.ncx.
 #epub_tocdepth = 3
