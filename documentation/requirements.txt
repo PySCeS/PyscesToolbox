@@ -9,5 +9,6 @@ ipywidgets
 widgetsnbextension
 jupyter-pip
 pandas
-sphinx~=6.2.0
-sphinx-rtd-theme~=1.2.0
+sphinx~=4.2.0
+sphinx-rtd-theme~=1.0.0
+readthedocs-sphinx-ext
