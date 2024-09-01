@@ -361,7 +361,7 @@ class Symca(object):
         head = ['name', 'value', 'latex_name', 'latex_expression']
         X = array(rows,
                   dtype=[(head[0], str_fmt),
-                         (head[1], 'float'),
+                         (head[1], float),
                          (head[2], str_fmt),
                          (head[3], str_fmt)])
 

@@ -8,7 +8,7 @@ from os import path, devnull
 
 from numpy.ma import log10
 from numpy import array, errstate, nanmin, nanmax, nonzero, float64,\
-    bool_, string_, ones
+    bool_, bytes_, ones
 from pysces.PyscesModel import PysMod
 from pysces import ModelMap
 from IPython.display import HTML
@@ -520,7 +520,7 @@ def is_number(suspected_number):
     # but for my cases it should not be a problem.
     number = False
     the_type = type(suspected_number)
-    if the_type not in (bool, str, bool_, string_):
+    if the_type not in (bool, str, bool_, bytes_):
         try:
             int(suspected_number)
             # suspected_number + 1

@@ -93,7 +93,7 @@ def check_term_format(lines, term_type):
     Inspects a list of string for the correct ThermoKin syntax. Returns
     `True` in case of correct format. Throws exception otherwise.
 
-    Correct format is a str matching the pattern "X{\w*}{\w*} .*" . Where
+    Correct format is a str matching the pattern r'X{\\w*}{\\w*} .*' . Where
     "X" is either "!G" or "!T" as specified by `term_type`.
 
     Parameters
@@ -112,7 +112,7 @@ def check_term_format(lines, term_type):
     assert term_type == '!T' or term_type == '!G', 'Invalid term type specified'
     errors_in = []
     for i, line in enumerate(lines):
-        if not match(term_type + '{\w*}{\w*} .*', line):
+        if not match(term_type + r'{\w*}{\w*} .*', line):
             errors_in.append(str(i))
     if len(errors_in) == 0:
         return True
@@ -139,10 +139,10 @@ def construct_dict(lines):
     """
     outer_dict = {}
     for line in lines:
-        in_brackets = findall('(?<={)\w+', line)
+        in_brackets = findall(r'(?<={)\w+', line)
         r_name = in_brackets[0]
         t_name = in_brackets[1]
-        expr = findall('(?<=\w} ).*', line)[0]
+        expr = findall(r'(?<=\w} ).*', line)[0]
 
         inner_dict = {t_name: expr}
         if r_name in outer_dict:

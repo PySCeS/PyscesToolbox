@@ -6,7 +6,7 @@ import numpy as np
 from numpy import array, nanmin, nanmax
 from sympy import Symbol
 from pysces import ModelMap, Scanner, ParScanner
-from numpy import NaN, abs
+from numpy import nan, abs
 
 from ...utils.model_graph import ModelGraph
 from ...utils.misc import silence_print, DotDict, formatter_factory, \
@@ -187,7 +187,7 @@ class CCoef(CCBase):
                     scan_res[i + 1].append(cp_abs)
                     cc_abs_value += cp_abs
                 else:
-                    scan_res[i + 1].append(NaN)
+                    scan_res[i + 1].append(nan)
 
             for i, cp in enumerate(self.control_patterns.values()):
                 if state_valid:
@@ -214,11 +214,11 @@ class CCoef(CCBase):
                     scan_res[i + 1].append(cp_value)
                     cc_value += cp_value
                 else:
-                    scan_res[i + 1].append(NaN)
+                    scan_res[i + 1].append(nan)
             if state_valid:
                 scan_res[i + 2].append(cc_value)
             else:
-                scan_res[i + 2].append(NaN)
+                scan_res[i + 2].append(nan)
 
         return scan_res
 
@@ -315,9 +315,9 @@ class CCoef(CCBase):
                 print('The parameter scan yielded the following error:')
                 print(exception)
                 print('Switching over to slower scan method and replacing')
-                print('invalid steady states with NaN values.')
+                print('invalid steady states with nan values.')
                 scan_res = self._perscan_legacy(parameter, scan_range)
-                data_array = array(scan_res, dtype=np.float).transpose()
+                data_array = array(scan_res, dtype=float).transpose()
 
             ylim = [nanmin(data_array[:, 1:]), nanmax(data_array[:, 1:]) * 1.1]
         elif scan_type == 'value':
@@ -334,9 +334,9 @@ class CCoef(CCBase):
                 print('The parameter scan yielded the following error:')
                 print(exception)
                 print('Switching over to slower scan method and replacing')
-                print('invalid steady states with NaN values.')
+                print('invalid steady states with nan values.')
                 scan_res = self._valscan_legacy(parameter, scan_range)
-                data_array = array(scan_res, dtype=np.float).transpose()
+                data_array = array(scan_res, dtype=float).transpose()
 
             ylim = [nanmin(data_array[:, 1:]), nanmax(data_array[:, 1:]) * 1.1]
         # print data_array.shape

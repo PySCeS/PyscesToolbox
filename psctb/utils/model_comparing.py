@@ -329,7 +329,7 @@ class ModelMap(object):
     def getattr(self, item):
         true_key = self.getattrname(item)
         if true_key is None:
-            return np.NaN
+            return np.nan
         else:
             return getattr(self.model, true_key)
 

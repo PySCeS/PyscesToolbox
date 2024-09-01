@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from os import path
 
-from numpy import log10, array, NaN, nanmin, nanmax, savetxt, hstack
+from numpy import log10, array, nan, nanmin, nanmax, savetxt, hstack
 from pysces import ModelMap, ParScanner, Scanner
 from sympy import sympify, diff, Symbol
 
@@ -205,7 +205,7 @@ class ThermoKin(object):
         head = ['name', 'value', 'latex_name', 'latex_expression']
         X = array(values,
                   dtype=[(head[0], str_fmt),
-                         (head[1], 'float'),
+                         (head[1], float),
                          (head[2], str_fmt),
                          (head[3], str_fmt)])
 
@@ -333,11 +333,11 @@ class RateEqn(object):
                 if state_valid:
                     scan_res[i + 1].append(term.value)
                 else:
-                    scan_res[i + 1].append(NaN)
+                    scan_res[i + 1].append(nan)
             if state_valid:
                 scan_res[i + 2].append(self.value)
             else:
-                scan_res[i + 2].append(NaN)
+                scan_res[i + 2].append(nan)
         return scan_res
 
     def _valscan(self,
@@ -454,7 +454,7 @@ class RateEqn(object):
                 if state_valid:
                     scan_res[i + 1].append(term.value)
                 else:
-                    scan_res[i + 1].append(NaN)
+                    scan_res[i + 1].append(nan)
         return scan_res
 
     def do_par_scan(self,

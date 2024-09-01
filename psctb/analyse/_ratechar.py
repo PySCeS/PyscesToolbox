@@ -554,8 +554,8 @@ class RateCharData(object):
             n_z_s = numpy.array([0.01, 1])
 
         # lets also (clumsily) find the non-negative mins and maxes
-        # by converting to logspace (to get NaNs) and back
-        # and then getting the min/max non-NaN
+        # by converting to logspace (to get nans) and back
+        # and then getting the min/max non-nan
         # PS flux max is the max of the totals
 
         with numpy.errstate(all='ignore'):
@@ -877,7 +877,7 @@ class RateCharData(object):
                      categories=['Fluxes',
                                  'Supply',
                                  'Total Supply'],
-                     properties={'label': '$%s$' % 'Total\,Supply',
+                     properties={'label': '$%s$' % r'Total\,Supply',
                                  'color': hsv_to_rgb(col[0], col[1],
                                                      col[2] * 0.9),
                                  'ls': '--'})
@@ -890,7 +890,7 @@ class RateCharData(object):
                      categories=['Fluxes',
                                  'Demand',
                                  'Total Demand'],
-                     properties={'label': '$%s$' % 'Total\,Demand',
+                     properties={'label': '$%s$' % r'Total\,Demand',
                                  'color': hsv_to_rgb(col[0], col[1],
                                                      col[2] * 0.9),
                                  'ls': '--'})

@@ -412,7 +412,7 @@ A particularly problematic example of where the above method is
 necessary, is a hypothetical control coefficient with a value of zero,
 but with two control patterns with equal value but opposite signs. In
 this case a conventional percentage calculation would lead to an
-undefined (``NaN``) result, whereas our methodology would indicate that
+undefined (``nan``) result, whereas our methodology would indicate that
 each control pattern is equally (:math:`50\%`) responsible for the
 observed control coefficient value.
 
@@ -1009,8 +1009,8 @@ The contents of the saved data file is as follows:
           <th>0</th>
           <td># results from cc_results</td>
           <td>0.000000</td>
-          <td>NaN</td>
-          <td>NaN</td>
+          <td>nan</td>
+          <td>nan</td>
         </tr>
         <tr>
           <th>1</th>
